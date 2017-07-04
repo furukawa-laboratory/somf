@@ -1,4 +1,4 @@
-from lib.models.KSE0331 import KSE as KSE0331
+from lib.models.flab.KSE0331 import KSE as KSE0331
 
 
 def KSE(version, X):
