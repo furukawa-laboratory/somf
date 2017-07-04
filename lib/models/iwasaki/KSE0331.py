@@ -47,7 +47,7 @@ class KSE(object):
             U = R - np.identity(self.N)
             Phi = np.dot(U, K)
             PhiBar = np.sum(R * Phi, axis=1)[:, None]
-            E = np.diag(U @ K @ U.T)
+            E = np.diag(U @ K @ U.T)[:, None]
             # E = np.sum(np.square(Y - self.X), axis=1)
 
             A = Rprime * (beta * (Phi - PhiBar))
