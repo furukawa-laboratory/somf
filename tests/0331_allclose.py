@@ -2,8 +2,8 @@ import unittest
 
 import numpy as np
 
-from lib.models.iwasaki.KSE0331 import KSE as KSE_IWA
-from lib.models.watanabe.KSE170331_wata_gamma import KSE170331_wata_gamma as KSE_WATA
+from lib.models.iwasaki.KSE0331 import KSE as KSE_Iwasaki
+from lib.models.watanabe.KSE170331_wata_gamma import KSE170331_wata_gamma as KSE_Watanabe
 
 
 class TestKSE0331(unittest.TestCase):
@@ -16,8 +16,8 @@ class TestKSE0331(unittest.TestCase):
         np.random.seed(seed)
         X = np.random.normal(0, 1, (N, D))
         Z0 = np.random.normal(0, 0.1, (N, L))
-        kse_iwa = KSE_IWA(X, L, Z0)
-        kse_wata = KSE_WATA(X, L, M, Z0)
+        kse_iwa = KSE_Iwasaki(X, L, Z0)
+        kse_wata = KSE_Watanabe(X, L, M, Z0)
 
         Epoch = 100
         epsilon = 0.5
