@@ -10,7 +10,7 @@ class KSE(object):
 
         self.Z = None
         if isinstance(init, str) and init in 'random':
-            self.Z = np.random.normal(0, 0.1, (self.N, self.D))
+            self.Z = np.random.normal(0, 0.1, (self.N, self.L))
         elif isinstance(init, np.ndarray) and init.shape == (self.N, self.L):
             self.Z = init.copy()
         else:
