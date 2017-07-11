@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation
 
-class KSE_viewer(object):
+class KSEViewer(object):
 
     def __init__(self, X, history):
         self.X = X
