@@ -2,7 +2,7 @@ import numpy as np
 
 
 class KSE(object):
-    def __init__(self, X, latent_dim, init='random'):
+    def __init__(self, X, latent_dim, init='random', betaType='type1'):
         self.X = X.copy()
         self.N = X.shape[0]
         self.D = X.shape[1]
@@ -15,6 +15,8 @@ class KSE(object):
             self.Z = init.copy()
         else:
             raise ValueError("invalid init: {}".format(init))
+
+        self.betaType = betaType;
 
         self.history = {}
 
@@ -38,16 +40,19 @@ class KSE(object):
             R = H * GInv
             Rprime = Hprime * GInv
 
-            Y = np.dot(R, self.X)
-            Y2 = np.sum(np.square(Y), axis=1)[:, None]
-            beta0 = np.sum(G) / np.sum(G * (X2 - Y2))
-            beta = (G / (1 + G)) * beta0
-
             U = R - np.identity(self.N)
             Phi = np.dot(U, K)
             PhiBar = np.sum(R * Phi, axis=1)[:, None]
             E = np.diag(U @ K @ U.T)[:, None]
             # E = np.sum(np.square(Y - self.X), axis=1)
+
+            Y = np.dot(R, self.X)
+            Y2 = np.sum(np.square(Y), axis=1)[:, None]
+            if self.betaType == 'type1':
+                beta0 = np.sum(G) / np.sum(G * (X2 - Y2))
+            else:
+                beta0 = (self.N * self.D) / np.sum(E)
+            beta = (G / (1 + G)) * beta0
 
             A = Rprime * (beta * (Phi - PhiBar))
             A += Rprime * (0.5 * (beta * E - 1.0) / (1.0 + G))
