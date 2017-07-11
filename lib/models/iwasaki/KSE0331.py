@@ -21,7 +21,7 @@ class KSE(object):
     def fit(self, nb_epoch=100, epsilon=0.5, gamma=1.0, sigma=30.0):
 
         K = np.dot(self.X, self.X.T)
-        X2 = np.diag(K)
+        X2 = np.diag(K)[:, None]
         alpha = 1.0 / (sigma ** 2.0)
 
         self.history['z'] = np.zeros((nb_epoch, self.N, self.L))
@@ -39,9 +39,8 @@ class KSE(object):
             Rprime = Hprime * GInv
 
             Y = np.dot(R, self.X)
-            Y2 = np.sum(np.square(Y), axis=1)
-            Gt = np.sum(H, axis=0)[:, None]
-            beta0 = np.sum(G) / (np.dot(Gt.T, X2) - np.dot(Gt.T, Y2))
+            Y2 = np.sum(np.square(Y), axis=1)[:, None]
+            beta0 = np.sum(G) / np.sum(G * (X2 - Y2))
             beta = (G / (1 + G)) * beta0
 
             U = R - np.identity(self.N)
