@@ -18,7 +18,7 @@ class KSE(object):
             raise ValueError("invalid init: {}".format(init))
 
         self.choice_beta = choice_beta
-        if self.choice_beta not in ['type1','type2','type3']:
+        if self.choice_beta not in ['type1','type2']:
             raise ValueError("invalid choice_beta: {}".format(choice_beta))
 
         self.history = {}
@@ -50,18 +50,11 @@ class KSE(object):
             PhiBar = np.sum(R * Phi, axis=1)[:, None]
             E = np.diag(U @ K @ U.T)[:, None]
 
-            if self.choice_beta is 'type1':
+            if self.choice_beta == 'type1':
                 Y2 = np.sum(np.square(Y), axis=1)[:, None]
                 beta0 = np.sum(G) / np.sum(G * (X2 - Y2))
-            elif self.choice_beta is 'type2':
+            elif self.choice_beta == 'type2':
                 beta0 = (self.N * self.D) / np.sum(E)
-            elif self.choice_beta is 'type3':
-                Delta = self.Z[:, None, :] - self.Z[None, :, :]
-                Dist = np.sum(np.square(Delta), axis=2)
-                O = np.exp(-0.5 * gamma * Dist)
-                Q = O / O.sum(axis=1)[:,np.newaxis]
-                DistXY = dist.cdist(self.X,self.Y,'sqeuclidean')
-                beta0 = (self.N * self.D)/np.sum(Q*DistXY)
             beta = (G / (1 + G)) * beta0
 
             A = Rprime * (beta * (Phi - PhiBar))
