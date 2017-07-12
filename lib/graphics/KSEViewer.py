@@ -5,9 +5,12 @@ from lib.graphics.observation_space import ObservationSpace
 
 
 class KSEViewer(object):
-    def __init__(self, kse):
+    def __init__(self, kse, rows, cols, size=3):
         self.kse = kse
-        self.fig = plt.figure()
+        self.rows = rows
+        self.cols = cols
+        self.size = size
+        self.fig = plt.figure(figsize=(self.size*self.cols, self.size*self.rows))
 
         self.animation = None
         self.interval = 10
