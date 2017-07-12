@@ -5,9 +5,12 @@ from lib.graphics.observation_space import ObservationSpace
 
 
 class KSEViewer(object):
-    def __init__(self, kse):
+    def __init__(self, kse, rows, cols, size=3):
         self.kse = kse
-        self.fig = plt.figure()
+        self.rows = rows
+        self.cols = cols
+        self.size = size
+        self.fig = plt.figure(figsize=(self.size*self.cols, self.size*self.rows))
 
         self.animation = None
         self.interval = 10
@@ -16,8 +19,10 @@ class KSEViewer(object):
 
         self.spaces = []
 
-    def add_observation_space(self):
-        self.spaces.append(ObservationSpace(self.fig, self.kse))
+    def add_observation_space(self, row, col, **kwargs):
+        index = (row-1) * self.cols + col
+        axes = self.fig.add_subplot(self.rows, self.cols, index, **kwargs)
+        self.spaces.append(ObservationSpace(axes, self.kse))
 
     def draw(self):
         frames = self.nb_epoch // self.skip
@@ -36,8 +41,8 @@ class KSEViewer(object):
             space.update(epoch)
 
     def _init(self):
-        for space in self.spaces:
-            space.init(111, aspect='equal')
+        for i, space in enumerate(self.spaces):
+            space.init()
 
     def save_gif(self, filename):
         self.animation.save(filename, writer='imagemagick', dpi=144)
