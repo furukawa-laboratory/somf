@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.spatial.distance as dist
 
 
 class KSE(object):
@@ -17,7 +18,7 @@ class KSE(object):
             raise ValueError("invalid init: {}".format(init))
 
         self.choice_beta = choice_beta
-        if choice_beta not in ['type1','type2']:
+        if self.choice_beta not in ['type1','type2','type3']:
             raise ValueError("invalid choice_beta: {}".format(choice_beta))
 
         self.history = {}
@@ -43,12 +44,6 @@ class KSE(object):
             Rprime = Hprime * GInv
 
             Y = R @ self.X
-            if self.choice_beta is 'type1':
-                Y2 = np.sum(np.square(Y), axis=1)[:, None]
-                beta0 = np.sum(G) / np.sum(G * (X2 - Y2))
-            elif self.choice_beta is 'type2':
-                beta0 = (self.N * self.D) / np.sum((X - Y)**2.0)
-            beta = (G / (1 + G)) * beta0
 
             U = R - np.identity(self.N)
             Phi = U @ K
@@ -60,6 +55,13 @@ class KSE(object):
                 beta0 = np.sum(G) / np.sum(G * (X2 - Y2))
             elif self.choice_beta is 'type2':
                 beta0 = (self.N * self.D) / np.sum(E)
+            elif self.choice_beta is 'type3':
+                Delta = self.Z[:, None, :] - self.Z[None, :, :]
+                Dist = np.sum(np.square(Delta), axis=2)
+                O = np.exp(-0.5 * gamma * Dist)
+                Q = O / O.sum(axis=1)[:,np.newaxis]
+                DistXY = dist.cdist(self.X,self.Y,'sqeuclidean')
+                beta0 = (self.N * self.D)/np.sum(Q*DistXY)
             beta = (G / (1 + G)) * beta0
 
             A = Rprime * (beta * (Phi - PhiBar))
