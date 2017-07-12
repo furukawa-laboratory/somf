@@ -1,17 +1,23 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation
+from lib.graphics.observation_space import ObservationSpace
 
 
 class KSEViewer(object):
     def __init__(self, kse):
-        self.fig = plt.figure()
-        self.axes = self.fig.add_subplot(111, aspect='equal')
-        self.interval = 10
         self.kse = kse
+        self.fig = plt.figure()
+
         self.animation = None
+        self.interval = 10
         self.skip = 1
         self.nb_epoch = self.kse.history['z'].shape[0]
+
+        self.spaces = []
+
+    def add_observation_space(self):
+        self.spaces.append(ObservationSpace(self.fig, self.kse))
 
     def draw(self):
         frames = self.nb_epoch // self.skip
@@ -26,15 +32,12 @@ class KSEViewer(object):
 
     def _update(self, i):
         epoch = i * self.skip
-        Y = self.kse.history['y'][epoch, :, :]
-        self.graph_y.set_xdata(Y[:, 0])
-        self.graph_y.set_ydata(Y[:, 1])
+        for space in self.spaces:
+            space.update(epoch)
 
     def _init(self):
-        self.axes.plot(self.kse.X[:, 0], self.kse.X[:, 1], 'o', label="$X$")
-        Y = self.kse.history['y'][0, :, :]
-        self.graph_y, = self.axes.plot(Y[:, 0], Y[:, 1], 'x', label="Y")
-        self.axes.legend(loc='upper right')
+        for space in self.spaces:
+            space.init(111, aspect='equal')
 
     def save_gif(self, filename):
         self.animation.save(filename, writer='imagemagick', dpi=144)

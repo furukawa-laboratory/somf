@@ -13,6 +13,7 @@ def _main():
     kse.fit()
 
     viewer = KSEViewer(kse)
+    viewer.add_observation_space()
     viewer.draw()
 
 
