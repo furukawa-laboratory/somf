@@ -53,6 +53,7 @@ class KSE(object):
             if self.betaType == 'type1':
                 beta0 = np.sum(G) / np.sum(G * (X2 - Y2))
             else:
+                # type2
                 beta0 = (self.N * self.D) / np.sum(E)
             beta = (G / (1 + G)) * beta0
 
