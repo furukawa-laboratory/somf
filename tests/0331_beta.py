@@ -7,7 +7,7 @@ from lib.models.iwasaki.KSE0331 import KSE as KSE_Iwasaki
 from lib.models.watanabe.KSE0331_add_changing_beta import KSE as KSE_Watanabe
 
 
-class TestKSE0331(unittest.TestCase):
+class TestKSE0331Beta(unittest.TestCase):
     def test_iwasaki_watanabe(self):
         N = 100
         D = 3
