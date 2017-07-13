@@ -6,11 +6,11 @@ import numpy as np
 
 def _main():
     version = "0331"
+    np.random.seed(100)
     X = sin.create_data(100)
     latent_dim = 2
     init = 'random'
 
-    np.random.seed(100)
     X += np.random.normal(0, 0.1, X.shape)
 
     kse = KSE(version, X, latent_dim=latent_dim, init=init)

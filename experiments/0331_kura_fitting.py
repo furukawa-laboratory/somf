@@ -5,6 +5,7 @@ from lib.graphics.KSEViewer import KSEViewer
 
 def _main():
     version = "0331"
+    np.random.seed(100)
     X = kura.create_data(100)
     latent_dim = 2
     init = 'random'
