@@ -5,7 +5,7 @@ import numpy as np
 
 
 def _main():
-    np.random.seed(100)
+    np.random.seed(10)
     X = sin.create_data(100)
     latent_dim = 2
     init = 'random'
@@ -15,7 +15,7 @@ def _main():
 
     X += np.random.normal(0, 0.1, X.shape)
 
-    nb_epoch = 500
+    nb_epoch = 100
 
     kse1 = KSE(X, latent_dim=latent_dim, init=init, choice_beta=betaType1)
     kse2 = KSE(X, latent_dim=latent_dim, init=init, choice_beta=betaType2)

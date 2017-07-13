@@ -7,7 +7,7 @@ from lib.graphics.sequential_space import SequentialSpace
 
 
 class KSEViewer(object):
-    def __init__(self, kse, rows, cols, figsize=None):
+    def __init__(self, kse, rows, cols, figsize=None, skip=1):
         self.kse = kse
         self.rows = rows
         self.cols = cols
@@ -16,10 +16,10 @@ class KSEViewer(object):
             self.fig = plt.figure(figsize=(size*self.cols, size*self.rows))
         else:
             self.fig = plt.figure(figsize=figsize)
+        self.skip = skip
 
         self.animation = None
         self.interval = 10
-        self.skip = 1
         self.nb_epoch = self.kse.history['z'].shape[0]
 
         self.spaces = []
