@@ -25,10 +25,13 @@ class KSEViewer(object):
         axes = self.fig.add_subplot(self.rows, self.cols, index, **kwargs)
         self.spaces.append(ObservationSpace(axes, self.kse))
 
-    def add_sequential_space(self, row, col, **kwargs):
+    def add_sequential_space(self, subject_name_list, row, col, **kwargs):
         index = (row-1) * self.cols + col
         axes = self.fig.add_subplot(self.rows, self.cols, index, **kwargs)
-        self.spaces.append(SequentialSpace(axes, self.kse))
+        ss = SequentialSpace(axes, self.kse)
+        for subject_name in subject_name_list:
+            ss.add_subject(subject_name)
+        self.spaces.append(ss)
 
     def draw(self):
         frames = self.nb_epoch // self.skip
