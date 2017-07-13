@@ -26,6 +26,7 @@ class KSE(object):
 
         self.history['z'] = np.zeros((nb_epoch, self.N, self.L))
         self.history['y'] = np.zeros((nb_epoch, self.N, self.D))
+        self.history['gamma'] = np.zeros(nb_epoch)
 
         for epoch in range(nb_epoch):
             Delta = self.Z[:, None, :] - self.Z[None, :, :]
@@ -58,5 +59,6 @@ class KSE(object):
 
             self.history['z'][epoch] = self.Z
             self.history['y'][epoch] = Y
+            self.history['gamma'][epoch] = gamma
 
         return self.history
