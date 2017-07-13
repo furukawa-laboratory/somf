@@ -20,7 +20,7 @@ def _main():
     kse1.fit()
     kse2.fit()
 
-    viewer = KSEViewer(kse1, rows=2, cols=2)
+    viewer = KSEViewer(kse1, rows=2, cols=2, figsize=(10, 6))
     viewer.add_observation_space(kse=kse1, row=1, col=1, aspect='equal', title=betaType1)
     viewer.add_sequential_space(kse=kse1, subject_name_list=['gamma', 'beta'], row=2, col=1)
     viewer.add_observation_space(kse=kse2, row=1, col=2, aspect='equal', title=betaType2)
