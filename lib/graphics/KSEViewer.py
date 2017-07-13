@@ -6,12 +6,15 @@ from lib.graphics.sequential_space import SequentialSpace
 
 
 class KSEViewer(object):
-    def __init__(self, kse, rows, cols, size=3):
+    def __init__(self, kse, rows, cols, figsize=None):
         self.kse = kse
         self.rows = rows
         self.cols = cols
-        self.size = size
-        self.fig = plt.figure(figsize=(self.size*self.cols, self.size*self.rows))
+        if figsize is None:
+            size = 3
+            self.fig = plt.figure(figsize=(size*self.cols, size*self.rows))
+        else:
+            self.fig = plt.figure(figsize=figsize)
 
         self.animation = None
         self.interval = 10
