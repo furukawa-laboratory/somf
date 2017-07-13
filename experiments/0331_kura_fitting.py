@@ -15,7 +15,7 @@ def _main():
     kse.fit()
 
     viewer = KSEViewer(kse, rows=2, cols=1, figsize=(6, 6))
-    viewer.add_observation_space(row=1, col=1, aspect='equal')
+    viewer.add_observation_space(row=1, col=1, aspect='equal', projection='3d')
     viewer.add_sequential_space(['gamma', 'beta'], row=2, col=1)
     viewer.draw()
 
