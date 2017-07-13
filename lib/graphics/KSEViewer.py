@@ -6,12 +6,15 @@ from lib.graphics.sequential_space import SequentialSpace
 
 
 class KSEViewer(object):
-    def __init__(self, kse, rows, cols, size=3):
+    def __init__(self, kse, rows, cols, figsize=None):
         self.kse = kse
         self.rows = rows
         self.cols = cols
-        self.size = size
-        self.fig = plt.figure(figsize=(self.size*self.cols, self.size*self.rows))
+        if figsize is None:
+            size = 3
+            self.fig = plt.figure(figsize=(size*self.cols, size*self.rows))
+        else:
+            self.fig = plt.figure(figsize=figsize)
 
         self.animation = None
         self.interval = 10
@@ -20,15 +23,24 @@ class KSEViewer(object):
 
         self.spaces = []
 
-    def add_observation_space(self, row, col, **kwargs):
+    def add_observation_space(self, kse=None, row=1, col=1, **kwargs):
         index = (row-1) * self.cols + col
         axes = self.fig.add_subplot(self.rows, self.cols, index, **kwargs)
-        self.spaces.append(ObservationSpace(axes, self.kse))
+        if kse is None:
+            self.spaces.append(ObservationSpace(axes, self.kse))
+        else:
+            self.spaces.append(ObservationSpace(axes, kse))
 
-    def add_sequential_space(self, subject_name_list, row, col, **kwargs):
+
+    def add_sequential_space(self, subject_name_list, kse=None, row=1, col=1, **kwargs):
         index = (row-1) * self.cols + col
         axes = self.fig.add_subplot(self.rows, self.cols, index, **kwargs)
-        ss = SequentialSpace(axes, self.kse)
+
+        if kse is None:
+            ss = SequentialSpace(axes, self.kse)
+        else:
+            ss = SequentialSpace(axes, kse)
+
         for subject_name in subject_name_list:
             ss.add_subject(subject_name)
         self.spaces.append(ss)
