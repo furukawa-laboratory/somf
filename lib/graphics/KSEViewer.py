@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation
 from lib.graphics.observation_space import ObservationSpace
+from lib.graphics.sequential_space import SequentialSpace
 
 
 class KSEViewer(object):
@@ -23,6 +24,11 @@ class KSEViewer(object):
         index = (row-1) * self.cols + col
         axes = self.fig.add_subplot(self.rows, self.cols, index, **kwargs)
         self.spaces.append(ObservationSpace(axes, self.kse))
+
+    def add_sequential_space(self, row, col, **kwargs):
+        index = (row-1) * self.cols + col
+        axes = self.fig.add_subplot(self.rows, self.cols, index, **kwargs)
+        self.spaces.append(SequentialSpace(axes, self.kse))
 
     def draw(self):
         frames = self.nb_epoch // self.skip

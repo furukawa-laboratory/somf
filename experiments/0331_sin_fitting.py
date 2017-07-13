@@ -1,13 +1,17 @@
-from lib.datasets.artificial import kura
+from lib.datasets.artificial import sin
 from lib.models.KSE import KSE
 from lib.graphics.KSEViewer import KSEViewer
+import numpy as np
 
 
 def _main():
     version = "0331"
-    X = kura.create_data(100)
+    X = sin.create_data(100)
     latent_dim = 2
     init = 'random'
+
+    np.random.seed(100)
+    X += np.random.normal(0, 0.1, X.shape)
 
     kse = KSE(version, X, latent_dim=latent_dim, init=init)
     kse.fit()
