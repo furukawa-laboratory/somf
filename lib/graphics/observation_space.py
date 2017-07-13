@@ -11,5 +11,5 @@ class ObservationSpace(object):
     def init(self):
         self.axes.plot(self.kse.X[:, 0], self.kse.X[:, 1], 'o', label="$X$")
         Y = self.kse.history['y'][0, :, :]
-        self.graph_y, = self.axes.plot(Y[:, 0], Y[:, 1], 'x', label="Y")
+        self.graph_y, = self.axes.plot(Y[:, 0], Y[:, 1], 'x', label="$Y$")
         self.axes.legend(loc='upper right')
