@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation
+from mpl_toolkits.mplot3d import Axes3D
 from lib.graphics.observation_space import ObservationSpace
 from lib.graphics.sequential_space import SequentialSpace
 
