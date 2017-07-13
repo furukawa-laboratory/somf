@@ -20,15 +20,24 @@ class KSEViewer(object):
 
         self.spaces = []
 
-    def add_observation_space(self, row, col, **kwargs):
+    def add_observation_space(self, kse=None, row=1, col=1, **kwargs):
         index = (row-1) * self.cols + col
         axes = self.fig.add_subplot(self.rows, self.cols, index, **kwargs)
-        self.spaces.append(ObservationSpace(axes, self.kse))
+        if kse is None:
+            self.spaces.append(ObservationSpace(axes, self.kse))
+        else:
+            self.spaces.append(ObservationSpace(axes, kse))
 
-    def add_sequential_space(self, subject_name_list, row, col, **kwargs):
+
+    def add_sequential_space(self, subject_name_list, kse=None, row=1, col=1, **kwargs):
         index = (row-1) * self.cols + col
         axes = self.fig.add_subplot(self.rows, self.cols, index, **kwargs)
-        ss = SequentialSpace(axes, self.kse)
+
+        if kse is None:
+            ss = SequentialSpace(axes, self.kse)
+        else:
+            ss = SequentialSpace(axes, kse)
+
         for subject_name in subject_name_list:
             ss.add_subject(subject_name)
         self.spaces.append(ss)
