@@ -19,16 +19,12 @@ def _main():
     kse1.fit(nb_epoch = nb_epoch)
     kse2.fit(nb_epoch = nb_epoch)
 
-    # viewer1 = KSEViewer(kse1, rows=2, cols=1)
-    # viewer1.add_observation_space(row=1, col=1, aspect='equal')
-    # viewer1.add_sequential_space(['gamma', 'beta'], row=2, col=1)
-    # viewer1.draw()
-
-    viewer2 = KSEViewer(kse2, rows=2, cols=1, size=4)
-    viewer2.add_observation_space(row=1, col=1, aspect='equal')
-    viewer2.add_sequential_space(['gamma', 'beta'], row=2, col=1)
-    viewer2.draw()
-    #viewer2.save_gif('result_changing_beta.gif')
+    viewer = KSEViewer(kse1, rows=2, cols=2, figsize=(10, 6))
+    viewer.add_observation_space(kse=kse1, row=1, col=1, aspect='equal', title=betaType1)
+    viewer.add_sequential_space(kse=kse1, subject_name_list=['gamma', 'beta'], row=2, col=1)
+    viewer.add_observation_space(kse=kse2, row=1, col=2, aspect='equal', title=betaType2)
+    viewer.add_sequential_space(kse=kse2, subject_name_list=['gamma', 'beta'], row=2, col=2)
+    viewer.draw()
 
 if __name__ == "__main__":
     _main()
