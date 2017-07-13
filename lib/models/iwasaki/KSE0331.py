@@ -16,7 +16,9 @@ class KSE(object):
         else:
             raise ValueError("invalid init: {}".format(init))
 
-        self.betaType = betaType;
+        if betaType not in ['type1', 'type2']:
+            raise ValueError("invalid betaType {}".format(betaType))
+        self.betaType = betaType
 
         self.history = {}
 
