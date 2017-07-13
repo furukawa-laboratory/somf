@@ -12,8 +12,9 @@ def _main():
     kse = KSE(version, X, latent_dim=latent_dim, init=init)
     kse.fit()
 
-    viewer = KSEViewer(kse, rows=2, cols=2)
-    viewer.add_observation_space(row=2, col=1, aspect='equal')
+    viewer = KSEViewer(kse, rows=2, cols=1)
+    viewer.add_observation_space(row=1, col=1, aspect='equal')
+    viewer.add_sequential_space(row=2, col=1)
     viewer.draw()
 
 
