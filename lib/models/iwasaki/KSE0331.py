@@ -24,6 +24,7 @@ class KSE(object):
         self.history = {}
 
     def fit(self, nb_epoch=100, epsilon=0.5, gamma=1.0, sigma=30.0):
+        self.nb_epoch = nb_epoch
 
         K = np.dot(self.X, self.X.T)
         X2 = np.diag(K)[:, None]
