@@ -5,9 +5,9 @@ import numpy as np
 
 
 def _main():
-    np.random.seed(10)
+    np.random.seed(122)
     X = sin.create_data(100)
-    latent_dim = 2
+    latent_dim = 1
     init = 'random'
 
     betaType1 = 'type1'
