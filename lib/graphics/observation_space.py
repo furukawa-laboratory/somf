@@ -10,38 +10,112 @@ class ObservationSpace(object):
             self.kse.calcF(resolution=10)
             self.f_style = 'c-s'
 
-    def update(self, epoch):
+        if self.axes.name == '3d':
+            self.view_dim = 3
+        else:
+            self.view_dim = 2
+
+        self.latent_dim = self.kse.L
+
+        if (self.view_dim, self.latent_dim) == (3, 2):
+            self.init = self.init_3dview_2dmesh
+            self.update = self.update_3dview_2dmesh
+        elif (self.view_dim, self.latent_dim) == (3, 1):
+            self.init = self.init_3dview_1dmesh
+            self.update = self.update_3dview_1dmesh
+        elif (self.view_dim, self.latent_dim) == (2, 2):
+            self.init = self.init_2dview_2dmesh
+            self.update = self.update_2dview_2dmesh
+        elif (self.view_dim, self.latent_dim) == (2, 1):
+            self.init = self.init_2dview_1dmesh
+            self.update = self.update_2dview_1dmesh
+        else:
+            raise ValueError('invalid dim view:{0}, latent{1}'.format(self.view_dim, self.latent_dim))
+
+    def update_3dview_2dmesh(self, epoch):
         Y = self.kse.history['y'][epoch, :, :]
         self.graph_y.set_xdata(Y[:, 0])
         self.graph_y.set_ydata(Y[:, 1])
-        if self.axes.name == '3d':
-            self.graph_y.set_3d_properties(Y[:, 2])
-
+        self.graph_y.set_3d_properties(Y[:, 2])
         if self.show_f:
             F = self.kse.history['f'][epoch, :, :]
-            if self.axes.name == '3d':
-                F = F.reshape(self.kse.resolution, self.kse.resolution, -1)
-                self.axes.collections.remove(self.graph_f)
-                self.graph_f = self.axes.plot_wireframe(F[:, :, 0], F[:, :, 1], F[:, :, 2], color=self.f_style[0], label="$F$")
-            else:
-                self.graph_f.set_xdata(F[:, 0])
-                self.graph_f.set_ydata(F[:, 1])
+            F = F.reshape(self.kse.resolution, self.kse.resolution, -1)
+            self.axes.collections.remove(self.graph_f)
+            self.graph_f = self.axes.plot_wireframe(F[:, :, 0], F[:, :, 1], F[:, :, 2], color=self.f_style[0], label="$F$")
 
-    def init(self):
-        Y = self.kse.history['y'][0, :, :]
+    def update_3dview_1dmesh(self, epoch):
+        Y = self.kse.history['y'][epoch, :, :]
+        self.graph_y.set_xdata(Y[:, 0])
+        self.graph_y.set_ydata(Y[:, 1])
+        self.graph_y.set_3d_properties(Y[:, 2])
+        if self.show_f:
+            F = self.kse.history['f'][epoch, :, :]
+            self.graph_f.set_xdata(F[:, 0])
+            self.graph_f.set_ydata(F[:, 1])
+            self.graph_f.set_3d_properties(F[:, 2])
+
+    def update_2dview_2dmesh(self, epoch):
+        Y = self.kse.history['y'][epoch, :, :]
+        self.graph_y.set_xdata(Y[:, 0])
+        self.graph_y.set_ydata(Y[:, 1])
+        if self.show_f:
+            F = self.kse.history['f'][epoch, :, :]
+            F = F.reshape(self.kse.resolution, self.kse.resolution, -1)
+            for k in range(self.kse.resolution):
+                self.graph_f1[k].set_xdata(F[:, k, 0])
+                self.graph_f1[k].set_ydata(F[:, k, 1])
+                self.graph_f2[k].set_xdata(F[k, :, 0])
+                self.graph_f2[k].set_ydata(F[k, :, 1])
+
+    def update_2dview_1dmesh(self, epoch):
+        Y = self.kse.history['y'][epoch, :, :]
+        self.graph_y.set_xdata(Y[:, 0])
+        self.graph_y.set_ydata(Y[:, 1])
+        if self.show_f:
+            F = self.kse.history['f'][epoch, :, :]
+            self.graph_f.set_xdata(F[:, 0])
+            self.graph_f.set_ydata(F[:, 1])
+
+    def init_3dview_2dmesh(self):
+        self.axes.plot(self.kse.X[:, 0], self.kse.X[:, 1], self.kse.X[:, 2], self.x_style, label="$X$")
         if self.show_f:
             F = self.kse.history['f'][0, :, :]
+            F = F.reshape(self.kse.resolution, self.kse.resolution, -1)
+            self.graph_f = self.axes.plot_wireframe(F[:, :, 0], F[:, :, 1], F[:, :, 2], color=self.f_style[0], label="$F$")
+        Y = self.kse.history['y'][0, :, :]
+        self.graph_y, = self.axes.plot(Y[:, 0], Y[:, 1], Y[:, 2], self.y_style, label="Y")
+        self.axes.legend(loc='upper right')
 
-        if self.axes.name == '3d':
-            self.axes.plot(self.kse.X[:, 0], self.kse.X[:, 1], self.kse.X[:, 2], self.x_style, label="$X$")
-            if self.show_f:
-                F = F.reshape(self.kse.resolution, self.kse.resolution, -1)
-                self.graph_f = self.axes.plot_wireframe(F[:, :, 0], F[:, :, 1], F[:, :, 2], color=self.f_style[0], label="$F$")
-            self.graph_y, = self.axes.plot(Y[:, 0], Y[:, 1], Y[:, 2], self.y_style, label="Y")
-        else:
-            self.axes.plot(self.kse.X[:, 0], self.kse.X[:, 1], self.x_style, label="$X$")
-            if self.show_f:
-                self.graph_f, = self.axes.plot(F[:, 0], F[:, 1], self.f_style, label="$F$")
-            self.graph_y, = self.axes.plot(Y[:, 0], Y[:, 1], self.y_style, label="Y")
+    def init_3dview_1dmesh(self):
+        self.axes.plot(self.kse.X[:, 0], self.kse.X[:, 1], self.kse.X[:, 2], self.x_style, label="$X$")
+        if self.show_f:
+            F = self.kse.history['f'][0, :, :]
+            self.graph_f = self.axes.plot(F[:, 0], F[:, 1], F[:, 2], self.f_style, label="$F$")[0]
+        Y = self.kse.history['y'][0, :, :]
+        self.graph_y = self.axes.plot(Y[:, 0], Y[:, 1], Y[:, 2], self.y_style, label="Y")[0]
+        self.axes.legend(loc='upper right')
 
+    def init_2dview_2dmesh(self):
+        self.axes.plot(self.kse.X[:, 0], self.kse.X[:, 1], self.x_style, label="$X$")
+        if self.show_f:
+            F = self.kse.history['f'][0, :, :]
+            F = F.reshape(self.kse.resolution, self.kse.resolution, -1)
+            self.graph_f1 = []
+            self.graph_f2 = []
+            self.f_style = self.f_style[:-1]
+            self.axes.plot(0, 0, self.f_style, label="$F$")
+            for k in range(self.kse.resolution):
+                self.graph_f1.append(self.axes.plot(F[:, k, 0], F[:, k, 1], self.f_style)[0])
+                self.graph_f2.append(self.axes.plot(F[k, :, 0], F[k, :, 1], self.f_style)[0])
+        Y = self.kse.history['y'][0, :, :]
+        self.graph_y, = self.axes.plot(Y[:, 0], Y[:, 1], self.y_style, label="Y")
+        self.axes.legend(loc='upper right')
+
+    def init_2dview_1dmesh(self):
+        self.axes.plot(self.kse.X[:, 0], self.kse.X[:, 1], self.x_style, label="$X$")
+        if self.show_f:
+            F = self.kse.history['f'][0, :, :]
+            self.graph_f = self.axes.plot(F[:, 0], F[:, 1], self.f_style, label="$F$")[0]
+        Y = self.kse.history['y'][0, :, :]
+        self.graph_y = self.axes.plot(Y[:, 0], Y[:, 1], self.y_style, label="Y")[0]
         self.axes.legend(loc='upper right')
