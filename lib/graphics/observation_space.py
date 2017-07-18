@@ -10,6 +10,22 @@ class ObservationSpace(object):
             self.kse.calcF(resolution=10)
             self.f_style = 'c-s'
 
+        if self.axes.name == '3d':
+            self.view_dim = 3
+        else:
+            self.view_dim = 2
+
+        self.latent_dim = self.kse.L
+
+        if (self.view_dim, self.latent_dim) == (3, 2):
+            self.init = self.init_3dview_2dmesh
+            self.update = self.update_3dview_2dmesh
+        elif (self.view_dim, self.latent_dim) == (2, 1):
+            self.init = self.init_2dview_1dmesh
+            self.update = self.update_2dview_1dmesh
+        else:
+            raise ValueError('invalid dim view:{0}, latent{1}'.format(self.view_dim, self.latent_dim))
+
     def update(self, epoch):
         Y = self.kse.history['y'][epoch, :, :]
         self.graph_y.set_xdata(Y[:, 0])
