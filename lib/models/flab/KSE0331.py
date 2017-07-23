@@ -1,5 +1,5 @@
 import numpy as np
-
+import scipy.spatial.distance as dist
 
 class KSE(object):
     def __init__(self, X, latent_dim, init='random'):
@@ -23,6 +23,8 @@ class KSE(object):
         K = self.X @ self.X.T
         X2 = np.diag(K)[:, None]
         alpha = 1.0 / (sigma ** 2)
+
+        self.nb_epoch = nb_epoch
 
         self.history['z'] = np.zeros((nb_epoch, self.N, self.L))
         self.history['y'] = np.zeros((nb_epoch, self.N, self.D))
@@ -64,3 +66,47 @@ class KSE(object):
             self.history['beta'][epoch] = beta0
 
         return self.history
+
+    def calcF(self, resolution, size='auto'):
+        """
+        :param resolution:
+        :param size:
+        :return:
+        """
+        self.resolution = resolution
+        Zeta = create_zeta(-1, 1, self.L, resolution)
+        M = Zeta.shape[0]
+
+        self.history['f'] = np.zeros((self.nb_epoch, M, self.D))
+
+        for epoch in range(self.nb_epoch):
+            Z = self.history['z'][epoch]
+            gamma = self.history['gamma'][epoch]
+            if size == 'auto':
+                Zeta = create_zeta(Z.min(), Z.max(), self.L, resolution)
+            else:
+                Zeta = create_zeta(size.min(), size.max(), self.L, resolution)
+
+            Dist = dist.cdist(Zeta, Z, 'sqeuclidean')
+
+            H = np.exp(-0.5 * gamma * Dist)
+            G = np.sum(H, axis=1)[:, None]
+            GInv = np.reciprocal(G)
+            R = H * GInv
+
+            Y = np.dot(R, self.X)
+
+            self.history['f'][epoch] = Y
+
+
+def create_zeta(zeta_min, zeta_max, latent_dim, resolution):
+    mesh1d, step = np.linspace(zeta_min, zeta_max, resolution, endpoint=False, retstep=True)
+    mesh1d += step / 2.0
+    if latent_dim == 1:
+        Zeta = mesh1d
+    elif latent_dim == 2:
+        Zeta = np.meshgrid(mesh1d, mesh1d)
+    else:
+        raise ValueError("invalid latent dim {}".format(latent_dim))
+    Zeta = np.dstack(Zeta).reshape(-1, latent_dim)
+    return Zeta
