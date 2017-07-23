@@ -18,11 +18,13 @@ class KSE(object):
 
         self.history = {}
 
-    def fit(self, nb_epoch=100, epsilon=0.5, gamma=30**2.0):
+    def fit(self, nb_epoch=100, epsilon=0.5, gamma=1.0, sigma=30.0):
 
         K = self.X @ self.X.T
         X2 = np.diag(K)[:, None]
-        alpha = 1.0
+        #alpha = 1.0
+        alpha = 1.0 / (sigma ** 2)
+
 
         self.nb_epoch = nb_epoch
 
