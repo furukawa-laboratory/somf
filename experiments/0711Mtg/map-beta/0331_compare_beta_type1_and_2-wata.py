@@ -13,7 +13,8 @@ def _main():
     betaType1 = 'type1'
     betaType2 = 'type2'
 
-    X += np.random.normal(0, 0.1, X.shape)
+    #X += np.random.normal(0, 0.1, X.shape)
+    X += np.random.normal(0, 0.3, X.shape)
 
     nb_epoch = 500
 
