@@ -1,7 +1,8 @@
-from lib.datasets.artificial import kura
-from lib.models.KSE import KSE
-from lib.graphics.KSEViewer import KSEViewer
 import numpy as np
+
+from lib.datasets.artificial import kura
+from lib.graphics.KSEViewer import KSEViewer
+from lib.models.flab.KSE import KSE
 
 
 def _main():

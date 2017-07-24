@@ -1,7 +1,8 @@
-from lib.datasets.artificial import sin
-from lib.models.KSE import KSE
-from lib.graphics.KSEViewer import KSEViewer
 import numpy as np
+
+from lib.datasets.artificial import sin
+from lib.graphics.KSEViewer import KSEViewer
+from lib.models.flab.KSE import KSE
 
 
 def _main():
