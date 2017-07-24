@@ -62,7 +62,7 @@ class KSE(object):
 
             self.Z += epsilon * dZ
 
-            if e > gamma_update_start and e % gamma_update_freq == 0:
+            if epoch > gamma_update_start and epoch % gamma_update_freq == 0:
                 x = Dist.reshape(self.N*self.N,1)
                 y = beta0*DistX.reshape(self.N * self.N,1)
                 h = H.reshape(self.N*self.N)
