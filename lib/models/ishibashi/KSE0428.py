@@ -18,7 +18,7 @@ class KSE(object):
         self.Gamma = 1
         self.history={}
 
-    def fit(self, Epoch=100, epsilon=0.5,blank=1,calcFunction=False,scale=1):
+    def fit(self, Epoch=100, epsilon=0.5,blank=1,calcFunction=False,scale=1, gamma_update_freq=50, gamma_update_start=300):
         self.history["z"] = np.zeros((Epoch, self.N, self.L))
         if calcFunction is True:
             self.history["f"] = np.zeros((Epoch, self.M, self.D))
@@ -83,7 +83,7 @@ class KSE(object):
             self.Z += epsilon * dZ
 
             # Gammaの更新
-            if e%10==9:
+            if e > gamma_update_start and e % gamma_update_freq == 0:
                 ErrorL = Dist
                 ErrorL2 = ErrorL.reshape(self.N*self.N)[:,np.newaxis]
                 one = np.ones(self.N*self.N)[:,np.newaxis]
