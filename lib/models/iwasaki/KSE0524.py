@@ -1,8 +1,6 @@
 import numpy as np
 import scipy.spatial.distance as dist
 from tqdm import tqdm
-from flib.basic.initialization import initialize_latent
-from flib.latent_space.zeta import create_zeta
 import matplotlib.pyplot as plt
 
 from sklearn.linear_model import LinearRegression
@@ -22,7 +20,14 @@ class KSE(object):
         self.input_dim = X.shape[1]
         self.latent_dim = latent_dim
 
-        self.Z = initialize_latent(init, latent_dim, X)
+        self.Z = None
+        if isinstance(init, str) and init in 'random':
+            self.Z = np.random.normal(0, 0.1, (self.nb_samples, self.latent_dim))
+        elif isinstance(init, np.ndarray) and init.shape == (self.nb_samples, self.latent_dim):
+            self.Z = init.copy()
+        else:
+            raise ValueError("invalid init: {}".format(init))
+
         self.Alpha = 1.0
         self.Gamma = 1.0
 
@@ -160,3 +165,16 @@ class KSE(object):
                 self.history['f'][epoch] = R @ self.X
 
         return self.history
+
+
+def create_zeta(zeta_min, zeta_max, latent_dim, resolution):
+    mesh1d, step = np.linspace(zeta_min, zeta_max, resolution, endpoint=False, retstep=True)
+    mesh1d += step / 2.0
+    if latent_dim == 1:
+        Zeta = mesh1d
+    elif latent_dim == 2:
+        Zeta = np.meshgrid(mesh1d, mesh1d)
+    else:
+        raise ValueError("invalid latent dim {}".format(latent_dim))
+    Zeta = np.dstack(Zeta).reshape(-1, latent_dim)
+    return Zeta
