@@ -64,7 +64,7 @@ class KSE(object):
             dZ = np.sum((A + A.T)[:, :, None] * Delta, axis=1)
             dZ -= (self.Alpha / self.Gamma) * self.Z
 
-            self.Z += epsilon * dZ
+            self.Z += (epsilon / self.D) * dZ
 
             if epoch > gamma_update_start and epoch % gamma_update_freq == 0:
                 _DistZ = DistZ.flatten()[:, None]
