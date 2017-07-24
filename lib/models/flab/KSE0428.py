@@ -10,6 +10,10 @@ class KSE(object):
         self.L = latent_dim
 
         self.Z = None
+
+        self.alpha = 1.0
+        self.gamma = 1.0
+        
         if isinstance(init, str) and init in 'random':
             self.Z = np.random.normal(0, 0.1, (self.N, self.L))
         elif isinstance(init, np.ndarray) and init.shape == (self.N, self.L):
@@ -19,11 +23,10 @@ class KSE(object):
 
         self.history = {}
 
-    def fit(self, nb_epoch=100, epsilon=0.5, gamma=1.0, sigma=30.0, gamma_update_freq=50, gamma_update_start=300):
+    def fit(self, nb_epoch=100, epsilon=0.5, gamma_update_freq=50, gamma_update_start=300):
 
         K = self.X @ self.X.T
         X2 = np.diag(K)[:, None]
-        alpha = 1.0 / (sigma ** 2)
         DistX = dist.cdist(self.X, self.X, 'sqeuclidean')
 
         self.nb_epoch = nb_epoch
@@ -36,7 +39,7 @@ class KSE(object):
         for epoch in range(nb_epoch):
             Delta = self.Z[:, None, :] - self.Z[None, :, :]
             Dist = np.sum(np.square(Delta), axis=2)
-            H = np.exp(-0.5 * gamma * Dist)
+            H = np.exp(-0.5 * self.gamma * Dist)
             H -= H * np.identity(self.N)
             Hprime = H
             G = np.sum(H, axis=1)[:, None]
@@ -57,10 +60,10 @@ class KSE(object):
             A = Rprime * (beta * (Phi - PhiBar))
             A += Rprime * (0.5 * (beta * E - 1.0) / (1.0 + G))
 
-            dZ = np.sum((A + A.T)[:, :, None] * Delta, axis=1)
-            dZ -= (alpha / gamma) * self.Z
+            dFdZ = np.sum((A + A.T)[:, :, None] * Delta, axis=1)
+            dFdZ -= (self.alpha / self.gamma) * self.Z
 
-            self.Z += epsilon * dZ
+            self.Z += epsilon * dFdZ
 
             if epoch > gamma_update_start and epoch % gamma_update_freq == 0:
                 x = Dist.reshape(self.N*self.N,1)
@@ -69,11 +72,11 @@ class KSE(object):
                 LR = linear_model.LinearRegression()
                 LR.fit(x,y,sample_weight=h)
                 #LR.fit(x,y)
-                gamma = np.float(LR.coef_)
+                self.gamma = np.float(LR.coef_)
 
             self.history['z'][epoch] = self.Z
             self.history['y'][epoch] = Y
-            self.history['gamma'][epoch] = gamma
+            self.history['gamma'][epoch] = self.gamma
             self.history['beta'][epoch] = beta0
 
         return self.history
