@@ -4,7 +4,7 @@ import scipy.spatial.distance as dist
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-class KSE_fit_error2(object):
+class KSE(object):
     def __init__(self, X, L,M, Z0=None):
         self.X = X
         [self.N,self.D] = X.shape
