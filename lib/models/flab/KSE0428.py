@@ -19,11 +19,12 @@ class KSE(object):
 
         self.history = {}
 
-    def fit(self, nb_epoch=100, epsilon=0.5, gamma=1.0, sigma=30.0):
+    def fit(self, nb_epoch=100, epsilon=0.5, gamma=1.0, sigma=30.0, time_gamma_update=50):
 
         K = self.X @ self.X.T
         X2 = np.diag(K)[:, None]
         alpha = 1.0 / (sigma ** 2)
+        DistX = dist.cdist(self.X, self.X, 'sqeuclidean')
 
         self.nb_epoch = nb_epoch
 
@@ -61,9 +62,9 @@ class KSE(object):
 
             self.Z += epsilon * dZ
 
-            if e%50==49:
-                x = DistZZ.reshape(self.N*self.N,1)
-                y = beta0*self.DistXX.reshape(self.N * self.N,1)
+            if e!=0 and e % time_gamma_update == 0:
+                x = Dist.reshape(self.N*self.N,1)
+                y = beta0*DistX.reshape(self.N * self.N,1)
                 h = H.reshape(self.N*self.N)
                 LR = linear_model.LinearRegression()
                 LR.fit(x,y,sample_weight=h)
