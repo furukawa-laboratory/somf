@@ -56,7 +56,7 @@ class KSE(object):
 
             A = Rprime * (beta * (Phi - PhiBar))
             A += Rprime * (0.5 * (beta * E - self.D) / (1.0 + G))
-            A /= self.D
+            #A /= self.D
 
             Delta_star = Delta * gamma
             dFdZ = np.sum((A + A.T)[:, :, None] * Delta_star, axis=1)
