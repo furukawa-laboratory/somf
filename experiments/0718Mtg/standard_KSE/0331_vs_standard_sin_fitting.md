@@ -13,6 +13,12 @@ standardのAをDで割る
   - $z$に関しては一致
   - 331のbetaとstandardのbeta/2.0が一致（D=2より）
 ---
+# 検証内容その2  
+- standardの$\alpha$を$D$倍
+- $\varepsilon$を$D$で割る
+# 検証結果
+- 331と$z$がtrue
+---
 # 未検証
 - $\alpha$と$\gamma$の変更．  
   - 331では後者を1.0として固定しているがstandard版では前者を1.0と固定する

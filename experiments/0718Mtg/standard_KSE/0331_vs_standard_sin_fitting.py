@@ -14,7 +14,7 @@ def _main():
     kse0331 = KSE("0331", X, latent_dim=latent_dim, init=init)
     kse_standard = KSE("standard", X, latent_dim=latent_dim, init=init)
 
-    nb_epoch = 300
+    nb_epoch = 500
     kse0331.fit(nb_epoch = nb_epoch)
     kse_standard.fit(nb_epoch = nb_epoch)
 
