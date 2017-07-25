@@ -60,9 +60,9 @@ class KSE(object):
 
             Delta_star = Delta * gamma
             dFdZ = np.sum((A + A.T)[:, :, None] * Delta_star, axis=1)
-            dFdZ -= alpha* self.Z
+            dFdZ -= self.D * alpha * self.Z
 
-            self.Z += epsilon / gamma * dFdZ
+            self.Z += epsilon / (gamma * self.D) * dFdZ
 
             self.history['z'][epoch] = self.Z
             self.history['y'][epoch] = Y

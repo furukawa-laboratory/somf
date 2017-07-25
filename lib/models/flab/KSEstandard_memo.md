@@ -10,6 +10,13 @@ $\delta_{ni}^*=\gamma\delta_{ni}$
 - 更新式を次のように変更
 $z_n:=z_n+\frac{\varepsilon}{\gamma}\frac{\partial F}{\partial z_n}$
 
+### 二度目の変更
+- 勾配を次のように変更．
+$\frac{\partial F}{\partial z_n}=\sum_i\bar{A}_{ni}\delta_{ni}^*-\alpha D z_n$
+
+- 更新式を次のように変更
+$z_n:=z_n+\frac{\varepsilon}{\gamma D}\frac{\partial F}{\partial z_n}$
+
 ### これから変更したい点
 - $\alpha$と$\gamma$の定義の変更
     - $\gamma=1.0$としていたのを$\alpha=1.0$に変更．fitで$\gamma$を指定する．
