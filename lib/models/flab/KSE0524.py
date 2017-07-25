@@ -60,11 +60,12 @@ class KSE(object):
 
             A = Rprime * (beta * (Phi - PhiBar))
             A += Rprime * (0.5 * (beta * E - self.D) / (1.0 + G))
+            A /= self.D
 
             dZ = np.sum((A + A.T)[:, :, None] * Delta, axis=1)
             dZ -= (self.Alpha / self.Gamma) * self.Z
 
-            self.Z += (epsilon / self.D) * dZ
+            self.Z += epsilon * dZ
 
             if epoch > gamma_update_start and epoch % gamma_update_freq == 0:
                 _DistZ = DistZ.flatten()[:, None]
