@@ -16,7 +16,7 @@ def _main():
     kse0524 = KSE("0524", X, latent_dim=latent_dim, init=init)
 
     nb_epoch = 5000
-    kse0524.fit(nb_epoch = nb_epoch, gamma_divisor=input_dim)
+    kse0524.fit(nb_epoch = nb_epoch, gamma_divisor=input_dim, gamma_update_freq=5)
 
     viewer = KSEViewer(kse0524, rows=2, cols=1, figsize=(5, 5),skip=10)
     viewer.add_observation_space(kse=kse0524, row=1, col=1, aspect='equal')
