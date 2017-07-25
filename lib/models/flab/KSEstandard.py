@@ -56,13 +56,13 @@ class KSE(object):
 
             A = Rprime * (beta * (Phi - PhiBar))
             A += Rprime * (0.5 * (beta * E - self.D) / (1.0 + G))
-            #A /= self.D
+            A /= self.D
 
             Delta_star = Delta * gamma
             dFdZ = np.sum((A + A.T)[:, :, None] * Delta_star, axis=1)
-            dFdZ -= self.D * alpha * self.Z
+            dFdZ -= alpha * self.Z
 
-            self.Z += epsilon / (gamma * self.D) * dFdZ
+            self.Z += epsilon / gamma * dFdZ
 
             self.history['z'][epoch] = self.Z
             self.history['y'][epoch] = Y
