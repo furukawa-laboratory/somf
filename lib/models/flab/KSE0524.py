@@ -22,7 +22,7 @@ class KSE(object):
 
         self.history = {}
 
-    def fit(self, nb_epoch=100, epsilon=0.5, gamma_update_freq=50, gamma_update_start=300):
+    def fit(self, nb_epoch=100, epsilon=0.5, gamma_update_freq=50, gamma_update_start=300, gamma_divisor=1):
 
         K = self.X @ self.X.T
         X2 = np.diag(K)[:, None]
@@ -60,17 +60,18 @@ class KSE(object):
 
             A = Rprime * (beta * (Phi - PhiBar))
             A += Rprime * (0.5 * (beta * E - self.D) / (1.0 + G))
+            A /= self.D
 
             dZ = np.sum((A + A.T)[:, :, None] * Delta, axis=1)
             dZ -= (self.Alpha / self.Gamma) * self.Z
 
-            self.Z += (epsilon / self.D) * dZ
+            self.Z += epsilon * dZ
 
             if epoch > gamma_update_start and epoch % gamma_update_freq == 0:
                 _DistZ = DistZ.flatten()[:, None]
                 Weight = H.flatten()
                 slr.fit(_DistZ, beta0 * DistX, sample_weight=Weight)
-                self.Gamma = slr.coef_
+                self.Gamma = slr.coef_ / gamma_divisor
 
             self.history['z'][epoch] = self.Z
             self.history['y'][epoch] = Y
