@@ -1,17 +1,26 @@
-# 検証内容
+# 検証1
+## 内容
 331とstandard版の比較
 2者の相違点は$\beta_0$の定義．後者はDも考慮している．
-# 検証結果
+## 結果
 - standard版は$\beta_0$が振動する
 ---
-# 検証内容その2
+# 検証2
+## 内容
 331とstandardの対応を取る．
 standardのAをDで割る
-# 検証結果
+## 結果
 ![sin_fitting_A_div_D](./compare_331_vs_standard_A_div_D.png)
 - 対応が取れた
   - $z$に関しては一致
   - 331のbetaとstandardのbeta/2.0が一致（D=2より）
+---
+# 検証3
+## 内容  
+- standardの$\alpha$を$D$倍
+- $\varepsilon$を$D$で割る
+## 結果
+- 331と$z$がtrue
 ---
 # 未検証
 - $\alpha$と$\gamma$の変更．  
