@@ -12,13 +12,21 @@ $z_n:=z_n+\frac{\varepsilon}{\gamma}\frac{\partial F}{\partial z_n}$
 
 ### 二度目の変更
 - 勾配を次のように変更．
-$\frac{\partial F}{\partial z_n}=\sum_i\bar{A}_{ni}\delta_{ni}^*-\alpha D z_n$
+$\frac{\partial F}{\partial z_n}=\sum_i\bar{A}_{ni}\delta_{ni}^* -\alpha D z_n$
 
 - 更新式を次のように変更
 $z_n:=z_n+\frac{\varepsilon}{\gamma D}\frac{\partial F}{\partial z_n}$
 
-### これから変更したい点
-- $\alpha$と$\gamma$の定義の変更
-    - $\gamma=1.0$としていたのを$\alpha=1.0$に変更．fitで$\gamma$を指定する．
-    - 事前分布の精度$\alpha=1/\sigma_z^2$，平滑化カーネルの精度$\gamma=1/\sigma_r^2$より，$\sigma_z$と$\sigma_r$の比が一定であれば同じ効果が得られるはず
-      - 331で$\gamma=1.0, \alpha=1/30^2$と指定していた場合，$\gamma=30^2, \alpha=1.0$と指定すれば同じことになるはず．
+### 7月26日の変更点
+- $\gamma$を$\lambda$に定義し直し
+それに伴い，もう一度式を定義し直す．
+$\delta_{ni}^* =\lambda\delta_{ni}$
+- 勾配の式を次のように変更
+$\frac{\partial F}{\partial z_n}=\sum_i\bar{A}_{ni}\delta_{ni}^* -\alpha z_n$
+- 更新式は二度目の変更のまま
+$z_n:=z_n+\frac{\varepsilon}{\lambda D}\frac{\partial F}{\partial z_n}$
+
+- $\alpha$と$\lambda$の定義の変更
+    - $\lambda=1.0$としていたのを$\alpha=1.0$に変更．fitで$\lambda$を指定する．
+    - 事前分布の精度$\alpha=1/\sigma_z^2$，平滑化カーネルの精度$\lambda=1/\sigma_r^2$より，$\sigma_z$と$\sigma_r$の比が一定であれば同じ効果が得られるはず
+      - 331で$\lambda=1.0, \alpha=1/30^2$と指定していた場合，$\lambda=30^2, \alpha=1.0$と指定すれば同じことになるはず．
