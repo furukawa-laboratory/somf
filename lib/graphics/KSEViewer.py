@@ -68,3 +68,6 @@ class KSEViewer(object):
 
     def save_gif(self, filename):
         self.animation.save(filename, writer='imagemagick', dpi=144)
+
+    def save_png(self, filename):
+        self.fig.savefig(filename)
