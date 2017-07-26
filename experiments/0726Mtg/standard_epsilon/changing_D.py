@@ -25,6 +25,9 @@ def _main():
         kse_331.fit(nb_epoch = nb_epoch, alpha = alpha, gamma = lamb)
         kse_standard.fit(nb_epoch = nb_epoch, lamb = lamb)
 
+        print(np.allclose(kse_331.history['z'], kse_standard.history['z']))
+        print(np.allclose(kse_331.history['beta'], kse_standard.history['beta/D']))
+
         viewer = KSEViewer(kse_331, rows=2, cols=2, figsize=(10, 5),skip=100)
         viewer.add_observation_space(kse=kse_331, row=1, col=1, aspect='equal', title=r'331 $D={}$'.format(input_dim))
         viewer.add_sequential_space(kse=kse_331, subject_name_list=['beta'], row=2, col=1)
