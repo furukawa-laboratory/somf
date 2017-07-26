@@ -83,7 +83,7 @@ class KSE(object):
 
         for epoch in range(self.nb_epoch):
             Z = self.history['z'][epoch]
-            gamma = self.history['gamma'][epoch]
+            lamb = self.history['lambda'][epoch]
             if size == 'auto':
                 Zeta = create_zeta(Z.min(), Z.max(), self.L, resolution)
             else:
@@ -91,7 +91,7 @@ class KSE(object):
 
             Dist = dist.cdist(Zeta, Z, 'sqeuclidean')
 
-            H = np.exp(-0.5 * gamma * Dist)
+            H = np.exp(-0.5 * lamb * Dist)
             G = np.sum(H, axis=1)[:, None]
             GInv = np.reciprocal(G)
             R = H * GInv
