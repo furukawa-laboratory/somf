@@ -56,7 +56,7 @@ class KSE(object):
             A += Rprime * (0.5 * (beta * E - 1.0) / (1.0 + G))
 
             dZ = np.sum((A + A.T)[:, :, None] * Delta, axis=1)
-            dZ -= (alpha / gamma / self.D) * self.Z
+            dZ -= (alpha / gamma) * self.Z
 
             self.Z += epsilon * dZ
 
