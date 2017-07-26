@@ -23,9 +23,9 @@ def _main():
         kse0524_div2.fit(nb_epoch = nb_epoch, gamma_divisor=2, gamma_update_freq=5)
 
         viewer = KSEViewer(kse0524_divD, rows=2, cols=2, figsize=(10, 5),skip=100)
-        viewer.add_observation_space(kse=kse0524_divD, row=1, col=1, aspect='equal', title='$\gamma = a/D$ $(D={})$'.format(input_dim))
+        viewer.add_observation_space(kse=kse0524_divD, row=1, col=1, aspect='equal', title=r'$\gamma = \frac{1}{D} a \beta$ ' + '$(D={})$'.format(input_dim))
         viewer.add_sequential_space(kse=kse0524_divD, subject_name_list=['gamma', 'beta'], row=2, col=1)
-        viewer.add_observation_space(kse=kse0524_div2, row=1, col=2, aspect='equal', title='$\gamma = a/2$')
+        viewer.add_observation_space(kse=kse0524_div2, row=1, col=2, aspect='equal', title=r'$\gamma = \frac{1}{2} a \beta$')
         viewer.add_sequential_space(kse=kse0524_div2, subject_name_list=['gamma', 'beta'], row=2, col=2)
         viewer.draw()
         viewer.save_png(filename='524_D_{}.png'.format(input_dim))
