@@ -15,20 +15,23 @@ def _main():
         latent_dim = 1
         init = np.random.normal(0, 0.01, (X.shape[0], latent_dim))
 
-        kse0524_divD = KSE("0524", X, latent_dim=latent_dim, init=init)
-        kse0524_div2 = KSE("0524", X, latent_dim=latent_dim, init=init)
+        kse_331 = KSE("0331", X, latent_dim=latent_dim, init=init)
+        kse_standard = KSE("standard", X, latent_dim=latent_dim, init=init)
 
-        nb_epoch = 5000
-        kse0524_divD.fit(nb_epoch = nb_epoch, gamma_divisor=input_dim, gamma_update_freq=5)
-        kse0524_div2.fit(nb_epoch = nb_epoch, gamma_divisor=2, gamma_update_freq=5)
+        nb_epoch = 1000
 
-        viewer = KSEViewer(kse0524_divD, rows=2, cols=2, figsize=(10, 5),skip=100)
-        viewer.add_observation_space(kse=kse0524_divD, row=1, col=1, aspect='equal', title=r'$\gamma = \frac{1}{D} a \beta$ ' + '$(D={})$'.format(input_dim))
-        viewer.add_sequential_space(kse=kse0524_divD, subject_name_list=['gamma', 'beta'], row=2, col=1)
-        viewer.add_observation_space(kse=kse0524_div2, row=1, col=2, aspect='equal', title=r'$\gamma = \frac{1}{2} a \beta$')
-        viewer.add_sequential_space(kse=kse0524_div2, subject_name_list=['gamma', 'beta'], row=2, col=2)
+        lamb = 30**2
+        alpha = 1.0
+        kse_331.fit(nb_epoch = nb_epoch, alpha = alpha, gamma = lamb)
+        kse_standard.fit(nb_epoch = nb_epoch, lamb = lamb)
+
+        viewer = KSEViewer(kse_331, rows=2, cols=2, figsize=(10, 5),skip=100)
+        viewer.add_observation_space(kse=kse_331, row=1, col=1, aspect='equal', title=r'331 $D={}$'.format(input_dim))
+        viewer.add_sequential_space(kse=kse_331, subject_name_list=['beta'], row=2, col=1)
+        viewer.add_observation_space(kse=kse_standard, row=1, col=2, aspect='equal', title=r'standard $D={}$'.format(input_dim))
+        viewer.add_sequential_space(kse=kse_standard, subject_name_list=['beta'], row=2, col=2)
         viewer.draw()
-        viewer.save_png(filename='524_D_{}.png'.format(input_dim))
+        viewer.save_png(filename='standard_D_{}.png'.format(input_dim))
 
 if __name__ == "__main__":
     _main()
