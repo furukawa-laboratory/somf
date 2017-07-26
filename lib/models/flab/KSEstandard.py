@@ -31,6 +31,7 @@ class KSE(object):
         self.history['y'] = np.zeros((nb_epoch, self.N, self.D))
         self.history['lambda'] = np.zeros(nb_epoch)
         self.history['beta'] = np.zeros(nb_epoch)
+        self.history['beta/D'] = np.zeros(nb_epoch)
 
         for epoch in range(nb_epoch):
             Delta = self.Z[:, None, :] - self.Z[None, :, :]
@@ -66,6 +67,7 @@ class KSE(object):
             self.history['y'][epoch] = Y
             self.history['lambda'][epoch] = lamb
             self.history['beta'][epoch] = beta0
+            self.history['beta/D'][epoch] = beta0 / self.D
 
         return self.history
 
