@@ -29,7 +29,7 @@ def _main():
         viewer.add_observation_space(kse=kse_331, row=1, col=1, aspect='equal', title=r'331 $D={}$'.format(input_dim))
         viewer.add_sequential_space(kse=kse_331, subject_name_list=['beta'], row=2, col=1)
         viewer.add_observation_space(kse=kse_standard, row=1, col=2, aspect='equal', title=r'standard $D={}$'.format(input_dim))
-        viewer.add_sequential_space(kse=kse_standard, subject_name_list=['beta'], row=2, col=2)
+        viewer.add_sequential_space(kse=kse_standard, subject_name_list=['beta','beta/D'], row=2, col=2)
         viewer.draw()
         viewer.save_png(filename='standard_D_{}.png'.format(input_dim))
 
