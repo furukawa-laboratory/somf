@@ -18,7 +18,7 @@ class KSE(object):
 
         self.history = {}
 
-    def fit(self, nb_epoch=100, epsilon=0.5, gamma=1.0, sigma=30.0):
+    def fit(self, nb_epoch=100, epsilon=0.5, lamb=1.0, sigma=30.0):
 
         K = self.X @ self.X.T
         X2 = np.diag(K)[:, None]
@@ -30,13 +30,13 @@ class KSE(object):
 
         self.history['z'] = np.zeros((nb_epoch, self.N, self.L))
         self.history['y'] = np.zeros((nb_epoch, self.N, self.D))
-        self.history['gamma'] = np.zeros(nb_epoch)
+        self.history['lamb'] = np.zeros(nb_epoch)
         self.history['beta'] = np.zeros(nb_epoch)
 
         for epoch in range(nb_epoch):
             Delta = self.Z[:, None, :] - self.Z[None, :, :]
             Dist = np.sum(np.square(Delta), axis=2)
-            H = np.exp(-0.5 * gamma * Dist)
+            H = np.exp(-0.5 * lamb * Dist)
             H -= H * np.identity(self.N)
             Hprime = H
             G = np.sum(H, axis=1)[:, None]
@@ -56,17 +56,16 @@ class KSE(object):
 
             A = Rprime * (beta * (Phi - PhiBar))
             A += Rprime * (0.5 * (beta * E - self.D) / (1.0 + G))
-            A /= self.D
 
-            Delta_star = Delta * gamma
+            Delta_star = Delta * lamb
             dFdZ = np.sum((A + A.T)[:, :, None] * Delta_star, axis=1)
             dFdZ -= alpha * self.Z
 
-            self.Z += epsilon / gamma * dFdZ
+            self.Z += epsilon / (lamb * self.D) * dFdZ
 
             self.history['z'][epoch] = self.Z
             self.history['y'][epoch] = Y
-            self.history['gamma'][epoch] = gamma
+            self.history['lamb'][epoch] = lamb
             self.history['beta'][epoch] = beta0
 
         return self.history
