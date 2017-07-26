@@ -21,7 +21,7 @@ def _main():
         nb_epoch = 1000
 
         lamb = 30**2
-        alpha = 1.0
+        alpha = 1.0 / input_dim
         kse_331.fit(nb_epoch = nb_epoch, alpha = alpha, gamma = lamb)
         kse_standard.fit(nb_epoch = nb_epoch, lamb = lamb)
 
