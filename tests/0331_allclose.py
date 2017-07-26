@@ -47,7 +47,7 @@ class TestKSE0331(unittest.TestCase):
         gamma = 1.0
         sigma = 30.0
         alpha = 1 / (sigma ** 2)
-        kse_flab.fit(nb_epoch=Epoch, epsilon=epsilon, gamma=gamma, sigma=sigma)
+        kse_flab.fit(nb_epoch=Epoch, epsilon=epsilon, gamma=gamma, alpha=alpha)
         kse_wata.fit(Epoch=Epoch, epsilon=epsilon, alpha=alpha)
 
         np.testing.assert_allclose(kse_flab.history['z'], kse_wata.history['z'])
