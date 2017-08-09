@@ -1,7 +1,9 @@
 import numpy as np
-from som import SOM
+import sys
+sys.path.append('../../')
+from libs.models.som.som import SOM
 from tqdm import tqdm
-from animation_reference_vector3d import anime_reference_vector_3d
+from visualization.som.animation_reference_vector3d import anime_reference_vector_3d
 from libs.datasets.artificial.kura import create_data
 if __name__ == '__main__':
     T = 300
@@ -14,7 +16,7 @@ if __name__ == '__main__':
     nb_samples = 300
     seed = 1
 
-    #X = np.loadtxt("../data/kura.txt")  # reading observation data
+    # X = np.loadtxt("../../data/kura.txt")  # reading observation data
     np.random.seed(seed)
     X = create_data(nb_samples)
     D = X.shape[1]
