@@ -2,6 +2,7 @@ import numpy as np
 from som import SOM
 from tqdm import tqdm
 from Umatrix import SOM_Umatrix
+from libs.datasets.artificial import animal
 
 if __name__ == '__main__':
     T = 300
@@ -15,9 +16,8 @@ if __name__ == '__main__':
     title="animal map"
     umat_resolution = 100 #U-matrix表示の解像度
 
-    #X = np.loadtxt("../data/kura.txt")  # reading observation data
-    X = np.loadtxt('../../data/animal/features.txt')
-    labels = np.genfromtxt('../../data/animal/labels.txt',dtype=str)
+    X, labels = animal.load_data()
+
     np.random.seed(seed)
 
     som = SOM(X, latent_dim=latent_dim, resolution=resolution, sigma_max=sigma_max, sigma_min=sigma_min, tau=tau)
