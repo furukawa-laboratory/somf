@@ -1,8 +1,13 @@
 import numpy as np
-from som import SOM
 from tqdm import tqdm
-from Umatrix import SOM_Umatrix
+
+import sys
+sys.path.append('../../')
+
+from libs.models.som.som import SOM
+from visualization.som.Umatrix import SOM_Umatrix
 from libs.datasets.artificial import animal
+
 
 if __name__ == '__main__':
     T = 300
