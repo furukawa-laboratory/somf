@@ -3,7 +3,7 @@ import sys
 sys.path.append('../../')
 from libs.models.som.som import SOM
 from tqdm import tqdm
-from visualization.som.animation_reference_vector3d import anime_reference_vector_3d
+from libs.visualization.som.animation_reference_vector3d import anime_reference_vector_3d
 from libs.datasets.artificial.kura import create_data
 if __name__ == '__main__':
     T = 300

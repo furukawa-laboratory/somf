@@ -5,7 +5,7 @@ import sys
 sys.path.append('../../')
 
 from libs.models.som.som import SOM
-from visualization.som.Umatrix import SOM_Umatrix
+from libs.visualization.som.Umatrix import SOM_Umatrix
 from libs.datasets.artificial import animal
 
 
