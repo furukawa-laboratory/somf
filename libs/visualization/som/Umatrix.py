@@ -80,7 +80,7 @@ class SOM_Umatrix:
 
         # dYdZの算出
         dRdZ = V - R[:, :, np.newaxis] * V_mean                                                     # KxNxL
-        dYdZ = np.sum(dRdZ[:, :, :, np.newaxis] * self.X[np.newaxis, :, np.newaxis, :], axis=1)     # KxLxD
+        dYdZ = np.einsum("knl,nd->kld", dRdZ, X)     # KxLxD
         dYdZ_norm = np.sum(dYdZ ** 2, axis=(1, 2))                                                  # Kx1
 
         # 表示用の値を算出（標準化）
