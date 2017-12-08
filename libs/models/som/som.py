@@ -12,6 +12,8 @@ class SOM:
         self.sigma_min = sigma_min
         self.tau = tau
 
+        self.D = X.shape[1]
+
 
         if latent_dim == 1:
             self.L = latent_dim

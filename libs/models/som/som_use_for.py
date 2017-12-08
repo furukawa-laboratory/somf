@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
+from tqdm import tqdm
+
 
 class SOMUseFor:
     def __init__(self, X, latent_dim, resolution, sigma_max, sigma_min, tau, init='random'):
@@ -42,6 +44,8 @@ class SOMUseFor:
         else:
             raise ValueError("invalid init: {}".format(init))
             # 例外処理
+
+        self.history = {}
 
 
     def fit(self, nb_epoch=100, verbose=True):
