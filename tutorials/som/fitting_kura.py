@@ -2,11 +2,10 @@ import numpy as np
 import sys
 sys.path.append('../../')
 from libs.models.som.som import SOM
-from tqdm import tqdm
 from libs.visualization.som.animation_reference_vector3d import anime_reference_vector_3d
 from libs.datasets.artificial.kura import create_data
 if __name__ == '__main__':
-    T = 300
+    nb_epoch = 300
     resolution = 20
     SIGMA_MAX = 2.2
     SIGMA_MIN = 0.1
@@ -23,9 +22,6 @@ if __name__ == '__main__':
 
     som = SOM(X, latent_dim=latent_dim, resolution=resolution, sigma_max=SIGMA_MAX, sigma_min=SIGMA_MIN, tau=TAU)
 
-    allY = np.zeros((resolution * resolution, D, T))
+    som.fit(nb_epoch=nb_epoch)
 
-    for t in tqdm(range(T)):
-        som.learning(t)
-        allY[:, :, t] = som.Y
-    anime_reference_vector_3d(X=X, allY=allY, resolution=resolution)
+    anime_reference_vector_3d(X=som.X, allY=som.history['y'])
