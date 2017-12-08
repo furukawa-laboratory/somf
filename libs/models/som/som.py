@@ -53,8 +53,8 @@ class SOM:
         for epoch in bar:
             # 協調過程
             # 学習量を計算
-            #sigma = self.sigma_min + (self.sigma_max - self.sigma_min) * np.exp(-epoch / self.tau) # 近傍半径を設定
-            sigma = self.sigma_min + (self.sigma_max - self.sigma_min) * ( 1 - (epoch / self.tau) ) # 近傍半径を設定
+            # sigma = self.sigma_min + (self.sigma_max - self.sigma_min) * np.exp(-epoch / self.tau) # 近傍半径を設定
+            sigma = max(self.sigma_min, self.sigma_max * ( 1 - (epoch / self.tau) ) )# 近傍半径を設定
             Dist = dist.cdist(self.Zeta, self.Z, 'sqeuclidean')
             # KxNの距離行列を計算
             # ノードと勝者ノードの全ての組み合わせにおける距離を網羅した行列
