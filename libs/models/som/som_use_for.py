@@ -31,6 +31,8 @@ class SOMUseFor:
             raise ValueError("invalid latent dimension: {}".format(latent_dim))
             # 例外処理
 
+        self.K = resolution**self.L
+
         # 勝者ノードの初期化
         if isinstance(init, str) and init == 'random':
             self.Z = np.random.rand(self.N, latent_dim) * 2.0 - 1.0
@@ -51,7 +53,7 @@ class SOMUseFor:
     def fit(self, nb_epoch=100, verbose=True):
 
         self.history['z'] = np.zeros((nb_epoch, self.N, self.L))
-        self.history['y'] = np.zeros((nb_epoch, self.N, self.D))
+        self.history['y'] = np.zeros((nb_epoch, self.K, self.D))
 
         if verbose:
             bar = tqdm(range(nb_epoch))

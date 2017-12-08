@@ -15,6 +15,7 @@ class SOM:
         self.D = X.shape[1]
 
 
+
         if latent_dim == 1:
             self.L = latent_dim
             self.Zeta = np.linspace(-1.0, 1.0, resolution)[:,np.newaxis]
@@ -24,6 +25,8 @@ class SOM:
             self.Zeta = np.dstack(zeta).reshape(resolution**2, latent_dim)
         else:
             raise ValueError("invalid latent dimension: {}".format(latent_dim))
+
+        self.K = resolution**self.L
 
         if isinstance(init, str) and init == 'random':
             self.Z = np.random.rand(self.N, latent_dim) * 2.0 - 1.0
@@ -40,7 +43,7 @@ class SOM:
     def fit(self, nb_epoch=100, verbose=True):
 
         self.history['z'] = np.zeros((nb_epoch, self.N, self.L))
-        self.history['y'] = np.zeros((nb_epoch, self.N, self.D))
+        self.history['y'] = np.zeros((nb_epoch, self.K, self.D))
 
         if verbose:
             bar = tqdm(range(nb_epoch))
