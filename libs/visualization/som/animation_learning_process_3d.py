@@ -19,7 +19,7 @@ def update_graph(epoch, X, Y_allepoch_mesh, labels,  ax, title_text):
                       Y_mesh[:, :, 1],
                       Y_mesh[:, :, 2],
                       color='b')
-    ax.set_title(title_text+', time={}'.format(epoch))
+    ax.set_title(title_text+', epoch={}'.format(epoch))
 
 
 def anime_learning_process_3d(X, Y_allepoch, labels=None,
