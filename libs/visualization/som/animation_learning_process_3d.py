@@ -28,7 +28,6 @@ def anime_learning_process_3d(X, Y_allepoch, labels=None,
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    title = ax.set_title(title_text)
     ax_pos = ax.get_position()
 
 
@@ -36,9 +35,6 @@ def anime_learning_process_3d(X, Y_allepoch, labels=None,
     ob_dim = Y_allepoch.shape[2]
     nb_epoch = Y_allepoch.shape[0]
     resolution = np.int(np.sqrt(num_nodes))
-
-    cumulative_propotion = 1
-    ob_dim_over_3 = False
 
 
     if ob_dim > 3:
