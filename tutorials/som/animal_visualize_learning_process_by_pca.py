@@ -19,6 +19,7 @@ if __name__ == '__main__':
     seed = 1
 
     title_text="animal_map_learning_process"
+    repeat = False
     save_gif = False
 
     X, labels = animal.load_data()
@@ -32,4 +33,4 @@ if __name__ == '__main__':
     som.fit(nb_epoch=nb_epoch)
 
     anime_learning_process_3d(X=som.X, Y_allepoch=som.history['y'], labels=labels,
-                              title_text=title_text, save_gif=save_gif)
+                              repeat=repeat, title_text=title_text, save_gif=save_gif)
