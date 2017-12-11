@@ -27,7 +27,7 @@ def anime_learning_process_3d(X, Y_allepoch, labels=None,
                               repeat=True, save_gif=False):
 
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(1,1,1,aspect='equal', projection='3d')
     ax_pos = ax.get_position()
 
 
@@ -38,9 +38,9 @@ def anime_learning_process_3d(X, Y_allepoch, labels=None,
 
 
     if ob_dim > 3:
-        ob_dim_over_3 = True
         pca = PCA(n_components=3)
         pca.fit(X)
+        # W = np.diag(np.sqrt(pca.explained_variance_)) @ pca.components_
         W = pca.components_
         ev_ratio = pca.explained_variance_ratio_
         cumulative_propotion = ev_ratio.cumsum()[2]
@@ -52,9 +52,16 @@ def anime_learning_process_3d(X, Y_allepoch, labels=None,
 
     Y_allepoch_mesh=Y_allepoch.reshape((nb_epoch, resolution, resolution, ob_dim))
 
-    ax.set_xlim(X[:,0].min(),X[:,0].max())
-    ax.set_ylim(X[:,1].min(),X[:,1].max())
-    ax.set_zlim(X[:,2].min(),X[:,2].max())
+    # ax.set_xlim(X[:,0].min(),X[:,0].max())
+    # ax.set_ylim(X[:,1].min(),X[:,1].max())
+    # ax.set_zlim(X[:,2].min(),X[:,2].max())
+    Xmin = np.min(X, axis=0)
+    Xmax = np.max(X, axis=0)
+    Xmid = (Xmax + Xmin) * 0.5
+    Xrange = np.max((Xmax - Xmin) * 0.5)
+    ax.set_xlim(Xmid[0] - Xrange, Xmid[0] + Xrange)
+    ax.set_ylim(Xmid[1] - Xrange, Xmid[1] + Xrange)
+    ax.set_zlim(Xmid[2] - Xrange, Xmid[2] + Xrange)
 
     ani = matplotlib.animation.FuncAnimation(fig, update_graph,
                                              fargs=(X,Y_allepoch_mesh,labels,ax,title_text),
