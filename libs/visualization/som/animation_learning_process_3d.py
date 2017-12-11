@@ -4,7 +4,10 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation
 from sklearn.decomposition import PCA
 
-def update_graph(epoch, X, Y_allepoch_mesh, labels,  ax, title_text):
+def update_graph(epoch, X, Y_allepoch_mesh, labels, ax, title_text, nb_epoch):
+    if epoch >= nb_epoch:
+        epoch = nb_epoch - 1
+
     ax.cla()
     Y_mesh= Y_allepoch_mesh[epoch, :, :, :]
     """
@@ -63,9 +66,13 @@ def anime_learning_process_3d(X, Y_allepoch, labels=None,
     ax.set_ylim(Xmid[1] - Xrange, Xmid[1] + Xrange)
     ax.set_zlim(Xmid[2] - Xrange, Xmid[2] + Xrange)
 
+    if repeat:
+        num_frames = nb_epoch
+    else:
+        num_frames = nb_epoch * 5
     ani = matplotlib.animation.FuncAnimation(fig, update_graph,
-                                             fargs=(X,Y_allepoch_mesh,labels,ax,title_text),
-                                             interval=40, blit=False, repeat=repeat, frames=nb_epoch)
+                                             fargs=(X,Y_allepoch_mesh,labels,ax,title_text,nb_epoch),
+                                             interval=40, blit=False, repeat=repeat, frames=num_frames)
 
     if save_gif:
         ani.save(title_text+'.gif', writer='imagemagick', fps=10)
