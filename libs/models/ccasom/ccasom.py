@@ -78,7 +78,7 @@ class CCASOM:
             A = self.__decomp_metric(self.Metric[v][t-1])
             x_met = self.X[v] @ A
             y_met = self.Y[v][t-1] @ A
-            dis_xy = dis_xy + dist.cdist(x_met, y_met)
+            dis_xy = dis_xy + dist.cdist(x_met, y_met, 'sqeuclidean')
         self.BMU[t] = np.argmin(dis_xy, axis=1)
 
     def __m_step(self, t):
@@ -92,13 +92,12 @@ class CCASOM:
     # メトリック推定用のBMU推定
     def __calc_teach_bmu_other(self, t, v_minus):
         dis_xy = np.zeros([self.N, self.K])
-        loop_v = np.arange(self.V)
-        np.delete(loop_v, v_minus)
         for v in range(self.V):
-            A = self.__decomp_metric(self.Metric[v][t-1])
-            x_met = self.X[v] @ A
-            y_met = self.Y[v][t] @ A
-            dis_xy = dis_xy + dist.cdist(x_met, y_met)
+            if v != v_minus:
+                A = self.__decomp_metric(self.Metric[v][t-1])
+                x_met = self.X[v] @ A
+                y_met = self.Y[v][t] @ A
+                dis_xy = dis_xy + dist.cdist(x_met, y_met, 'sqeuclidean')
         winner = np.argmin(dis_xy, axis=1)
         return winner
 
@@ -108,7 +107,7 @@ class CCASOM:
             A = self.__decomp_metric(self.Metric[v][t-1])
             x_met = self.X[v] @ A
             y_met = self.Y[v][t] @ A
-            dis_xy = dis_xy + dist.cdist(x_met, y_met)
+            dis_xy = dis_xy + dist.cdist(x_met, y_met, 'sqeuclidean')
         winner = np.argmin(dis_xy, axis=1)
         return winner
 
