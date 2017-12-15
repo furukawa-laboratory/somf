@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 
 class CCASOM:
-    def __init__(self, x=0, kx=20, ky=20, sigma_max=2.0, sigma_min=0.2, tau=50, epoch=500, bmu=0, mode='coclustring'):
+    def __init__(self, x=0, kx=20, ky=20, sigma_max=2.0, sigma_min=0.2, tau=50, epoch=500, bmu=None, mode='coclustring'):
         # データ形式のチェック
         try:
             if x == 0:
@@ -45,7 +45,7 @@ class CCASOM:
         self.Distance = np.zeros([self.V, self.N, self.K])
         self.Mode = mode
 
-        if bmu == 0:
+        if bmu is None:
             self.BMU[0] = np.random.randint(0, self.K, size=self.N)
         else:
             self.BMU[0] = bmu
@@ -117,7 +117,7 @@ class CCASOM:
         # 誤差の共分散行列算出
         error = self.X[v] - self.Y[v][t, v_teach]
         e = (error.T @ error) / self.N
-        self.Metric[v][t] = np.linalg.inv(e)
+        self.Metric[v][t] = np.linalg.pinv(e)
 
     @staticmethod
     def __decomp_metric(s):
