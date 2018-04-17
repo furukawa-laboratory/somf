@@ -19,7 +19,8 @@ if __name__ == '__main__':
     seed = 1
 
     title="coffee map"
-    umat_resolution = 100 #U-matrix表示の解像度
+    umat_resolution = 10 #U-matrix表示の解像度
+    interpolation_method = 'none'
 
     X, labels = coffee.load_data()
 
@@ -28,5 +29,6 @@ if __name__ == '__main__':
     som = SOM(X, latent_dim=latent_dim, resolution=resolution, sigma_max=sigma_max, sigma_min=sigma_min, tau=tau)
     som.fit(nb_epoch=nb_epoch)
 
-    som_umatrix = SOM_Umatrix(z=som.Z, x=X, resolution=umat_resolution, sigma=sigma_min, labels=labels)
+    som_umatrix = SOM_Umatrix(z=som.Z, x=X, resolution=umat_resolution, sigma=sigma_min,
+                              labels=labels, interpolation_method=interpolation_method)
     som_umatrix.draw_umatrix()
