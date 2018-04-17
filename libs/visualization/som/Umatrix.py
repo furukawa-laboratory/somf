@@ -4,7 +4,9 @@ import scipy.spatial.distance as dist
 from sklearn.preprocessing import StandardScaler
 
 class SOM_Umatrix:
-    def __init__(self, z=None, x=None, sigma=0.2, resolution=100, labels=None, fig_size=[8,8], cmap_type='jet'):
+    def __init__(self, z=None, x=None, sigma=0.2, resolution=100,
+                 labels=None, fig_size=[8,8], cmap_type='jet',
+                 interpolation_method='spline36'):
         # インプットが無効だった時のエラー処理
         if z is None:
             print('勝者位置をインプットして！！')
@@ -28,6 +30,7 @@ class SOM_Umatrix:
         self.Map = self.Fig.add_subplot(1, 1, 1)
         self.Cmap_type = cmap_type
         self.labels = labels
+        self.interpolation_method = interpolation_method
 
         # 潜在空間の代表点の設定
         self.Zeta = np.meshgrid(np.linspace(self.Z[:, 0].min(), self.Z[:, 0].max(), self.Resolution),
@@ -43,7 +46,7 @@ class SOM_Umatrix:
 
         # U-matrix表示
         self.Map.set_title("U-matrix")
-        self.Map.imshow(U_matrix_val, interpolation='spline36',
+        self.Map.imshow(U_matrix_val, interpolation=self.interpolation_method,
                       extent=[self.Zeta[:, 0].min(), self.Zeta[:, 0].max(),
                               self.Zeta[:, 1].max(), self.Zeta[:, 1].min()],
                    cmap=self.Cmap_type, vmax=0.5, vmin=-0.5)
