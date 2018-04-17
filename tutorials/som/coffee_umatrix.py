@@ -16,7 +16,7 @@ if __name__ == '__main__':
     sigma_min = 0.4
     tau = 50
     latent_dim = 2
-    seed = 1
+    seed = 10
 
     title="coffee map"
     umat_resolution = 10 #U-matrix表示の解像度
