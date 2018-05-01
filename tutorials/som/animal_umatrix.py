@@ -31,6 +31,5 @@ if __name__ == '__main__':
     som_umatrix = SOM_Umatrix(X=X,
                               Z_allepoch=som.history['z'],
                               sigma_allepoch=som.history['sigma'],
-                              resolution=umat_resolution,
                               labels=labels)
     som_umatrix.draw_umatrix()
