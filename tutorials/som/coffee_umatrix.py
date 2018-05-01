@@ -10,7 +10,7 @@ from libs.datasets.artificial import coffee
 
 
 if __name__ == '__main__':
-    nb_epoch = 300
+    nb_epoch = 50
     resolution = 10
     sigma_max = 2.2
     sigma_min = 0.4
@@ -18,9 +18,9 @@ if __name__ == '__main__':
     latent_dim = 2
     seed = 10
 
-    title="coffee map"
+    title="coffee U-matrix"
     umat_resolution = 10 #U-matrix表示の解像度
-    interpolation_method = 'none'
+    interpolation_method = 'spline36'
 
     X, labels = coffee.load_data()
 
@@ -29,6 +29,8 @@ if __name__ == '__main__':
     som = SOM(X, latent_dim=latent_dim, resolution=resolution, sigma_max=sigma_max, sigma_min=sigma_min, tau=tau)
     som.fit(nb_epoch=nb_epoch)
 
-    som_umatrix = SOM_Umatrix(z=som.Z, x=X, resolution=umat_resolution, sigma=sigma_min,
-                              labels=labels, interpolation_method=interpolation_method)
+    som_umatrix = SOM_Umatrix(Z_allepoch=som.history['z'], X=X, resolution=umat_resolution,
+                              sigma_allepoch=som.history['sigma'], labels=labels,
+                              title_text=title, repeat=True,
+                              interpolation_method=interpolation_method)
     som_umatrix.draw_umatrix()
