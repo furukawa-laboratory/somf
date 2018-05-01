@@ -10,7 +10,7 @@ from libs.datasets.artificial import animal
 
 
 if __name__ == '__main__':
-    nb_epoch = 300
+    nb_epoch = 50
     resolution = 10
     sigma_max = 2.2
     sigma_min = 0.4
@@ -28,5 +28,8 @@ if __name__ == '__main__':
     som = SOM(X, latent_dim=latent_dim, resolution=resolution, sigma_max=sigma_max, sigma_min=sigma_min, tau=tau)
     som.fit(nb_epoch=nb_epoch)
 
-    som_umatrix = SOM_Umatrix(z=som.Z, x=X, resolution=umat_resolution, sigma=sigma_min, labels=labels)
+    som_umatrix = SOM_Umatrix(X=X,
+                              Z_allepoch=som.history['z'],
+                              sigma_allepoch=som.history['sigma'],
+                              labels=labels)
     som_umatrix.draw_umatrix()

@@ -44,6 +44,7 @@ class SOM:
 
         self.history['z'] = np.zeros((nb_epoch, self.N, self.L))
         self.history['y'] = np.zeros((nb_epoch, self.K, self.D))
+        self.history['sigma'] = np.zeros(nb_epoch)
 
         if verbose:
             bar = tqdm(range(nb_epoch))
@@ -77,3 +78,4 @@ class SOM:
 
             self.history['z'][epoch] = self.Z
             self.history['y'][epoch] = self.Y
+            self.history['sigma'][epoch] = sigma
