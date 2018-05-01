@@ -13,7 +13,7 @@ if __name__ == '__main__':
     nb_epoch = 50
     resolution = 10
     sigma_max = 2.2
-    sigma_min = 0.4
+    sigma_min = 0.3
     tau = 50
     latent_dim = 2
     seed = 1
