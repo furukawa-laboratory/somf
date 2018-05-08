@@ -29,8 +29,8 @@ if __name__ == '__main__':
     som = SOM(X, latent_dim=latent_dim, resolution=resolution, sigma_max=sigma_max, sigma_min=sigma_min, tau=tau)
     som.fit(nb_epoch=nb_epoch)
 
-    som_umatrix = SOM_Umatrix(Z_allepoch=som.history['z'], X=X, resolution=umat_resolution,
-                              sigma_allepoch=som.history['sigma'], labels=labels,
+    som_umatrix = SOM_Umatrix(Z=som.history['z'], X=X, resolution=umat_resolution,
+                              sigma=som.history['sigma'], labels=labels,
                               title_text=title,
                               interpolation_method=interpolation_method)
     som_umatrix.draw_umatrix()
