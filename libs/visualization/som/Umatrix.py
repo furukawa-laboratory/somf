@@ -5,31 +5,55 @@ from sklearn.preprocessing import StandardScaler
 import matplotlib.animation
 
 class SOM_Umatrix:
-    def __init__(self, X=None, Z_allepoch=None, sigma_allepoch=0.2, resolution=100,
-                 labels=None, fig_size=[8,8], title_text='U-matrix', cmap_type='jet',
+    def __init__(self, X=None, Z=None, sigma=0.2, resolution=100,
+                 labels=None, fig_size=[6,6], title_text='U-matrix', cmap_type='jet',
                  interpolation_method='spline36', repeat=False, interval=40):
         # インプットが無効だった時のエラー処理
-        if Z_allepoch is None:
-            print('please input winner point in all epoch')
-            exit(1)
+        if Z is None:
+            raise ValueError('please input winner point')
 
         if X is None:
-            print('input observed data X')
-            exit(1)
+            raise ValueError('input observed data X')
 
         # set input
         self.X = X
-        self.Z_allepoch = Z_allepoch # shape=(T,N,L)
-        self.sigma_allepoch = sigma_allepoch #shape=(T)
-        self.resolution = resolution
-        self.K = resolution * resolution
-        self.N = self.X.shape[0]
-        self.L = self.Z_allepoch.shape[2]
-        self.T = self.Z_allepoch.shape[0]
-        if self.L != 2:
-            print('latent dimension must be 2')
-            exit(1)
 
+        # set latent variables
+        if Z.ndim == 3:
+            self.Z_allepoch = Z     # shape=(T,N,L)
+            self.isStillImage = False
+        elif Z.ndim == 2:
+            self.Z_allepoch = Z[None,:,:] # shape=(1,N,L)
+            self.isStillImage = True
+
+        # set sigma
+        if isinstance(sigma, (int, float)):
+            if self.isStillImage:
+                self.sigma_allepoch = np.array([sigma,])
+            else:
+                raise ValueError("if Z is 3d array, sigma must be 1d array")
+        elif sigma.ndim == 1:
+            if self.isStillImage:
+                raise ValueError("if Z is 2d array, sigma must be scalar")
+            else:
+                self.sigma_allepoch = sigma #shape=(T)
+        else:
+            raise ValueError("sigma must be 1d array or scalar")
+
+        self.resolution = resolution
+
+        self.N = self.X.shape[0]
+        if self.N != self.Z_allepoch.shape[1]:
+            raise ValueError("Z's sample number and X's one must be match")
+
+        self.T = self.Z_allepoch.shape[0]
+
+        self.L = self.Z_allepoch.shape[2]
+
+        if self.L != 2:
+            raise ValueError('latent variable must be 2dim')
+
+        self.K = resolution ** self.L
 
         # 描画キャンバスの設定
         self.Fig = plt.figure(figsize=(fig_size[0], fig_size[1]))
@@ -61,7 +85,7 @@ class SOM_Umatrix:
         U_matrix_val = dY_std.reshape((self.resolution, self.resolution))
 
         # U-matrix表示
-        self.Map.set_title("U-matrix")
+        self.Map.set_title(self.title_text)
         self.Im = self.Map.imshow(U_matrix_val, interpolation=self.interpolation_method,
                       extent=[self.Zeta[:, 0].min(), self.Zeta[:, 0].max(),
                               self.Zeta[:, 1].max(), self.Zeta[:, 1].min()],
@@ -104,7 +128,8 @@ class SOM_Umatrix:
                                                 Z[i, 1] + self.epsilon * count,
                                                 self.labels[i],
                                                 color='k')
-        self.Map.set_title(self.title_text+' epoch={}'.format(epoch))
+        if not self.isStillImage:
+            self.Map.set_title(self.title_text+' epoch={}'.format(epoch))
 
     # U-matrix表示用の値（勾配）を算出
     def __calc_umatrix(self, Z, sigma):
