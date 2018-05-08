@@ -28,8 +28,13 @@ if __name__ == '__main__':
     som = SOM(X, latent_dim=latent_dim, resolution=resolution, sigma_max=sigma_max, sigma_min=sigma_min, tau=tau)
     som.fit(nb_epoch=nb_epoch)
 
+    Z = som.Z
+    sigma = som.history['sigma'][-1]
+
     som_umatrix = SOM_Umatrix(X=X,
-                              Z_allepoch=som.history['z'],
-                              sigma_allepoch=som.history['sigma'],
-                              labels=labels)
+                              Z=Z,
+                              sigma=sigma,
+                              labels=labels,
+                              title_text=title,
+                              resolution=umat_resolution)
     som_umatrix.draw_umatrix()
