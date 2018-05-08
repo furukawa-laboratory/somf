@@ -18,8 +18,8 @@ if __name__ == '__main__':
     latent_dim = 2
     seed = 1
 
-    title="animal map"
-    umat_resolution = 100 #U-matrix表示の解像度
+    title_text= "animal map"
+    umat_resolution = 100 # U-matrix表示の解像度
 
     X, labels = animal.load_data()
 
@@ -29,7 +29,9 @@ if __name__ == '__main__':
     som.fit(nb_epoch=nb_epoch)
 
     som_umatrix = SOM_Umatrix(X=X,
-                              Z_allepoch=som.history['z'],
-                              sigma_allepoch=som.history['sigma'],
-                              labels=labels)
+                              Z=som.history['z'],
+                              sigma=som.history['sigma'],
+                              labels=labels,
+                              resolution=umat_resolution,
+                              title_text=title_text)
     som_umatrix.draw_umatrix()

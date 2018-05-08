@@ -6,7 +6,7 @@ sys.path.append('../../')
 
 from libs.models.som.som import SOM
 from libs.visualization.som.Umatrix import SOM_Umatrix
-from libs.datasets.artificial import coffee
+from libs.datasets.artificial import animal
 
 
 if __name__ == '__main__':
@@ -16,21 +16,25 @@ if __name__ == '__main__':
     sigma_min = 0.3
     tau = 50
     latent_dim = 2
-    seed = 10
+    seed = 1
 
-    title="coffee U-matrix"
-    umat_resolution = 10 #U-matrix表示の解像度
-    interpolation_method = 'spline36'
+    title="animal map"
+    umat_resolution = 100 #U-matrix表示の解像度
 
-    X, labels = coffee.load_data()
+    X, labels = animal.load_data()
 
     np.random.seed(seed)
 
     som = SOM(X, latent_dim=latent_dim, resolution=resolution, sigma_max=sigma_max, sigma_min=sigma_min, tau=tau)
     som.fit(nb_epoch=nb_epoch)
 
-    som_umatrix = SOM_Umatrix(Z_allepoch=som.history['z'], X=X, resolution=umat_resolution,
-                              sigma_allepoch=som.history['sigma'], labels=labels,
+    Z = som.Z
+    sigma = som.history['sigma'][-1]
+
+    som_umatrix = SOM_Umatrix(X=X,
+                              Z=Z,
+                              sigma=sigma,
+                              labels=labels,
                               title_text=title,
-                              interpolation_method=interpolation_method)
+                              resolution=umat_resolution)
     som_umatrix.draw_umatrix()
