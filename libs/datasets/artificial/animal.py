@@ -2,7 +2,7 @@ import numpy as np
 import os
 
 
-def load_data(retlabel=True):
+def load_data(retlabel_animal=True, retlabel_feature=False):
     datastore_name = 'datastore/animal'
     file_name = 'features.txt'
 
@@ -11,11 +11,18 @@ def load_data(retlabel=True):
 
     x = np.loadtxt(file_path)
 
-    if retlabel:
+    return_objects = [x]
+
+    if retlabel_animal:
         label_name = 'labels_animal.txt'
         label_path = os.path.join(directory_path, label_name)
-        label = np.genfromtxt(label_path, dtype=str)
+        label_animal = np.genfromtxt(label_path, dtype=str)
+        return_objects.append(label_animal)
 
-        return x, label
-    else:
-        return x
+    if retlabel_feature:
+        label_name = 'labels_feature.txt'
+        label_path = os.path.join(directory_path, label_name)
+        label_feature = np.genfromtxt(label_path, dtype=str)
+        return_objects.append(label_feature)
+
+    return return_objects
