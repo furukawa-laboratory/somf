@@ -12,7 +12,7 @@ def load_data(retlabel=True):
     x = np.loadtxt(file_path)
 
     if retlabel:
-        label_name = 'labels.txt'
+        label_name = 'labels_animal.txt'
         label_path = os.path.join(directory_path, label_name)
         label = np.genfromtxt(label_path, dtype=str)
 
