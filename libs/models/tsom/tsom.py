@@ -3,7 +3,7 @@ from scipy.spatial import distance
 
 
 class TSOM2():
-    def __init__(self, X, mode1_nodes=[10,10],mode2_nodes=[10,10],SIGMA_MAX=[2.0, 2.0] ,SIGMA_MIN=[0.2, 0.2], TAU=[50,50],epoch_num=200):
+    def __init__(self, X,mode1_nodes=[10,10],mode2_nodes=[10,10],SIGMA_MAX=[2.0, 2.0] ,SIGMA_MIN=[0.2, 0.2], TAU=[50,50],epoch_num=200):
         #パラメータの設定
         self.SIGMA1_MIN = SIGMA_MIN[0]
         self.SIGMA1_MAX = SIGMA_MAX[0]
