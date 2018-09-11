@@ -9,14 +9,14 @@ import matplotlib.animation as animation
 
 #データの読み込み
 I=30
-J=30
+J=10
 X=load_kura_tsom(I,J)
 print(X.shape)
 
-nodes1_kx=10
+nodes1_kx=15
 nodes1_ky=1#kuraの場合,潜在空間は1次元
 nodes1_num=nodes1_kx*nodes1_ky
-nodes2_kx=10
+nodes2_kx=25
 nodes2_ky=1#kuraの場合,潜在空間は1次元
 nodes2_num=nodes2_kx*nodes2_ky
 mode1_samples=X.shape[0]
@@ -28,15 +28,12 @@ sigma1_min=0.1
 sigma1_zero=1.2
 sigma2_min=0.1
 sigma2_zero=1.2
+tsom2=TSOM2(X, latent_dim=1,mode1_nodes=nodes1_kx,mode2_nodes=nodes2_kx,SIGMA_MAX=[sigma1_zero, sigma2_zero] ,
+                  SIGMA_MIN=[sigma1_min, sigma2_min], TAU=[tau1,tau2])
 
-epoch_num=250
-tsom2=TSOM2(X, mode1_nodes=[nodes1_kx,nodes1_ky],mode2_nodes=[nodes2_kx,nodes2_ky],SIGMA_MAX=[sigma1_zero, sigma2_zero] ,
-                  SIGMA_MIN=[sigma1_min, sigma2_min], TAU=[tau1,tau2],epoch_num=epoch_num)
-Y_allepoch=np.zeros((epoch_num,nodes1_num,nodes2_num,observed_dim))
+tsom2.fit(nb_epoch=250)
 
-for epoch in tqdm(range(epoch_num)):
-    Y=tsom2.learning(epoch)
-    Y_allepoch[epoch,:,:,:]=Y
+
 
 
 #観測空間の描画
@@ -45,10 +42,24 @@ ax = Axes3D(fig)
 def plot(i):
     ax.cla()
     ax.scatter(X[:,:, 0], X[:,:, 1], X[:,:, 2])
-    ax.plot_wireframe(Y_allepoch[i,:, :, 0], Y_allepoch[i,:, :, 1], Y_allepoch[i,:, :, 2])
+    #ax.plot_wireframe(tsom2.history['y'][i,:, :, 0], tsom2.history['y'][i,:, :, 1], tsom2.history['y'][i,:, :, 2])
     plt.title(' t=' + str(i))
-ani = animation.FuncAnimation(fig, plot, frames=epoch_num,interval=100)
+
+ani = animation.FuncAnimation(fig, plot, frames=250,interval=100)
 plt.show()
+
+#
+# fig = plt.figure()
+# ax = Axes3D(fig)
+# ax.scatter(X[:,:, 0], X[:,:, 1], X[:,:, 2])
+# ax.plot_wireframe(tsom2.history['y'][249,:, :, 0], tsom2.history['y'][249,:, :, 1], tsom2.history['y'][249,:, :, 2])
+#
+# #ani = animation.FuncAnimation(fig, plot, frames=250,interval=100)
+# plt.show()
+
+
+
+
 
 #
 # #X=X.reshape(mode1_samples,mode2_samples)
