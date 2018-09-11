@@ -3,7 +3,7 @@ from scipy.spatial import distance
 from tqdm import tqdm
 
 class TSOM2():
-    def __init__(self, X,latent_dim,mode1_nodes,mode2_nodes,SIGMA_MAX=[2.0, 2.0] ,SIGMA_MIN=[0.2, 0.2], TAU=[50,50]):
+    def __init__(self, X,latent_dim,mode1_nodes=[10,1],mode2_nodes=[10,1],SIGMA_MAX=[2.0, 2.0] ,SIGMA_MIN=[0.2, 0.2], TAU=[50,50]):
         #パラメータの設定
         self.SIGMA1_MIN = SIGMA_MIN[0]
         self.SIGMA1_MAX = SIGMA_MAX[0]
@@ -12,8 +12,8 @@ class TSOM2():
         self.TAU1 = TAU[0]
         self.TAU2 = TAU[1]
         self.latent_dim=latent_dim
-        self.K1 = mode1_nodes**2
-        self.K2 = mode2_nodes**2
+        self.K1 = mode1_nodes[0]*mode1_nodes[1]
+        self.K2 = mode2_nodes[0]*mode2_nodes[1]
         #サンプル数の決定
         self.N1 = X.shape[0]
         self.N2 = X.shape[1]
@@ -25,18 +25,17 @@ class TSOM2():
         self.history = {}
 
         #潜在空間の作成
-        if latent_dim==1:
-            self.Zeta1 = np.linspace(-1, 1, mode1_nodes)[:,np.newaxis]
-            self.Zeta2 = np.linspace(-1, 1, mode2_nodes)[:,np.newaxis]
-        if latent_dim==2:
-            mode1_x = np.linspace(-1, 1, mode1_nodes)
-            mode1_y = np.linspace(-1, 1, mode1_nodes)
-            mode2_x = np.linspace(-1, 1, mode2_nodes)
-            mode2_y = np.linspace(-1, 1, mode2_nodes)
-            mode1_Zeta1, mode1_Zeta2 = np.meshgrid(mode1_x,mode1_y)
-            mode2_Zeta1, mode2_Zeta2 = np.meshgrid(mode2_x, mode2_y)
-            self.Zeta1 = np.c_[mode1_Zeta2.ravel(), mode1_Zeta1.ravel()]
-            self.Zeta2 = np.c_[mode2_Zeta2.ravel(), mode2_Zeta1.ravel()]
+        # if latent_dim==1:
+        #     self.Zeta1 = np.linspace(-1, 1, mode1_nodes)[:,np.newaxis]
+        #     self.Zeta2 = np.linspace(-1, 1, mode2_nodes)[:,np.newaxis]
+        mode1_x = np.linspace(-1, 1, mode1_nodes[0])
+        mode1_y = np.linspace(-1, 1, mode1_nodes[1])
+        mode2_x = np.linspace(-1, 1, mode2_nodes[0])
+        mode2_y = np.linspace(-1, 1, mode2_nodes[1])
+        mode1_Zeta1, mode1_Zeta2 = np.meshgrid(mode1_x,mode1_y)
+        mode2_Zeta1, mode2_Zeta2 = np.meshgrid(mode2_x, mode2_y)
+        self.Zeta1 = np.c_[mode1_Zeta2.ravel(), mode1_Zeta1.ravel()]
+        self.Zeta2 = np.c_[mode2_Zeta2.ravel(), mode2_Zeta1.ravel()]
 
     def fit(self,nb_epoch=200):
         self.history['y'] = np.zeros((nb_epoch, self.K1, self.K2, self.observed_dim))
@@ -68,11 +67,11 @@ class TSOM2():
             self.Z1 = self.Zeta1[k_star1, :]  # k_starのZの座標N*L(L=2
             self.Z2 = self.Zeta2[k_star2, :]  # k_starのZの座標N*L(L=2
 
-            # self.history['y'][epoch,:,:] = self.Y
-            # self.history['z1'][epoch,:] = self.Z1
-            # self.history['z2'][epoch,:] = self.Z2
-            # self.history['sigma1'][epoch] = sigma1
-            # self.history['sigma2'][epoch] = sigma2
+            self.history['y'][epoch,:,:] = self.Y
+            self.history['z1'][epoch,:] = self.Z1
+            self.history['z2'][epoch,:] = self.Z2
+            self.history['sigma1'][epoch] = sigma1
+            self.history['sigma2'][epoch] = sigma2
 
 
 
