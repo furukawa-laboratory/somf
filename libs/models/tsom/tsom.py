@@ -109,13 +109,15 @@ class TSOM2():
 
         for epoch in tqdm(np.arange(nb_epoch)):
             # 学習量の決定
-            sigma1 = self.SIGMA1_MIN + (self.SIGMA1_MAX - self.SIGMA1_MIN) * np.exp(-epoch / self.TAU1)
+            #sigma1 = self.SIGMA1_MIN + (self.SIGMA1_MAX - self.SIGMA1_MIN) * np.exp(-epoch / self.TAU1)
+            sigma1 = max(self.SIGMA1_MIN, self.SIGMA1_MAX * ( 1 - (epoch / self.TAU1) ) )
             distance1 = distance.cdist(self.Zeta1, self.Z1, 'sqeuclidean')  # 距離行列をつくるDはN*K行列
             H1 = np.exp(-distance1 / (2 * pow(sigma1, 2)))  # かっこに気を付ける
             G1 = np.sum(H1, axis=1)  # Gは行ごとの和をとったベクトル
             R1 = (H1.T / G1).T  # 行列の計算なので.Tで転置を行う
 
-            sigma2 = self.SIGMA2_MIN + (self.SIGMA2_MAX - self.SIGMA2_MIN) * np.exp(-epoch / self.TAU2)
+            #sigma2 = self.SIGMA2_MIN + (self.SIGMA2_MAX - self.SIGMA2_MIN) * np.exp(-epoch / self.TAU2)
+            sigma2 = max(self.SIGMA2_MIN, self.SIGMA2_MAX * ( 1 - (epoch / self.TAU2) ) )
             distance2 = distance.cdist(self.Zeta2, self.Z2, 'sqeuclidean')  # 距離行列をつくるDはN*K行列
             H2 = np.exp(-distance2 / (2 * pow(sigma2, 2)))  # かっこに気を付ける
             G2 = np.sum(H2, axis=1)  # Gは行ごとの和をとったベクトル
