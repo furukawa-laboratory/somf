@@ -13,10 +13,10 @@ J=10
 X=load_kura_tsom(I,J)
 print(X.shape)
 
-nodes1_kx=15
+nodes1_kx=10
 nodes1_ky=1#kuraの場合,潜在空間は1次元
 nodes1_num=nodes1_kx*nodes1_ky
-nodes2_kx=25
+nodes2_kx=5
 nodes2_ky=1#kuraの場合,潜在空間は1次元
 nodes2_num=nodes2_kx*nodes2_ky
 mode1_samples=X.shape[0]
@@ -29,7 +29,7 @@ sigma1_zero=1.2
 sigma2_min=0.1
 sigma2_zero=1.2
 
-tsom2=TSOM2(X,latent_dim=2,mode1_nodes=[nodes1_kx,nodes1_ky],mode2_nodes=[nodes1_kx,nodes1_ky],SIGMA_MAX=[sigma1_zero, sigma2_zero] ,
+tsom2=TSOM2(X,latent_dim=2,resolution1=(10,1),resolution2=(15,1),SIGMA_MAX=[sigma1_zero, sigma2_zero] ,
                   SIGMA_MIN=[sigma1_min, sigma2_min], TAU=[tau1,tau2])
 
 tsom2.fit(nb_epoch=250)
