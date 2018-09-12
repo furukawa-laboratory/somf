@@ -3,18 +3,39 @@ from scipy.spatial import distance
 from tqdm import tqdm
 
 class TSOM2():
-    def __init__(self, X,latent_dim,resolution,SIGMA_MAX=[2.0, 2.0] ,SIGMA_MIN=[0.2, 0.2], TAU=[50,50]):
-        #パラメータの設定
+    def __init__(self, X,latent_dim,resolution,SIGMA_MAX,SIGMA_MIN, TAU):
+        #最大近傍半径(SIGMAX)の設定
         if type(SIGMA_MAX) is float:
             self.SIGMA1_MAX = SIGMA_MAX
             self.SIGMA2_MAX = SIGMA_MAX
-        elif type(SIGMA_MAX)
-        self.SIGMA1_MIN = SIGMA_MIN[0]
-        self.SIGMA1_MAX = SIGMA_MAX[0]
-        self.SIGMA2_MIN = SIGMA_MIN[1]
-        self.SIGMA2_MAX = SIGMA_MAX[1]
-        self.TAU1 = TAU[0]
-        self.TAU2 = TAU[1]
+        elif type(SIGMA_MAX) is tuple:
+            self.SIGMA1_MAX=SIGMA_MAX[0]
+            self.SIGMA2_MAX=SIGMA_MAX[1]
+        else:
+            print("please SIGMAX tuple or float")
+        # 最小近傍半径(SIGMIN)の設定
+        if type(SIGMA_MIN) is float:
+            self.SIGMA1_MIN = SIGMA_MIN
+            self.SIGMA2_MIN = SIGMA_MIN
+        elif type(SIGMA_MIN) is tuple:
+            self.SIGMA1_MIN=SIGMA_MIN[0]
+            self.SIGMA2_MIN=SIGMA_MIN[1]
+        else:
+            print("please SIGMIN tuple or float")
+        #self.SIGMA1_MIN = SIGMA_MIN[0]
+        # self.SIGMA1_MAX = SIGMA_MAX[0]
+        #self.SIGMA2_MIN = SIGMA_MIN[1]
+        #self.SIGMA2_MAX = SIGMA_MAX[1]
+        if type(TAU) is int:
+            self.TAU1 = TAU
+            self.TAU1 = TAU
+        elif type(TAU) is tuple:
+            self.TAU1=TAU[0]
+            self.TAU2=TAU[1]
+        else:
+            print("please TAU tuple or int")
+        # self.TAU1 = TAU[0]
+        # self.TAU2 = TAU[1]
         # self.latent1_dim=latent_dim[0]
         # self.latent2_dim = latent_dim[1]
         #Xについて
