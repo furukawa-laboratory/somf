@@ -1,9 +1,11 @@
 import numpy as np
 from scipy.spatial import distance
 from tqdm import tqdm
+from libs.tools.create_zeta import create_zeta
 
 class TSOM2():
-    def __init__(self, X,latent_dim,resolution,SIGMA_MAX,SIGMA_MIN, TAU):
+    def __init__(self, X,latent_dim,resolution,SIGMA_MAX,SIGMA_MIN,TAU):
+
         #最大近傍半径(SIGMAX)の設定
         if type(SIGMA_MAX) is float:
             self.SIGMA1_MAX = SIGMA_MAX
@@ -13,7 +15,8 @@ class TSOM2():
             self.SIGMA2_MAX=SIGMA_MAX[1]
         else:
             print("please SIGMAX tuple or float")
-        # 最小近傍半径(SIGMIN)の設定
+
+        # 最小近傍半径(SIGMA_MIN)の設定
         if type(SIGMA_MIN) is float:
             self.SIGMA1_MIN = SIGMA_MIN
             self.SIGMA2_MIN = SIGMA_MIN
@@ -22,10 +25,8 @@ class TSOM2():
             self.SIGMA2_MIN=SIGMA_MIN[1]
         else:
             print("please SIGMIN tuple or float")
-        #self.SIGMA1_MIN = SIGMA_MIN[0]
-        # self.SIGMA1_MAX = SIGMA_MAX[0]
-        #self.SIGMA2_MIN = SIGMA_MIN[1]
-        #self.SIGMA2_MAX = SIGMA_MAX[1]
+
+        # 時定数(TAU)の設定
         if type(TAU) is int:
             self.TAU1 = TAU
             self.TAU1 = TAU
@@ -34,10 +35,7 @@ class TSOM2():
             self.TAU2=TAU[1]
         else:
             print("please TAU tuple or int")
-        # self.TAU1 = TAU[0]
-        # self.TAU2 = TAU[1]
-        # self.latent1_dim=latent_dim[0]
-        # self.latent2_dim = latent_dim[1]
+        
         #Xについて
         if X.ndim == 2:
             self.X = X.reshape((X.shape[0], X.shape[1], 1))
@@ -65,9 +63,10 @@ class TSOM2():
 
         #潜在空間の設定
         if type(latent_dim) is int:#latent_dimがintであればどちらのモードも潜在空間の次元は同じ
-            self.latent_dim1=latent_dim
+            self.latent_dim1 = latent_dim
             self.latent_dim2 = latent_dim
             if latent_dim==1:
+                self.Zeta1 =
             elif latent_dim==2:
                 mode1_x = np.linspace(-1, 1, resolution1)
                 mode1_y = np.linspace(-1, 1, resolution1)
