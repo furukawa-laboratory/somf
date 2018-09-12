@@ -4,7 +4,7 @@ from tqdm import tqdm
 from libs.tools.create_zeta import create_zeta
 
 class TSOM2():
-    def __init__(self, X,latent_dim,resolution,SIGMA_MAX,SIGMA_MIN,TAU,inits='random'):
+    def __init__(self, X, latent_dim, resolution, SIGMA_MAX, SIGMA_MIN, TAU, init='random'):
 
         #最大近傍半径(SIGMAX)の設定
         if type(SIGMA_MAX) is float:
@@ -83,20 +83,20 @@ class TSOM2():
         #勝者ノードの初期化
         self.Z1 = None
         self.Z2 = None
-        if isinstance(inits, str) and inits in 'random':
+        if isinstance(init, str) and init in 'random':
             self.Z1 = np.random.rand(self.N1, self.latent_dim1) * 2.0 - 1.0
             self.Z2 = np.random.rand(self.N2, self.latent_dim2) * 2.0 - 1.0
-        elif isinstance(inits, tuple) and len(inits) == 2:
-            if isinstance(inits[0], np.ndarray) and inits[0].shape == (self.N1, self.latent_dim1):
+        elif isinstance(init, tuple) and len(init) == 2:
+            if isinstance(init[0], np.ndarray) and init[0].shape == (self.N1, self.latent_dim1):
                 self.Z1 = init[0].copy()
             else:
-                raise ValueError("invalid inits[0]: {}".format(inits))
-            if isinstance(inits[1], np.ndarray) and inits[1].shape == (self.N2, self.latent_dim2):
+                raise ValueError("invalid inits[0]: {}".format(init))
+            if isinstance(init[1], np.ndarray) and init[1].shape == (self.N2, self.latent_dim2):
                 self.Z2 = init[1].copy()
             else:
-                raise ValueError("invalid inits[1]: {}".format(inits))
+                raise ValueError("invalid inits[1]: {}".format(init))
         else:
-            raise ValueError("invalid inits: {}".format(inits))
+            raise ValueError("invalid inits: {}".format(init))
 
         self.history = {}
 
