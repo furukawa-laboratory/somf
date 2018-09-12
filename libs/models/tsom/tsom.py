@@ -14,15 +14,32 @@ class TSOM2():
         self.latent_dim=latent_dim
         self.K1 = mode1_nodes[0]*mode1_nodes[1]
         self.K2 = mode2_nodes[0]*mode2_nodes[1]
+        #Xについて
+        if X.ndim == 2:
+            self.X = X.reshape((X.shape[0], X.shape[1], 1))
+            self.N1 = self.X.shape[0]
+            self.N2 = self.X.shape[1]
+            self.observed_dim = self.X.shape[2]  # 観測空間の次元
+
+        elif X.ndim == 3:
+            self.X = X
+            self.N1 = self.X.shape[0]
+            self.N2 = self.X.shape[1]
+            self.observed_dim = self.X.shape[2]  # 観測空間の次元
+        else:
+            print("X_error")
+
+        
         #サンプル数の決定
-        self.N1 = X.shape[0]
-        self.N2 = X.shape[1]
-        self.observed_dim = X.shape[2]  # 観測空間の次元
-        self.X = X  #:N1*N2*D
+        # self.N1 = X.shape[0]
+        # self.N2 = X.shape[1]
+        # self.observed_dim = X.shape[2]  # 観測空間の次元
+        # self.X = X  #:N1*N2*D
         #勝者ノードの初期化
-        self.Z1 = np.random.rand(self.N1, latent_dim)
-        self.Z2 = np.random.rand(self.N2, latent_dim)
+        self.Z1 = np.random.rand(self.N1, self.latent_dim)
+        self.Z2 = np.random.rand(self.N2, self.latent_dim)
         self.history = {}
+
 
         #潜在空間の作成
         # if latent_dim==1:
