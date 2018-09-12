@@ -5,6 +5,10 @@ from tqdm import tqdm
 class TSOM2():
     def __init__(self, X,latent_dim,resolution,SIGMA_MAX=[2.0, 2.0] ,SIGMA_MIN=[0.2, 0.2], TAU=[50,50]):
         #パラメータの設定
+        if type(SIGMA_MAX) is float:
+            self.SIGMA1_MAX = SIGMA_MAX
+            self.SIGMA2_MAX = SIGMA_MAX
+        elif type(SIGMA_MAX)
         self.SIGMA1_MIN = SIGMA_MIN[0]
         self.SIGMA1_MAX = SIGMA_MAX[0]
         self.SIGMA2_MIN = SIGMA_MIN[1]
