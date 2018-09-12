@@ -11,9 +11,8 @@ class TSOM2():
         self.SIGMA2_MAX = SIGMA_MAX[1]
         self.TAU1 = TAU[0]
         self.TAU2 = TAU[1]
-        self.latent_dim=latent_dim
-        # self.K1 = resolution1**2
-        # self.K2 = resolution2**2
+        # self.latent1_dim=latent_dim[0]
+        # self.latent2_dim = latent_dim[1]
         #Xについて
         if X.ndim == 2:
             self.X = X.reshape((X.shape[0], X.shape[1], 1))
@@ -29,62 +28,73 @@ class TSOM2():
         else:
             print("X_error")
 
-        # #潜在空間の設定
-        # if type(latent_dim) is int:#latent_dimがintであればどちらのモードも潜在空間の次元は同じ
-        #     if latent_dim==1:
-        #         self.Zeta1 = np.linspace(-1, 1, mode1_nodes[0])[:, np.newaxis]
-        #         self.Zeta2 = np.linspace(-1, 1, mode2_nodes[0])[:,np.newaxis]
-        #     elif latent_dim==2:
-        #         mode1_x = np.linspace(-1, 1, mode1_nodes[0])
-        #         mode1_y = np.linspace(-1, 1, mode1_nodes[1])
-        #         mode2_x = np.linspace(-1, 1, mode2_nodes[0])
-        #         mode2_y = np.linspace(-1, 1, mode2_nodes[1])
-        #         mode1_Zeta1, mode1_Zeta2 = np.meshgrid(mode1_x, mode1_y)
-        #         mode2_Zeta1, mode2_Zeta2 = np.meshgrid(mode2_x, mode2_y)
-        #         self.Zeta1 = np.c_[mode1_Zeta1.ravel(), mode1_Zeta2.ravel()]
-        #         self.Zeta2 = np.c_[mode2_Zeta1.ravel(), mode2_Zeta2.ravel()]
-        #
-        # elif type(latent_dim) is tuple:#latent_dimがtupleであれば各モードで潜在空間の次元を決定
-        #     #モード1の場合
-        #     if latent_dim[0]==1:
-        #         self.Zeta1 = np.linspace(-1, 1, mode1_nodes[0])[:, np.newaxis]
-        #     elif latent_dim[0]==2:
-        #         mode1_x = np.linspace(-1, 1, mode1_nodes[0])
-        #         mode1_y = np.linspace(-1, 1, mode1_nodes[1])
-        #         mode1_Zeta1, mode1_Zeta2 = np.meshgrid(mode1_x, mode1_y)
-        #         self.Zeta1 = np.c_[mode1_Zeta1.ravel(), mode1_Zeta2.ravel()]
-        #     #モード2の場合
-        #     if latent_dim[1]==1:
-        #         self.Zeta1 = np.linspace(-1, 1, mode1_nodes[0])[:, np.newaxis]
-        #     elif latent_dim[1]==2:
-        #         mode2_x = np.linspace(-1, 1, mode2_nodes[0])
-        #         mode2_y = np.linspace(-1, 1, mode2_nodes[1])
-        #         mode2_Zeta1, mode2_Zeta2 = np.meshgrid(mode2_x, mode2_y)
-        #         self.Zeta2 = np.c_[mode2_Zeta1.ravel(), mode2_Zeta2.ravel()]
-        # else:
-        #     print("latent_dim error")
+        #潜在空間の設定
+        if type(latent_dim) is int:#latent_dimがintであればどちらのモードも潜在空間の次元は同じ
+            if latent_dim==1:
+                self.Zeta1 = np.linspace(-1, 1, resolution1[0])[:, np.newaxis]
+                self.Zeta2 = np.linspace(-1, 1, resolution2[0])[:,np.newaxis]
+                self.latent1_dim=latent_dim
+                self.latent2_dim = latent_dim
+            elif latent_dim==2:
+                mode1_x = np.linspace(-1, 1, resolution1[0])
+                mode1_y = np.linspace(-1, 1, resolution1[1])
+                mode2_x = np.linspace(-1, 1, resolution2[0])
+                mode2_y = np.linspace(-1, 1, resolution2[1])
+                mode1_Zeta1, mode1_Zeta2 = np.meshgrid(mode1_x, mode1_y)
+                mode2_Zeta1, mode2_Zeta2 = np.meshgrid(mode2_x, mode2_y)
+                self.Zeta1 = np.c_[mode1_Zeta1.ravel(), mode1_Zeta2.ravel()]
+                self.Zeta2 = np.c_[mode2_Zeta1.ravel(), mode2_Zeta2.ravel()]
+                self.latent1_dim = latent_dim
+                self.latent2_dim = latent_dim
 
+        elif type(latent_dim) is tuple:#latent_dimがtupleであれば各モードで潜在空間の次元を決定
+            #モード1の場合
+            if latent_dim[0]==1:
+                self.Zeta1 = np.linspace(-1, 1, resolution1[0])[:, np.newaxis]
+                self.latent1_dim=latent_dim[0]
+            elif latent_dim[0]==2:
+                mode1_x = np.linspace(-1, 1, resolution1[0])
+                mode1_y = np.linspace(-1, 1, resolution1[1])
+                mode1_Zeta1, mode1_Zeta2 = np.meshgrid(mode1_x, mode1_y)
+                self.Zeta1 = np.c_[mode1_Zeta1.ravel(), mode1_Zeta2.ravel()]
+                self.latent1_dim=latent_dim[0]
+            #モード2の場合
+            if latent_dim[1]==1:
+                self.Zeta2 = np.linspace(-1, 1, resolution2[0])[:, np.newaxis]
+                self.latent2_dim = latent_dim[1]
+            elif latent_dim[1]==2:
+                mode2_x = np.linspace(-1, 1, resolution2[0])
+                mode2_y = np.linspace(-1, 1, resolution2[1])
+                mode2_Zeta1, mode2_Zeta2 = np.meshgrid(mode2_x, mode2_y)
+                self.Zeta2 = np.c_[mode2_Zeta1.ravel(), mode2_Zeta2.ravel()]
+                self.latent2_dim = latent_dim[1]
+        else:
+            print("latent_dim error")
+            #latent_dimがlist,float,3次元以上はエラーかな?
+
+        #K1とK2は潜在空間の設定が終わった後がいいよね
+        self.K1 = self.Zeta1.shape[0]
+        self.K2 = self.Zeta2.shape[0]
         #勝者ノードの初期化
-        self.Z1 = np.random.rand(self.N1, latent_dim)
-        self.Z2 = np.random.rand(self.N2, latent_dim)
+        self.Z1 = np.random.rand(self.N1, self.latent1_dim)
+        self.Z2 = np.random.rand(self.N2, self.latent2_dim)
         self.history = {}
 
-        mode1_x = np.linspace(-1, 1, resolution1[0])
-        mode1_y = np.linspace(-1, 1, resolution1[1])
-        mode2_x = np.linspace(-1, 1, resolution2[0])
-        mode2_y = np.linspace(-1, 1, resolution2[1])
-        mode1_Zeta1, mode1_Zeta2 = np.meshgrid(mode1_x,mode1_y)
-        mode2_Zeta1, mode2_Zeta2 = np.meshgrid(mode2_x, mode2_y)
-        self.Zeta1 = np.c_[mode1_Zeta1.ravel(), mode1_Zeta2.ravel()]
-        self.Zeta2 = np.c_[mode2_Zeta1.ravel(), mode2_Zeta2.ravel()]
-        self.K1=self.Zeta1.shape[0]
-        self.K2 = self.Zeta2.shape[0]
+        # # mode1_x = np.linspace(-1, 1, resolution1[0])
+        # # mode1_y = np.linspace(-1, 1, resolution1[1])
+        # # mode2_x = np.linspace(-1, 1, resolution2[0])
+        # # mode2_y = np.linspace(-1, 1, resolution2[1])
+        # # mode1_Zeta1, mode1_Zeta2 = np.meshgrid(mode1_x,mode1_y)
+        # # mode2_Zeta1, mode2_Zeta2 = np.meshgrid(mode2_x, mode2_y)
+        # self.Zeta1 = np.c_[mode1_Zeta1.ravel(), mode1_Zeta2.ravel()]
+        # self.Zeta2 = np.c_[mode2_Zeta1.ravel(), mode2_Zeta2.ravel()]
+
 
 
     def fit(self,nb_epoch=200):
         self.history['y'] = np.zeros((nb_epoch, self.K1, self.K2, self.observed_dim))
-        self.history['z1'] = np.zeros((nb_epoch, self.N1, self.latent_dim))
-        self.history['z2'] = np.zeros((nb_epoch, self.N2, self.latent_dim))
+        self.history['z1'] = np.zeros((nb_epoch, self.N1, self.latent1_dim))
+        self.history['z2'] = np.zeros((nb_epoch, self.N2, self.latent2_dim))
         self.history['sigma1'] = np.zeros(nb_epoch)
         self.history['sigma2'] = np.zeros(nb_epoch)
 
