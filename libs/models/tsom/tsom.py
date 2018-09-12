@@ -14,7 +14,7 @@ class TSOM2():
             self.SIGMA1_MAX=SIGMA_MAX[0]
             self.SIGMA2_MAX=SIGMA_MAX[1]
         else:
-            print("please SIGMAX tuple or float")
+            raise ValueError("invalid SIGMA_MAX: {}".format(SIGMA_MAX))
 
         # 最小近傍半径(SIGMA_MIN)の設定
         if type(SIGMA_MIN) is float:
@@ -24,7 +24,7 @@ class TSOM2():
             self.SIGMA1_MIN=SIGMA_MIN[0]
             self.SIGMA2_MIN=SIGMA_MIN[1]
         else:
-            print("please SIGMIN tuple or float")
+            raise ValueError("invalid SIGMA_MIN: {}".format(SIGMA_MIN))
 
         # 時定数(TAU)の設定
         if type(TAU) is int:
@@ -34,7 +34,7 @@ class TSOM2():
             self.TAU1=TAU[0]
             self.TAU2=TAU[1]
         else:
-            print("please TAU tuple or int")
+            raise ValueError("invalid TAU: {}".format(TAU))
 
         #Xについて
         if X.ndim == 2:
@@ -50,6 +50,7 @@ class TSOM2():
             self.observed_dim = self.X.shape[2]  # 観測空間の次元
         else:
             print("X please 2mode tensor or 3 mode tensor")
+            raise ValueError("invalid X: {}".format(X))
 
         #resolutionの設定
         if type(resolution) is int:
