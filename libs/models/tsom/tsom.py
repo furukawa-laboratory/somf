@@ -61,7 +61,7 @@ class TSOM2():
             resolution1 = resolution[0]
             resolution2 = resolution[1]
         else:
-            print("please tuple or int")
+            raise ValueError("invalid resolution: {}".format(resolution))
 
         # 潜在空間の設定
         if type(latent_dim) is int:  # latent_dimがintであればどちらのモードも潜在空間の次元は同じ
@@ -72,7 +72,7 @@ class TSOM2():
             self.latent_dim1 = latent_dim[0]
             self.latent_dim2 = latent_dim[1]
         else:
-            print("latent_dim please int or tuple")
+            raise ValueError("invalid latent_dim: {}".format(latent_dim))
             # latent_dimがlist,float,3次元以上はエラーかな?
         self.Zeta1 = create_zeta(-1.0, 1.0, latent_dim=self.latent_dim1, resolution=resolution1, include_min_max=True)
         self.Zeta2 = create_zeta(-1.0, 1.0, latent_dim=self.latent_dim2, resolution=resolution2, include_min_max=True)
