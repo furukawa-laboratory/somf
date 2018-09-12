@@ -7,6 +7,21 @@ from libs.tools.create_zeta import create_zeta
 class TSOM2():
     def __init__(self, X, latent_dim, resolution, SIGMA_MAX, SIGMA_MIN, TAU, init='random'):
 
+        # 入力データXについて
+        if X.ndim == 2:
+            self.X = X.reshape((X.shape[0], X.shape[1], 1))
+            self.N1 = self.X.shape[0]
+            self.N2 = self.X.shape[1]
+            self.observed_dim = self.X.shape[2]  # 観測空間の次元
+
+        elif X.ndim == 3:
+            self.X = X
+            self.N1 = self.X.shape[0]
+            self.N2 = self.X.shape[1]
+            self.observed_dim = self.X.shape[2]  # 観測空間の次元
+        else:
+            raise ValueError("invalid X: {}\nX must be 2d or 3d ndarray".format(X))
+
         # 最大近傍半径(SIGMAX)の設定
         if type(SIGMA_MAX) is float:
             self.SIGMA1_MAX = SIGMA_MAX
@@ -37,21 +52,6 @@ class TSOM2():
         else:
             raise ValueError("invalid TAU: {}".format(TAU))
 
-        # Xについて
-        if X.ndim == 2:
-            self.X = X.reshape((X.shape[0], X.shape[1], 1))
-            self.N1 = self.X.shape[0]
-            self.N2 = self.X.shape[1]
-            self.observed_dim = self.X.shape[2]  # 観測空間の次元
-
-        elif X.ndim == 3:
-            self.X = X
-            self.N1 = self.X.shape[0]
-            self.N2 = self.X.shape[1]
-            self.observed_dim = self.X.shape[2]  # 観測空間の次元
-        else:
-            print("X please 2mode tensor or 3 mode tensor")
-            raise ValueError("invalid X: {}".format(X))
 
         # resolutionの設定
         if type(resolution) is int:
