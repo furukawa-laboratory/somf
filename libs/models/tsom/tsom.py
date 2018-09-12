@@ -3,7 +3,7 @@ from scipy.spatial import distance
 from tqdm import tqdm
 
 class TSOM2():
-    def __init__(self, X,latent_dim,resolution1,resolution2,SIGMA_MAX=[2.0, 2.0] ,SIGMA_MIN=[0.2, 0.2], TAU=[50,50]):
+    def __init__(self, X,latent_dim,resolution,SIGMA_MAX=[2.0, 2.0] ,SIGMA_MIN=[0.2, 0.2], TAU=[50,50]):
         #パラメータの設定
         self.SIGMA1_MIN = SIGMA_MIN[0]
         self.SIGMA1_MAX = SIGMA_MAX[0]
@@ -26,20 +26,30 @@ class TSOM2():
             self.N2 = self.X.shape[1]
             self.observed_dim = self.X.shape[2]  # 観測空間の次元
         else:
-            print("X_error")
+            print("X please 2mode tensor or 3 mode tensor")
+
+        #resolutionの設定
+        if type(resolution) is int:
+            resolution1=resolution
+            resolution2=resolution
+        elif type(resolution) is tuple:
+            resolution1=resolution[0]
+            resolution2=resolution[1]
+        else:
+            print("please tuple or int")
 
         #潜在空間の設定
         if type(latent_dim) is int:#latent_dimがintであればどちらのモードも潜在空間の次元は同じ
             if latent_dim==1:
-                self.Zeta1 = np.linspace(-1, 1, resolution1[0])[:, np.newaxis]
-                self.Zeta2 = np.linspace(-1, 1, resolution2[0])[:,np.newaxis]
+                self.Zeta1 = np.linspace(-1, 1, resolution1)[:, np.newaxis]
+                self.Zeta2 = np.linspace(-1, 1, resolution2)[:,np.newaxis]
                 self.latent1_dim=latent_dim
                 self.latent2_dim = latent_dim
             elif latent_dim==2:
-                mode1_x = np.linspace(-1, 1, resolution1[0])
-                mode1_y = np.linspace(-1, 1, resolution1[1])
-                mode2_x = np.linspace(-1, 1, resolution2[0])
-                mode2_y = np.linspace(-1, 1, resolution2[1])
+                mode1_x = np.linspace(-1, 1, resolution1)
+                mode1_y = np.linspace(-1, 1, resolution1)
+                mode2_x = np.linspace(-1, 1, resolution2)
+                mode2_y = np.linspace(-1, 1, resolution2)
                 mode1_Zeta1, mode1_Zeta2 = np.meshgrid(mode1_x, mode1_y)
                 mode2_Zeta1, mode2_Zeta2 = np.meshgrid(mode2_x, mode2_y)
                 self.Zeta1 = np.c_[mode1_Zeta1.ravel(), mode1_Zeta2.ravel()]
@@ -50,26 +60,26 @@ class TSOM2():
         elif type(latent_dim) is tuple:#latent_dimがtupleであれば各モードで潜在空間の次元を決定
             #モード1の場合
             if latent_dim[0]==1:
-                self.Zeta1 = np.linspace(-1, 1, resolution1[0])[:, np.newaxis]
+                self.Zeta1 = np.linspace(-1, 1, resolution1)[:, np.newaxis]
                 self.latent1_dim=latent_dim[0]
             elif latent_dim[0]==2:
-                mode1_x = np.linspace(-1, 1, resolution1[0])
-                mode1_y = np.linspace(-1, 1, resolution1[1])
+                mode1_x = np.linspace(-1, 1, resolution1)
+                mode1_y = np.linspace(-1, 1, resolution1)
                 mode1_Zeta1, mode1_Zeta2 = np.meshgrid(mode1_x, mode1_y)
                 self.Zeta1 = np.c_[mode1_Zeta1.ravel(), mode1_Zeta2.ravel()]
                 self.latent1_dim=latent_dim[0]
             #モード2の場合
             if latent_dim[1]==1:
-                self.Zeta2 = np.linspace(-1, 1, resolution2[0])[:, np.newaxis]
+                self.Zeta2 = np.linspace(-1, 1, resolution2)[:, np.newaxis]
                 self.latent2_dim = latent_dim[1]
             elif latent_dim[1]==2:
-                mode2_x = np.linspace(-1, 1, resolution2[0])
-                mode2_y = np.linspace(-1, 1, resolution2[1])
+                mode2_x = np.linspace(-1, 1, resolution2)
+                mode2_y = np.linspace(-1, 1, resolution2)
                 mode2_Zeta1, mode2_Zeta2 = np.meshgrid(mode2_x, mode2_y)
                 self.Zeta2 = np.c_[mode2_Zeta1.ravel(), mode2_Zeta2.ravel()]
                 self.latent2_dim = latent_dim[1]
         else:
-            print("latent_dim error")
+            print("latent_dim please int or tuple")
             #latent_dimがlist,float,3次元以上はエラーかな?
 
         #K1とK2は潜在空間の設定が終わった後がいいよね

@@ -29,7 +29,7 @@ sigma1_zero=1.2
 sigma2_min=0.1
 sigma2_zero=1.2
 
-tsom2=TSOM2(X,latent_dim=(1,1),resolution1=(10,1),resolution2=(15,1),SIGMA_MAX=[sigma1_zero, sigma2_zero] ,
+tsom2=TSOM2(X,latent_dim=(1,1),resolution=(10,15),SIGMA_MAX=[sigma1_zero, sigma2_zero] ,
                   SIGMA_MIN=[sigma1_min, sigma2_min], TAU=[tau1,tau2])
 
 tsom2.fit(nb_epoch=250)
