@@ -35,7 +35,7 @@ class TSOM2():
             self.TAU2=TAU[1]
         else:
             print("please TAU tuple or int")
-        
+
         #Xについて
         if X.ndim == 2:
             self.X = X.reshape((X.shape[0], X.shape[1], 1))
@@ -65,48 +65,20 @@ class TSOM2():
         if type(latent_dim) is int:#latent_dimがintであればどちらのモードも潜在空間の次元は同じ
             self.latent_dim1 = latent_dim
             self.latent_dim2 = latent_dim
-            if latent_dim==1:
-                self.Zeta1 =
-            elif latent_dim==2:
-                mode1_x = np.linspace(-1, 1, resolution1)
-                mode1_y = np.linspace(-1, 1, resolution1)
-                mode2_x = np.linspace(-1, 1, resolution2)
-                mode2_y = np.linspace(-1, 1, resolution2)
-                mode1_Zeta1, mode1_Zeta2 = np.meshgrid(mode1_x, mode1_y)
-                mode2_Zeta1, mode2_Zeta2 = np.meshgrid(mode2_x, mode2_y)
-                self.Zeta1 = np.c_[mode1_Zeta1.ravel(), mode1_Zeta2.ravel()]
-                self.Zeta2 = np.c_[mode2_Zeta1.ravel(), mode2_Zeta2.ravel()]
-                self.latent_dim1 = latent_dim
-                self.latent_dim2 = latent_dim
 
         elif type(latent_dim) is tuple:#latent_dimがtupleであれば各モードで潜在空間の次元を決定
-            #モード1の場合
-            if latent_dim[0]==1:
-                self.Zeta1 = np.linspace(-1, 1, resolution1)[:, np.newaxis]
-                self.latent_dim1=latent_dim[0]
-            elif latent_dim[0]==2:
-                mode1_x = np.linspace(-1, 1, resolution1)
-                mode1_y = np.linspace(-1, 1, resolution1)
-                mode1_Zeta1, mode1_Zeta2 = np.meshgrid(mode1_x, mode1_y)
-                self.Zeta1 = np.c_[mode1_Zeta1.ravel(), mode1_Zeta2.ravel()]
-                self.latent_dim1=latent_dim[0]
-            #モード2の場合
-            if latent_dim[1]==1:
-                self.Zeta2 = np.linspace(-1, 1, resolution2)[:, np.newaxis]
-                self.latent_dim2 = latent_dim[1]
-            elif latent_dim[1]==2:
-                mode2_x = np.linspace(-1, 1, resolution2)
-                mode2_y = np.linspace(-1, 1, resolution2)
-                mode2_Zeta1, mode2_Zeta2 = np.meshgrid(mode2_x, mode2_y)
-                self.Zeta2 = np.c_[mode2_Zeta1.ravel(), mode2_Zeta2.ravel()]
-                self.latent_dim2 = latent_dim[1]
+            self.latent_dim1 = latent_dim[0]
+            self.latent_dim2 = latent_dim[1]
         else:
             print("latent_dim please int or tuple")
             #latent_dimがlist,float,3次元以上はエラーかな?
+        self.Zeta1 = create_zeta(-1.0,1.0,latent_dim=self.latent_dim1,resolution=resolution1,include_min_max=True)
+        self.Zeta2 = create_zeta(-1.0,1.0,latent_dim=self.latent_dim2,resolution=resolution2,include_min_max=True)
 
         #K1とK2は潜在空間の設定が終わった後がいいよね
         self.K1 = self.Zeta1.shape[0]
         self.K2 = self.Zeta2.shape[0]
+
         #勝者ノードの初期化
         self.Z1 = np.random.rand(self.N1, self.latent_dim1)
         self.Z2 = np.random.rand(self.N2, self.latent_dim2)
