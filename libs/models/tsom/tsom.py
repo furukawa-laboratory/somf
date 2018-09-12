@@ -4,7 +4,7 @@ from tqdm import tqdm
 from libs.tools.create_zeta import create_zeta
 
 class TSOM2():
-    def __init__(self, X,latent_dim,resolution,SIGMA_MAX,SIGMA_MIN,TAU):
+    def __init__(self, X,latent_dim,resolution,SIGMA_MAX,SIGMA_MIN,TAU,inits='random'):
 
         #最大近傍半径(SIGMAX)の設定
         if type(SIGMA_MAX) is float:
@@ -80,19 +80,24 @@ class TSOM2():
         self.K2 = self.Zeta2.shape[0]
 
         #勝者ノードの初期化
-        self.Z1 = np.random.rand(self.N1, self.latent_dim1)
-        self.Z2 = np.random.rand(self.N2, self.latent_dim2)
+        self.Z1 = None
+        self.Z2 = None
+        if isinstance(inits, str) and inits in 'random':
+            self.Z1 = np.random.rand(self.N1, self.latent_dim1) * 2.0 - 1.0
+            self.Z2 = np.random.rand(self.N2, self.latent_dim2) * 2.0 - 1.0
+        elif isinstance(inits, tuple) and len(inits) == 2:
+            if isinstance(inits[0], np.ndarray) and inits[0].shape == (self.N1, self.latent_dim1):
+                self.Z1 = init[0].copy()
+            else:
+                raise ValueError("invalid inits[0]: {}".format(inits))
+            if isinstance(inits[1], np.ndarray) and inits[1].shape == (self.N2, self.latent_dim2):
+                self.Z2 = init[1].copy()
+            else:
+                raise ValueError("invalid inits[1]: {}".format(inits))
+        else:
+            raise ValueError("invalid inits: {}".format(inits))
+
         self.history = {}
-
-        # # mode1_x = np.linspace(-1, 1, resolution1[0])
-        # # mode1_y = np.linspace(-1, 1, resolution1[1])
-        # # mode2_x = np.linspace(-1, 1, resolution2[0])
-        # # mode2_y = np.linspace(-1, 1, resolution2[1])
-        # # mode1_Zeta1, mode1_Zeta2 = np.meshgrid(mode1_x,mode1_y)
-        # # mode2_Zeta1, mode2_Zeta2 = np.meshgrid(mode2_x, mode2_y)
-        # self.Zeta1 = np.c_[mode1_Zeta1.ravel(), mode1_Zeta2.ravel()]
-        # self.Zeta2 = np.c_[mode2_Zeta1.ravel(), mode2_Zeta2.ravel()]
-
 
 
     def fit(self,nb_epoch=200):
