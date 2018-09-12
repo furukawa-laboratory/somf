@@ -3,16 +3,17 @@ from scipy.spatial import distance
 from tqdm import tqdm
 from libs.tools.create_zeta import create_zeta
 
+
 class TSOM2():
     def __init__(self, X, latent_dim, resolution, SIGMA_MAX, SIGMA_MIN, TAU, init='random'):
 
-        #最大近傍半径(SIGMAX)の設定
+        # 最大近傍半径(SIGMAX)の設定
         if type(SIGMA_MAX) is float:
             self.SIGMA1_MAX = SIGMA_MAX
             self.SIGMA2_MAX = SIGMA_MAX
         elif type(SIGMA_MAX) is tuple:
-            self.SIGMA1_MAX=SIGMA_MAX[0]
-            self.SIGMA2_MAX=SIGMA_MAX[1]
+            self.SIGMA1_MAX = SIGMA_MAX[0]
+            self.SIGMA2_MAX = SIGMA_MAX[1]
         else:
             raise ValueError("invalid SIGMA_MAX: {}".format(SIGMA_MAX))
 
@@ -21,8 +22,8 @@ class TSOM2():
             self.SIGMA1_MIN = SIGMA_MIN
             self.SIGMA2_MIN = SIGMA_MIN
         elif type(SIGMA_MIN) is tuple:
-            self.SIGMA1_MIN=SIGMA_MIN[0]
-            self.SIGMA2_MIN=SIGMA_MIN[1]
+            self.SIGMA1_MIN = SIGMA_MIN[0]
+            self.SIGMA2_MIN = SIGMA_MIN[1]
         else:
             raise ValueError("invalid SIGMA_MIN: {}".format(SIGMA_MIN))
 
@@ -31,12 +32,12 @@ class TSOM2():
             self.TAU1 = TAU
             self.TAU1 = TAU
         elif type(TAU) is tuple:
-            self.TAU1=TAU[0]
-            self.TAU2=TAU[1]
+            self.TAU1 = TAU[0]
+            self.TAU2 = TAU[1]
         else:
             raise ValueError("invalid TAU: {}".format(TAU))
 
-        #Xについて
+        # Xについて
         if X.ndim == 2:
             self.X = X.reshape((X.shape[0], X.shape[1], 1))
             self.N1 = self.X.shape[0]
@@ -52,35 +53,35 @@ class TSOM2():
             print("X please 2mode tensor or 3 mode tensor")
             raise ValueError("invalid X: {}".format(X))
 
-        #resolutionの設定
+        # resolutionの設定
         if type(resolution) is int:
-            resolution1=resolution
-            resolution2=resolution
+            resolution1 = resolution
+            resolution2 = resolution
         elif type(resolution) is tuple:
-            resolution1=resolution[0]
-            resolution2=resolution[1]
+            resolution1 = resolution[0]
+            resolution2 = resolution[1]
         else:
             print("please tuple or int")
 
-        #潜在空間の設定
-        if type(latent_dim) is int:#latent_dimがintであればどちらのモードも潜在空間の次元は同じ
+        # 潜在空間の設定
+        if type(latent_dim) is int:  # latent_dimがintであればどちらのモードも潜在空間の次元は同じ
             self.latent_dim1 = latent_dim
             self.latent_dim2 = latent_dim
 
-        elif type(latent_dim) is tuple:#latent_dimがtupleであれば各モードで潜在空間の次元を決定
+        elif type(latent_dim) is tuple:  # latent_dimがtupleであれば各モードで潜在空間の次元を決定
             self.latent_dim1 = latent_dim[0]
             self.latent_dim2 = latent_dim[1]
         else:
             print("latent_dim please int or tuple")
-            #latent_dimがlist,float,3次元以上はエラーかな?
-        self.Zeta1 = create_zeta(-1.0,1.0,latent_dim=self.latent_dim1,resolution=resolution1,include_min_max=True)
-        self.Zeta2 = create_zeta(-1.0,1.0,latent_dim=self.latent_dim2,resolution=resolution2,include_min_max=True)
+            # latent_dimがlist,float,3次元以上はエラーかな?
+        self.Zeta1 = create_zeta(-1.0, 1.0, latent_dim=self.latent_dim1, resolution=resolution1, include_min_max=True)
+        self.Zeta2 = create_zeta(-1.0, 1.0, latent_dim=self.latent_dim2, resolution=resolution2, include_min_max=True)
 
-        #K1とK2は潜在空間の設定が終わった後がいいよね
+        # K1とK2は潜在空間の設定が終わった後がいいよね
         self.K1 = self.Zeta1.shape[0]
         self.K2 = self.Zeta2.shape[0]
 
-        #勝者ノードの初期化
+        # 勝者ノードの初期化
         self.Z1 = None
         self.Z2 = None
         if isinstance(init, str) and init in 'random':
@@ -100,8 +101,7 @@ class TSOM2():
 
         self.history = {}
 
-
-    def fit(self,nb_epoch=200):
+    def fit(self, nb_epoch=200):
         self.history['y'] = np.zeros((nb_epoch, self.K1, self.K2, self.observed_dim))
         self.history['z1'] = np.zeros((nb_epoch, self.N1, self.latent_dim1))
         self.history['z2'] = np.zeros((nb_epoch, self.N2, self.latent_dim2))
@@ -110,15 +110,15 @@ class TSOM2():
 
         for epoch in tqdm(np.arange(nb_epoch)):
             # 学習量の決定
-            #sigma1 = self.SIGMA1_MIN + (self.SIGMA1_MAX - self.SIGMA1_MIN) * np.exp(-epoch / self.TAU1)
-            sigma1 = max(self.SIGMA1_MIN, self.SIGMA1_MAX * ( 1 - (epoch / self.TAU1) ) )
+            # sigma1 = self.SIGMA1_MIN + (self.SIGMA1_MAX - self.SIGMA1_MIN) * np.exp(-epoch / self.TAU1)
+            sigma1 = max(self.SIGMA1_MIN, self.SIGMA1_MAX * (1 - (epoch / self.TAU1)))
             distance1 = distance.cdist(self.Zeta1, self.Z1, 'sqeuclidean')  # 距離行列をつくるDはN*K行列
             H1 = np.exp(-distance1 / (2 * pow(sigma1, 2)))  # かっこに気を付ける
             G1 = np.sum(H1, axis=1)  # Gは行ごとの和をとったベクトル
             R1 = (H1.T / G1).T  # 行列の計算なので.Tで転置を行う
 
-            #sigma2 = self.SIGMA2_MIN + (self.SIGMA2_MAX - self.SIGMA2_MIN) * np.exp(-epoch / self.TAU2)
-            sigma2 = max(self.SIGMA2_MIN, self.SIGMA2_MAX * ( 1 - (epoch / self.TAU2) ) )
+            # sigma2 = self.SIGMA2_MIN + (self.SIGMA2_MAX - self.SIGMA2_MIN) * np.exp(-epoch / self.TAU2)
+            sigma2 = max(self.SIGMA2_MIN, self.SIGMA2_MAX * (1 - (epoch / self.TAU2)))
             distance2 = distance.cdist(self.Zeta2, self.Z2, 'sqeuclidean')  # 距離行列をつくるDはN*K行列
             H2 = np.exp(-distance2 / (2 * pow(sigma2, 2)))  # かっこに気を付ける
             G2 = np.sum(H2, axis=1)  # Gは行ごとの和をとったベクトル
@@ -133,13 +133,8 @@ class TSOM2():
             self.Z1 = self.Zeta1[k_star1, :]  # k_starのZの座標N*L(L=2
             self.Z2 = self.Zeta2[k_star2, :]  # k_starのZの座標N*L(L=2
 
-            self.history['y'][epoch,:,:] = self.Y
-            self.history['z1'][epoch,:] = self.Z1
-            self.history['z2'][epoch,:] = self.Z2
+            self.history['y'][epoch, :, :] = self.Y
+            self.history['z1'][epoch, :] = self.Z1
+            self.history['z2'][epoch, :] = self.Z2
             self.history['sigma1'][epoch] = sigma1
             self.history['sigma2'][epoch] = sigma2
-
-
-
-
-
