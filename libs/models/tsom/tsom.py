@@ -52,7 +52,6 @@ class TSOM2():
         else:
             raise ValueError("invalid TAU: {}".format(TAU))
 
-
         # resolutionの設定
         if type(resolution) is int:
             resolution1 = resolution
