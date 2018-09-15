@@ -26,7 +26,7 @@ class TSOM2():
         if type(SIGMA_MAX) is float:
             self.SIGMA1_MAX = SIGMA_MAX
             self.SIGMA2_MAX = SIGMA_MAX
-        elif type(SIGMA_MAX) is tuple:
+        elif isinstance(SIGMA_MAX, (list, tuple)):
             self.SIGMA1_MAX = SIGMA_MAX[0]
             self.SIGMA2_MAX = SIGMA_MAX[1]
         else:
@@ -36,7 +36,7 @@ class TSOM2():
         if type(SIGMA_MIN) is float:
             self.SIGMA1_MIN = SIGMA_MIN
             self.SIGMA2_MIN = SIGMA_MIN
-        elif type(SIGMA_MIN) is tuple:
+        elif isinstance(SIGMA_MIN, (list, tuple)):
             self.SIGMA1_MIN = SIGMA_MIN[0]
             self.SIGMA2_MIN = SIGMA_MIN[1]
         else:
@@ -46,7 +46,7 @@ class TSOM2():
         if type(TAU) is int:
             self.TAU1 = TAU
             self.TAU1 = TAU
-        elif type(TAU) is tuple:
+        elif isinstance(TAU, (list, tuple)):
             self.TAU1 = TAU[0]
             self.TAU2 = TAU[1]
         else:
@@ -57,7 +57,7 @@ class TSOM2():
         if type(resolution) is int:
             resolution1 = resolution
             resolution2 = resolution
-        elif type(resolution) is tuple:
+        elif isinstance(resolution, (list, tuple)):
             resolution1 = resolution[0]
             resolution2 = resolution[1]
         else:
@@ -68,7 +68,7 @@ class TSOM2():
             self.latent_dim1 = latent_dim
             self.latent_dim2 = latent_dim
 
-        elif type(latent_dim) is tuple:  # latent_dimがtupleであれば各モードで潜在空間の次元を決定
+        elif isinstance(latent_dim, (list, tuple)):
             self.latent_dim1 = latent_dim[0]
             self.latent_dim2 = latent_dim[1]
         else:
@@ -87,7 +87,7 @@ class TSOM2():
         if isinstance(init, str) and init in 'random':
             self.Z1 = np.random.rand(self.N1, self.latent_dim1) * 2.0 - 1.0
             self.Z2 = np.random.rand(self.N2, self.latent_dim2) * 2.0 - 1.0
-        elif isinstance(init, tuple) and len(init) == 2:
+        elif isinstance(init, (tuple, list)) and len(init) == 2:
             if isinstance(init[0], np.ndarray) and init[0].shape == (self.N1, self.latent_dim1):
                 self.Z1 = init[0].copy()
             else:
