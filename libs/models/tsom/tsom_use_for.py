@@ -3,7 +3,7 @@ from tqdm import tqdm
 from libs.tools.create_zeta import create_zeta
 
 
-class TSOM2():
+class TSOM2UseFor():
     def __init__(self, X, latent_dim, resolution, SIGMA_MAX, SIGMA_MIN, TAU, init='random'):
 
         # 入力データXについて
@@ -117,6 +117,8 @@ class TSOM2():
         k_star = np.random.randint(0, self.K1, self.N1)
         l_star = np.random.randint(0, self.K2, self.N2)
 
+
+
         for epoch in tqdm(np.arange(nb_epoch)):
             # 協調過程
             h1 = np.zeros((self.N1, self.K1))
@@ -128,7 +130,7 @@ class TSOM2():
                 for k in np.arange(self.K1):
                     zeta_dis1 = 0
                     for latent_l in np.arange(self.latent_dim1):
-                        zeta_dis1 += (self.Z1[k_star[i]][latent_l] - self.Zeta1[k][latent_l]) ** 2
+                        zeta_dis1 += (self.Z1[i][latent_l] - self.Zeta1[k][latent_l]) ** 2
                     h1[i][k] = np.exp(-0.5 * (zeta_dis1 * zeta_dis1) / sigma1 ** 2)
 
             # mode2の学習量の計算
@@ -136,8 +138,8 @@ class TSOM2():
             for j in np.arange(self.N2):
                 for l in np.arange(self.K2):
                     zeta_dis2 = 0
-                    for latent_l in np.arange(self.latent_dim2):
-                        zeta_dis2 += (self.Z2[l_star[j]][latent_l] - self.Zeta2[l][latent_l]) ** 2
+                    for latent_l2 in np.arange(self.latent_dim2):
+                        zeta_dis2 += (self.Z2[j][latent_l2] - self.Zeta2[l][latent_l2]) ** 2
                     h2[j][l] = np.exp(-0.5 * (zeta_dis2 * zeta_dis2) / sigma2 ** 2)
 
             # 適応過程の計算
@@ -200,6 +202,7 @@ class TSOM2():
                     mode1_D[i][k] = distance2
 
             k_star = np.argmin(mode1_D, axis=1)
+            self.Z1=self.Zeta1[k_star,:]
 
             # mode2の競合過程
             for j in np.arange(self.N2):
@@ -213,6 +216,7 @@ class TSOM2():
                     mode2_D[j][l] = distance2
 
             l_star = np.argmin(mode2_D, axis=1)
+            self.Z2 = self.Zeta2[l_star, :]
 
 
             self.history['y'][epoch, :, :] = self.Y
