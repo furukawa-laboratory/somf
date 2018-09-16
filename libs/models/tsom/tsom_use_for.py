@@ -1,7 +1,7 @@
 import numpy as np
-from scipy.spatial import distance
 from tqdm import tqdm
 from libs.tools.create_zeta import create_zeta
+import random
 
 
 class TSOM2():
@@ -98,6 +98,13 @@ class TSOM2():
         else:
             raise ValueError("invalid inits: {}".format(init))
 
+        #モデルの初期化
+        self.U = np.zeros((self.N1, self.K2, self.observed_dim))
+        self.V = np.zeros((self.K1, self.N2, self.observed_dim))
+        self.Y = np.zeros((self.K1, self.K2, self.observed_dim))
+
+
+
         self.history = {}
 
     def fit(self, nb_epoch=200):
@@ -107,8 +114,9 @@ class TSOM2():
         self.history['sigma1'] = np.zeros(nb_epoch)
         self.history['sigma2'] = np.zeros(nb_epoch)
 
-        mode1_D=np.zeros((self.N1,self.K1))
-        mode2_D=np.zeros((self.N2,self.K2))
+        #勝者番号の初期化
+        k_star = np.arange(self.K1)
+        l_star = np.arange(self.K2)
 
         for epoch in tqdm(np.arange(nb_epoch)):
             # 協調過程
@@ -121,7 +129,7 @@ class TSOM2():
                 for k in np.arange(self.K1):
                     zeta_dis1 = 0
                     for latent_l in np.arange(self.latent_dim1):
-                        zeta_dis1 += (self.Zeta1[k_star[i]][latent_l] - self.Zeta1[k][latent_l]) ** 2
+                        zeta_dis1 += (self.Z1[k_star[i]][latent_l] - self.Zeta1[k][latent_l]) ** 2
                     h1[i][k] = np.exp(-0.5 * (zeta_dis1 * zeta_dis1) / sigma1 ** 2)
 
             # mode2の学習量の計算
@@ -130,7 +138,7 @@ class TSOM2():
                 for l in np.arange(self.K2):
                     zeta_dis2 = 0
                     for latent_l in np.arange(self.latent_dim2):
-                        zeta_dis2 += (self.Zeta2[l_star[j]][latent_l] - self.Zeta2[l][latent_l]) ** 2
+                        zeta_dis2 += (self.Z2[l_star[j]][latent_l] - self.Zeta2[l][latent_l]) ** 2
                     h2[j][l] = np.exp(-0.5 * (zeta_dis2 * zeta_dis2) / sigma2 ** 2)
 
             # 適応過程の計算
@@ -153,20 +161,20 @@ class TSOM2():
 
             # モデルの更新
             # 1次モデル
-            U = np.zeros((self.N1, self.K2, self.observed_dim))
-            V = np.zeros((self.K1, self.N2, self.observed_dim))
-            Y = np.zeros((self.K1, self.K2, self.observed_dim))
+            self.U = np.zeros((self.N1, self.K2, self.observed_dim))
+            self.V = np.zeros((self.K1, self.N2, self.observed_dim))
+            self.Y = np.zeros((self.K1, self.K2, self.observed_dim))
             for i in np.arange(self.N1):
                 for l in np.arange(self.K2):
                     for d in np.arange(self.observed_dim):
                         for j in np.arange(self.N2):
-                            U[i][l][d] += h2[j][l] * self.X[i][j][d]
+                            self.U[i][l][d] += h2[j][l] * self.X[i][j][d]
 
             for k in np.arange(self.K1):
                 for j in np.arange(self.N2):
                     for d in np.arange(self.observed_dim):
                         for i in np.arange(self.N1):
-                            V[k][j][d] += h1[i][k] * self.X[i][j][d]
+                            self.V[k][j][d] += h1[i][k] * self.X[i][j][d]
 
             # 2次モデルの更新
             for k in np.arange(self.K1):
@@ -174,9 +182,11 @@ class TSOM2():
                     for d in np.arange(self.observed_dim):
                         for i in np.arange(self.N1):
                             for j in np.arange(self.N2):
-                                Y[k][l][d] += h1[i][k] * h2[j][l] * self.X[i][j][d]
+                                self.Y[k][l][d] += h1[i][k] * h2[j][l] * self.X[i][j][d]
 
-
+            #距離行列の初期化
+            mode1_D = np.zeros((self.N1, self.K1))
+            mode2_D = np.zeros((self.N2, self.K2))
 
             # 競合過程を作る
             # mode1の競合過程
@@ -206,11 +216,11 @@ class TSOM2():
             l_star = np.argmin(mode2_D, axis=1)
 
 
-        self.history['y'][epoch, :, :] = self.Y
-        self.history['z1'][epoch, :] = self.Z1
-        self.history['z2'][epoch, :] = self.Z2
-        self.history['sigma1'][epoch] = sigma1
-        self.history['sigma2'][epoch] = sigma2
+            self.history['y'][epoch, :, :] = self.Y
+            self.history['z1'][epoch, :] = self.Z1
+            self.history['z2'][epoch, :] = self.Z2
+            self.history['sigma1'][epoch] = sigma1
+            self.history['sigma2'][epoch] = sigma2
 
 
 
