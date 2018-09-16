@@ -13,9 +13,9 @@ class TestTSOM2(unittest.TestCase):
         np.random.seed(seed)
 
         # prepare observed data
-        nb_samples1 = 25
-        nb_samples2 = 35
-        observed_dim = 5
+        nb_samples1 = 5
+        nb_samples2 = 3
+        observed_dim = 2
 
         X = np.random.normal(0, 1, (nb_samples1, nb_samples2, observed_dim))
 
@@ -60,7 +60,7 @@ class TestTSOM2(unittest.TestCase):
         observed_dim = 1
 
         X_3d = np.random.normal(0, 1, (nb_samples1, nb_samples2, observed_dim))
-        X_2d = X.reshape(nb_samples1,nb_samples2)
+        X_2d = X_3d.reshape(nb_samples1,nb_samples2)
 
         # set learning parameter
         nb_epoch = 60
@@ -85,6 +85,9 @@ class TestTSOM2(unittest.TestCase):
         tsom_type1.fit(nb_epoch=nb_epoch)
         tsom_type2.fit(nb_epoch=nb_epoch)
 
+        np.testing.assert_allclose(tsom_type1.history['y'], tsom_type2.history['y'])
+        np.testing.assert_allclose(tsom_type1.history['z1'], tsom_type2.history['z1'])
+        np.testing.assert_allclose(tsom_type1.history['z2'], tsom_type2.history['z2'])
 
 
 if __name__ == "__main__":
