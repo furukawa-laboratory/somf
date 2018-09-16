@@ -13,8 +13,8 @@ class TestTSOM2(unittest.TestCase):
         np.random.seed(seed)
 
         # prepare observed data
-        nb_samples1 = 5
-        nb_samples2 = 3
+        nb_samples1 = 10
+        nb_samples2 = 5
         observed_dim = 2
 
         X = np.random.normal(0, 1, (nb_samples1, nb_samples2, observed_dim))
@@ -22,7 +22,7 @@ class TestTSOM2(unittest.TestCase):
         # set learning parameter
         nb_epoch = 60
         latent_dim = [1, 2]
-        resolution = [20, 30]
+        resolution = [7, 9]
         sigma_max = [2.0, 2.2]
         sigma_min = [0.4, 0.2]
         tau = [50, 60]
