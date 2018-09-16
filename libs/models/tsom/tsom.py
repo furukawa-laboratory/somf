@@ -45,7 +45,7 @@ class TSOM2():
         # 時定数(TAU)の設定
         if type(TAU) is int:
             self.TAU1 = TAU
-            self.TAU1 = TAU
+            self.TAU2 = TAU
         elif isinstance(TAU, (list, tuple)):
             self.TAU1 = TAU[0]
             self.TAU2 = TAU[1]
