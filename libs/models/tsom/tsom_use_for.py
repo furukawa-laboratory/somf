@@ -44,7 +44,7 @@ class TSOM2UseFor():
         # 時定数(TAU)の設定
         if type(TAU) is int:
             self.TAU1 = TAU
-            self.TAU1 = TAU
+            self.TAU2 = TAU
         elif isinstance(TAU, (list, tuple)):
             self.TAU1 = TAU[0]
             self.TAU2 = TAU[1]
@@ -113,9 +113,9 @@ class TSOM2UseFor():
         self.history['sigma1'] = np.zeros(nb_epoch)
         self.history['sigma2'] = np.zeros(nb_epoch)
 
-        #勝者番号の初期化
-        k_star = np.random.randint(0, self.K1, self.N1)
-        l_star = np.random.randint(0, self.K2, self.N2)
+        # #勝者番号の初期化
+        # k_star = np.random.randint(0, self.K1, self.N1)
+        # l_star = np.random.randint(0, self.K2, self.N2)
 
 
 
