@@ -1,159 +1,279 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.spatial import distance
-from datasets.kura_tsom import load_kura_tsom
 from tqdm import tqdm
-import ComponentPlane as comp
-#from libs.datasets.artificial.kura import create_data
-#from libs.datasets.artificial.animal import load_data
-#from libs.visualization.som.animation_learning_process_3d import anime_learning_process_3d
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.animation as animation
-
-#データの生成
-I=10
-J=20
-X=load_kura_tsom(I,J)
-nodes1_kx=20
-nodes1_ky=1
-nodes1_num=nodes1_kx*nodes1_ky
-nodes2_kx=20
-nodes2_ky=1
-nodes2_num=nodes2_kx*nodes2_ky
-mode1_samples=X.shape[0]
-mode2_samples=X.shape[1]
-observed_dim=X.shape[2]
-tau1=50
-tau2=50
-sigma1_min=0.1
-sigma1_zero=1.0
-sigma2_min=0.1
-sigma2_zero=1.0
-epoch_num=250
-
-#モデルの初期化
-Y=np.random.rand(nodes1_num,nodes2_num,observed_dim)*2.0-1.0#参照ベクトルの初期化0~1 Y:K*D
-U=np.random.rand(mode1_samples,nodes2_num,observed_dim)*2.0-1.0
-V=np.random.rand(nodes1_num,mode2_samples,observed_dim)*2.0-1.0
-# '潜在空間の生成'
-mode1_x = np.linspace(-1, 1, nodes1_kx)
-mode1_y = np.linspace(-1, 1, nodes1_ky)
-mode2_x = np.linspace(-1, 1, nodes2_kx)
-mode2_y = np.linspace(-1, 1, nodes2_ky)
-mode1_Zeta1, mode1_Zeta2 = np.meshgrid(mode1_x, mode1_y)
-mode2_Zeta1, mode2_Zeta2 = np.meshgrid(mode2_x, mode2_y)
-Zeta1 = np.c_[mode1_Zeta2.ravel(), mode1_Zeta1.ravel()]
-Zeta2 = np.c_[mode2_Zeta2.ravel(), mode2_Zeta1.ravel()]
-Y_allepoch=np.zeros((epoch_num,nodes1_num,nodes2_num,observed_dim))
-#memo: 組ませるのであれば，アルゴリズムのイメージを持ってもらわないと厳しい?
-mode1_D=np.zeros((I,nodes1_num))
-mode2_D=np.zeros((J,nodes2_num))
-
-for epoch in np.arange(epoch_num):
-    print(epoch)
-    #競合過程を作る
-    #mode1の競合過程
-    for i in np.arange(I):
-        for k in np.arange(nodes1_num):
-            distance2=0
-            for l in np.arange(nodes2_num):
-                distance=0
-                for d in np.arange(observed_dim):
-                    distance+=(U[i][l][d]-Y[k][l][d])**2
-                distance2+=distance
-            mode1_D[i][k]=distance2
-
-    k_star=np.argmin(mode1_D,axis=1)
-
-    #mode2の競合過程
-    for j in np.arange(J):
-        for l in np.arange(nodes2_num):
-            distance2 = 0
-            for k in np.arange(nodes1_num):
-                distance=0
-                for d in np.arange(observed_dim):
-                    distance+=(V[k][j][d]-Y[k][l][d])**2
-                distance2+=distance
-            mode2_D[j][l]=distance2
-
-    l_star=np.argmin(mode2_D,axis=1)
-
-    #協調過程
-
-    h1=np.zeros((I,nodes1_num))
-    h2=np.zeros((J,nodes2_num))
-
-    #mode1の学習量の計算
-    sigmak= sigma1_min + (sigma1_zero - sigma1_min) * np.exp(-epoch / tau1)
-    for i in np.arange(I):
-        for k in np.arange(nodes1_num):
-            zeta_dis1=0
-            for latent_l in np.arange(Zeta1.shape[1]):
-                zeta_dis1+=(Zeta1[k_star[i]][latent_l]-Zeta1[k][latent_l])**2
-            h1[i][k]=np.exp(-0.5*(zeta_dis1*zeta_dis1)/sigmak**2)
+from libs.tools.create_zeta import create_zeta
 
 
-    #mode2の学習量の計算
-    sigmal = sigma2_min + (sigma2_zero - sigma2_min) * np.exp(-epoch / tau2)
-    for j in np.arange(J):
-        for l in np.arange(nodes2_num):
-            zeta_dis2=0
-            for latent_l in np.arange(Zeta2.shape[1]):
-                zeta_dis2+=(Zeta2[l_star[j]][latent_l]-Zeta2[l][latent_l])**2
-            h2[j][l]=np.exp(-0.5*(zeta_dis2*zeta_dis2)/sigmal**2)
+class TSOM2():
+    def __init__(self, X, latent_dim, resolution, SIGMA_MAX, SIGMA_MIN, TAU, init='random'):
 
-    #適応過程の計算
-    #gの計算
-    #mode1のgの計算
-    for k in np.arange(nodes1_num):
-        g1=0
-        for i in np.arange(I):
-            g1+=h1[i][k]
-        for i in np.arange(I):
-            h1[i][k] /=g1
+        # 入力データXについて
+        if X.ndim == 2:
+            self.X = X.reshape((X.shape[0], X.shape[1], 1))
+            self.N1 = self.X.shape[0]
+            self.N2 = self.X.shape[1]
+            self.observed_dim = self.X.shape[2]  # 観測空間の次元
 
-    #mode2のgの計算
-    for l in np.arange(nodes2_num):
-        g2=0
-        for j in np.arange(J):
-            g2+=h2[j][l]
-        for j in np.arange(J):
-            h2[j][l] /=g2
+        elif X.ndim == 3:
+            self.X = X
+            self.N1 = self.X.shape[0]
+            self.N2 = self.X.shape[1]
+            self.observed_dim = self.X.shape[2]  # 観測空間の次元
+        else:
+            raise ValueError("invalid X: {}\nX must be 2d or 3d ndarray".format(X))
 
-    #モデルの更新
-    #1次モデル
-    U = np.zeros((I,nodes2_num,observed_dim))
-    V = np.zeros((nodes1_num,J, observed_dim))
-    Y = np.zeros((nodes1_num, nodes2_num, observed_dim))
-    for i in np.arange(I):
-        for l in np.arange(nodes2_num):
-            for d in np.arange(observed_dim):
-                for j in np.arange(J):
-                    U[i][l][d]+=h2[j][l]*X[i][j][d]
+        # 最大近傍半径(SIGMAX)の設定
+        if type(SIGMA_MAX) is float:
+            self.SIGMA1_MAX = SIGMA_MAX
+            self.SIGMA2_MAX = SIGMA_MAX
+        elif isinstance(SIGMA_MAX, (list, tuple)):
+            self.SIGMA1_MAX = SIGMA_MAX[0]
+            self.SIGMA2_MAX = SIGMA_MAX[1]
+        else:
+            raise ValueError("invalid SIGMA_MAX: {}".format(SIGMA_MAX))
 
-    for k in np.arange(nodes1_num):
-        for j in np.arange(J):
-            for d in np.arange(observed_dim):
-                for i in np.arange(I):
-                    V[k][j][d]+=h1[i][k]*X[i][j][d]
+        # 最小近傍半径(SIGMA_MIN)の設定
+        if type(SIGMA_MIN) is float:
+            self.SIGMA1_MIN = SIGMA_MIN
+            self.SIGMA2_MIN = SIGMA_MIN
+        elif isinstance(SIGMA_MIN, (list, tuple)):
+            self.SIGMA1_MIN = SIGMA_MIN[0]
+            self.SIGMA2_MIN = SIGMA_MIN[1]
+        else:
+            raise ValueError("invalid SIGMA_MIN: {}".format(SIGMA_MIN))
 
-    #2次モデルの更新
-    for k in np.arange(nodes1_num):
-        for l in np.arange(nodes2_num):
-            for d in np.arange(observed_dim):
-                for i in np.arange(I):
-                    for j in np.arange(J):
-                        Y[k][l][d]+=h1[i][k]*h2[j][l]*X[i][j][d]
-    Y_allepoch[epoch,:,:]=Y
+        # 時定数(TAU)の設定
+        if type(TAU) is int:
+            self.TAU1 = TAU
+            self.TAU1 = TAU
+        elif isinstance(TAU, (list, tuple)):
+            self.TAU1 = TAU[0]
+            self.TAU2 = TAU[1]
+        else:
+            raise ValueError("invalid TAU: {}".format(TAU))
+
+        # resolutionの設定
+        if type(resolution) is int:
+            resolution1 = resolution
+            resolution2 = resolution
+        elif isinstance(resolution, (list, tuple)):
+            resolution1 = resolution[0]
+            resolution2 = resolution[1]
+        else:
+            raise ValueError("invalid resolution: {}".format(resolution))
+
+        # 潜在空間の設定
+        if type(latent_dim) is int:  # latent_dimがintであればどちらのモードも潜在空間の次元は同じ
+            self.latent_dim1 = latent_dim
+            self.latent_dim2 = latent_dim
+
+        elif isinstance(latent_dim, (list, tuple)):
+            self.latent_dim1 = latent_dim[0]
+            self.latent_dim2 = latent_dim[1]
+        else:
+            raise ValueError("invalid latent_dim: {}".format(latent_dim))
+            # latent_dimがlist,float,3次元以上はエラーかな?
+        self.Zeta1 = create_zeta(-1.0, 1.0, latent_dim=self.latent_dim1, resolution=resolution1, include_min_max=True)
+        self.Zeta2 = create_zeta(-1.0, 1.0, latent_dim=self.latent_dim2, resolution=resolution2, include_min_max=True)
+
+        # K1とK2は潜在空間の設定が終わった後がいいよね
+        self.K1 = self.Zeta1.shape[0]
+        self.K2 = self.Zeta2.shape[0]
+
+        # 勝者ノードの初期化
+        self.Z1 = None
+        self.Z2 = None
+        if isinstance(init, str) and init in 'random':
+            self.Z1 = np.random.rand(self.N1, self.latent_dim1) * 2.0 - 1.0
+            self.Z2 = np.random.rand(self.N2, self.latent_dim2) * 2.0 - 1.0
+        elif isinstance(init, (tuple, list)) and len(init) == 2:
+            if isinstance(init[0], np.ndarray) and init[0].shape == (self.N1, self.latent_dim1):
+                self.Z1 = init[0].copy()
+            else:
+                raise ValueError("invalid inits[0]: {}".format(init))
+            if isinstance(init[1], np.ndarray) and init[1].shape == (self.N2, self.latent_dim2):
+                self.Z2 = init[1].copy()
+            else:
+                raise ValueError("invalid inits[1]: {}".format(init))
+        else:
+            raise ValueError("invalid inits: {}".format(init))
+
+        self.history = {}
+
+    def fit(self, nb_epoch=200):
+        self.history['y'] = np.zeros((nb_epoch, self.K1, self.K2, self.observed_dim))
+        self.history['z1'] = np.zeros((nb_epoch, self.N1, self.latent_dim1))
+        self.history['z2'] = np.zeros((nb_epoch, self.N2, self.latent_dim2))
+        self.history['sigma1'] = np.zeros(nb_epoch)
+        self.history['sigma2'] = np.zeros(nb_epoch)
+
+        mode1_D=np.zeros((self.N1,self.K1))
+        mode2_D=np.zeros((self.N2,self.K2))
+
+        # 協調過程
+        h1 = np.zeros((self.N1, self.K1))
+        h2 = np.zeros((self.N2, self.K2))
+
+        # mode1の学習量の計算
+        sigma1 = self.SIGMA1_MIN + (self.SIGMA1_MAX - self.SIGMA1_MIN) * np.exp(-epoch / tau1)
+        for i in np.arange(self.N1):
+            for k in np.arange(self.K1):
+                zeta_dis1 = 0
+                for latent_l in np.arange(Zeta1.shape[1]):
+                    zeta_dis1 += (Zeta1[k_star[i]][latent_l] - Zeta1[k][latent_l]) ** 2
+                h1[i][k] = np.exp(-0.5 * (zeta_dis1 * zeta_dis1) / sigma1 ** 2)
+
+        # mode2の学習量の計算
+        sigma2 = self.SIGMA2_MIN + (self.SIGMA2_MAX - self.SIGMA2_MIN) * np.exp(-epoch / tau2)
+        for j in np.arange(self.N2):
+            for l in np.arange(self.K2):
+                zeta_dis2 = 0
+                for latent_l in np.arange(Zeta2.shape[1]):
+                    zeta_dis2 += (Zeta2[l_star[j]][latent_l] - Zeta2[l][latent_l]) ** 2
+                h2[j][l] = np.exp(-0.5 * (zeta_dis2 * zeta_dis2) / sigma2 ** 2)
+
+        # 適応過程の計算
+        # gの計算
+        # mode1のgの計算
+        for k in np.arange(self.K1):
+            g1 = 0
+            for i in np.arange(self.N1):
+                g1 += h1[i][k]
+            for i in np.arange(self.N1):
+                h1[i][k] /= g1
+
+        # mode2のgの計算
+        for l in np.arange(self.K2):
+            g2 = 0
+            for j in np.arange(self.N2):
+                g2 += h2[j][l]
+            for j in np.arange(self.N2):
+                h2[j][l] /= g2
+
+        # モデルの更新
+        # 1次モデル
+        U = np.zeros((self.N1, self.K2, self.observed_dim))
+        V = np.zeros((self.K1, self.N2, self.observed_dim))
+        Y = np.zeros((self.K1, self.K2, self.observed_dim))
+        for i in np.arange(self.N1):
+            for l in np.arange(self.K2):
+                for d in np.arange(self.observed_dim):
+                    for j in np.arange(self.N2):
+                        U[i][l][d] += h2[j][l] * X[i][j][d]
+
+        for k in np.arange(self.K1):
+            for j in np.arange(self.N2):
+                for d in np.arange(self.observed_dim):
+                    for i in np.arange(self.N1):
+                        V[k][j][d] += h1[i][k] * X[i][j][d]
+
+        # 2次モデルの更新
+        for k in np.arange(self.K1):
+            for l in np.arange(self.K2):
+                for d in np.arange(self.observed_dim):
+                    for i in np.arange(self.N1):
+                        for j in np.arange(self.N2):
+                            Y[k][l][d] += h1[i][k] * h2[j][l] * X[i][j][d]
 
 
-fig = plt.figure()
-ax = Axes3D(fig)
-def plot(i):
-    ax.cla()
-    ax.scatter(X[:,:, 0], X[:,:, 1], X[:,:, 2])
-    ax.plot_wireframe(Y_allepoch[i,:, :, 0], Y_allepoch[i,:, :, 1], Y_allepoch[i,:, :, 2])
-    plt.title(' t=' + str(i))
 
-ani = animation.FuncAnimation(fig, plot, frames=epoch_num,interval=10)
-plt.show()
+
+        for epoch in tqdm(np.arange(nb_epoch)):
+            # 競合過程を作る
+            # mode1の競合過程
+            for i in np.arange(self.N1):
+                for k in np.arange(self.K1):
+                    distance2 = 0
+                    for l in np.arange(self.K2):
+                        distance = 0
+                        for d in np.arange(self.observed_dim):
+                            distance += (U[i][l][d] - Y[k][l][d]) ** 2
+                        distance2 += distance
+                    mode1_D[i][k] = distance2
+
+            k_star = np.argmin(mode1_D, axis=1)
+
+            # mode2の競合過程
+            for j in np.arange(self.N2):
+                for l in np.arange(self.K2):
+                    distance2 = 0
+                    for k in np.arange(self.K1):
+                        distance = 0
+                        for d in np.arange(self.observed_dim):
+                            distance += (V[k][j][d] - Y[k][l][d]) ** 2
+                        distance2 += distance
+                    mode2_D[j][l] = distance2
+
+            l_star = np.argmin(mode2_D, axis=1)
+
+            # 協調過程
+
+            h1 = np.zeros((self.N1, self.K1))
+            h2 = np.zeros((self.N2, self.K2))
+
+            # mode1の学習量の計算
+            sigma1 = self.SIGMA1_MIN + (self.SIGMA1_MAX - self.SIGMA1_MIN) * np.exp(-epoch / tau1)
+            for i in np.arange(self.N1):
+                for k in np.arange(self.K1):
+                    zeta_dis1 = 0
+                    for latent_l in np.arange(Zeta1.shape[1]):
+                        zeta_dis1 += (Zeta1[k_star[i]][latent_l] - Zeta1[k][latent_l]) ** 2
+                    h1[i][k] = np.exp(-0.5 * (zeta_dis1 * zeta_dis1) / sigma1 ** 2)
+
+            # mode2の学習量の計算
+            sigma2 = self.SIGMA2_MIN + (self.SIGMA2_MAX - self.SIGMA2_MIN) * np.exp(-epoch / tau2)
+            for j in np.arange(self.N2):
+                for l in np.arange(self.K2):
+                    zeta_dis2 = 0
+                    for latent_l in np.arange(Zeta2.shape[1]):
+                        zeta_dis2 += (Zeta2[l_star[j]][latent_l] - Zeta2[l][latent_l]) ** 2
+                    h2[j][l] = np.exp(-0.5 * (zeta_dis2 * zeta_dis2) / sigma2 ** 2)
+
+            # 適応過程の計算
+            # gの計算
+            # mode1のgの計算
+            for k in np.arange(self.K1):
+                g1 = 0
+                for i in np.arange(self.N1):
+                    g1 += h1[i][k]
+                for i in np.arange(self.N1):
+                    h1[i][k] /= g1
+
+            # mode2のgの計算
+            for l in np.arange(self.K2):
+                g2 = 0
+                for j in np.arange(self.N2):
+                    g2 += h2[j][l]
+                for j in np.arange(self.N2):
+                    h2[j][l] /= g2
+
+            # モデルの更新
+            # 1次モデル
+            U = np.zeros((self.N1, self.K2, self.observed_dim))
+            V = np.zeros((self.K1, self.N2, self.observed_dim))
+            Y = np.zeros((self.K1, self.K2, self.observed_dim))
+            for i in np.arange(self.N1):
+                for l in np.arange(self.K2):
+                    for d in np.arange(self.observed_dim):
+                        for j in np.arange(self.N2):
+                            U[i][l][d] += h2[j][l] * X[i][j][d]
+
+            for k in np.arange(self.K1):
+                for j in np.arange(self.N2):
+                    for d in np.arange(self.observed_dim):
+                        for i in np.arange(self.N1):
+                            V[k][j][d] += h1[i][k] * X[i][j][d]
+
+            # 2次モデルの更新
+            for k in np.arange(self.K1):
+                for l in np.arange(self.K2):
+                    for d in np.arange(self.observed_dim):
+                        for i in np.arange(self.N1):
+                            for j in np.arange(self.N2):
+                                Y[k][l][d] += h1[i][k] * h2[j][l] * X[i][j][d]
+            Y_allepoch[epoch, :, :] = Y
+            self.history['y'][epoch, :, :] = self.Y
+            self.history['z1'][epoch, :] = self.Z1
+            self.history['z2'][epoch, :] = self.Z2
+            self.history['sigma1'][epoch] = sigma1
+            self.history['sigma2'][epoch] = sigma2
