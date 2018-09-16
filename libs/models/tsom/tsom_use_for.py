@@ -113,11 +113,6 @@ class TSOM2UseFor():
         self.history['sigma1'] = np.zeros(nb_epoch)
         self.history['sigma2'] = np.zeros(nb_epoch)
 
-        # #勝者番号の初期化
-        # k_star = np.random.randint(0, self.K1, self.N1)
-        # l_star = np.random.randint(0, self.K2, self.N2)
-
-
 
         for epoch in tqdm(np.arange(nb_epoch)):
             # 協調過程
@@ -132,7 +127,7 @@ class TSOM2UseFor():
                     zeta_dis1 = 0
                     for latent_l in np.arange(self.latent_dim1):
                         zeta_dis1 += (self.Z1[i][latent_l] - self.Zeta1[k][latent_l]) ** 2
-                    h1[i][k] = np.exp(-0.5 * (zeta_dis1 * zeta_dis1) / sigma1 ** 2)
+                    h1[i][k] = np.exp(-0.5 * zeta_dis1 / (sigma1 ** 2))
 
             # mode2の学習量の計算
             sigma2 = max(self.SIGMA2_MIN, self.SIGMA2_MAX * (1 - (epoch / self.TAU2)))
@@ -142,7 +137,7 @@ class TSOM2UseFor():
                     zeta_dis2 = 0
                     for latent_l2 in np.arange(self.latent_dim2):
                         zeta_dis2 += (self.Z2[j][latent_l2] - self.Zeta2[l][latent_l2]) ** 2
-                    h2[j][l] = np.exp(-0.5 * (zeta_dis2 * zeta_dis2) / sigma2 ** 2)
+                    h2[j][l] = np.exp(-0.5 * zeta_dis2 / (sigma2 ** 2))
 
             # 適応過程の計算
             # gの計算
