@@ -125,7 +125,8 @@ class TSOM2UseFor():
             h2 = np.zeros((self.N2, self.K2))
 
             # mode1の学習量の計算
-            sigma1 = self.SIGMA1_MIN + (self.SIGMA1_MAX - self.SIGMA1_MIN) * np.exp(-epoch / self.TAU1)
+            #sigma1 = self.SIGMA1_MIN + (self.SIGMA1_MAX - self.SIGMA1_MIN) * np.exp(-epoch / self.TAU1)
+            sigma1 = max(self.SIGMA1_MIN, self.SIGMA1_MAX * (1 - (epoch / self.TAU1)))
             for i in np.arange(self.N1):
                 for k in np.arange(self.K1):
                     zeta_dis1 = 0
@@ -134,7 +135,8 @@ class TSOM2UseFor():
                     h1[i][k] = np.exp(-0.5 * (zeta_dis1 * zeta_dis1) / sigma1 ** 2)
 
             # mode2の学習量の計算
-            sigma2 = self.SIGMA2_MIN + (self.SIGMA2_MAX - self.SIGMA2_MIN) * np.exp(-epoch / self.TAU2)
+            sigma2 = max(self.SIGMA2_MIN, self.SIGMA2_MAX * (1 - (epoch / self.TAU2)))
+            #sigma2 = self.SIGMA2_MIN + (self.SIGMA2_MAX - self.SIGMA2_MIN) * np.exp(-epoch / self.TAU2)
             for j in np.arange(self.N2):
                 for l in np.arange(self.K2):
                     zeta_dis2 = 0
