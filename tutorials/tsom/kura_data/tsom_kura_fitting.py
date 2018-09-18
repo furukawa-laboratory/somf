@@ -1,8 +1,6 @@
-import numpy as np
 import matplotlib.pyplot as plt
 from libs.datasets.artificial.kura_tsom import load_kura_tsom
-from libs.models.tsom.tsom import TSOM2
-from tqdm import tqdm
+from libs.models.tsom import TSOM2
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation as animation
 
