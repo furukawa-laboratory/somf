@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 sys.path.append('../../')
-from libs.models.som.som import SOM
+from libs.models.som import SOM
 from libs.visualization.som.animation_learning_process_3d import anime_learning_process_3d
 from libs.datasets.artificial.kura import create_data
 if __name__ == '__main__':

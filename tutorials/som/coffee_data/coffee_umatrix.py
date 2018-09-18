@@ -1,10 +1,9 @@
 import numpy as np
-from tqdm import tqdm
 
 import sys
 sys.path.append('../../')
 
-from libs.models.som.som import SOM
+from libs.models.som import SOM
 from libs.visualization.som.Umatrix import SOM_Umatrix
 from libs.datasets.artificial import coffee
 
