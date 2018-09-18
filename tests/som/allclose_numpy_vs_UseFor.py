@@ -2,8 +2,8 @@ import unittest
 
 import numpy as np
 
-from libs.models.som.som import SOM
-from libs.models.som.som_use_for import SOMUseFor
+from libs.models.som import SOM
+from libs.models.som_use_for import SOMUseFor
 
 
 class TestSOM(unittest.TestCase):
