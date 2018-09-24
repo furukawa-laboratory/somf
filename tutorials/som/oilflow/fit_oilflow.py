@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from libs.models.som.som import SOM
+from libs.models.som import SOM
 from libs.datasets.real import oilflow
 
 

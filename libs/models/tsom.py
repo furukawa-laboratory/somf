@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial import distance
 from tqdm import tqdm
-from libs.tools.create_zeta import create_zeta
+from ..tools.create_zeta import create_zeta
 
 
 class TSOM2():

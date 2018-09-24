@@ -1,10 +1,9 @@
 import numpy as np
-from tqdm import tqdm
 
 import sys
 sys.path.append('../../')
 
-from libs.models.som.som import SOM
+from libs.models.som import SOM
 from libs.datasets.artificial import animal
 from libs.visualization.som.animation_learning_process_3d import anime_learning_process_3d
 

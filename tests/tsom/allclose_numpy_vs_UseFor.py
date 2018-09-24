@@ -2,8 +2,8 @@ import unittest
 
 import numpy as np
 
-from libs.models.tsom.tsom import TSOM2
-from libs.models.tsom.tsom_use_for import TSOM2UseFor
+from libs.models.tsom import TSOM2
+from libs.models.tsom_use_for import TSOM2UseFor
 
 
 class TestTSOM2(unittest.TestCase):
