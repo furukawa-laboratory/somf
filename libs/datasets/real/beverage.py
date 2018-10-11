@@ -2,24 +2,28 @@ import numpy as np
 import os
 
 
-def load_data():
+def load_data(ret_beverage_label=True,ret_situation_label=False):
     dir_name='beverage_data'
     file_name='mixiDrinkData2_Filter123.txt'
     dir_path=os.path.join(os.path.dirname(__file__),dir_name)#beverage_dataまでのpath
     #path to mixiDrinkData2_Filter123.txt
     file_path=os.path.join(dir_path,file_name)
 
-    file_name1='beverage_label.txt'
-    file_name2='situation_label.txt'
+    temp_data = np.loadtxt(file_path)
+    x = temp_data.reshape((604, 14, 11))  # reshapeして正しく(回答者,飲料,状況)に形になっているかは未確認
 
-    label_path1=os.path.join(dir_path,file_name1)
-    label_path2=os.path.join(dir_path,file_name2)
-    print(label_path2)
+    return_objects=[x]
 
-    temp_data=np.loadtxt(file_path)
-    x=temp_data.reshape((604,14,11))#reshapeして正しく(回答者,飲料,状況)に形になっているかは未確認
+    if ret_beverage_label:
+        label_name='beverage_label.txt'
+        label_path = os.path.join(dir_path, label_name)
+        beverage_label = np.loadtxt(label_path, dtype='str', delimiter=',')
+        return_objects.append(beverage_label)
 
-    beverage_label=np.loadtxt(label_path1,dtype='str',delimiter=',')
-    situation_label=np.loadtxt(label_path2,dtype='str',delimiter=',')
+    if ret_situation_label:
+        label_name='situation_label.txt'
+        label_path = os.path.join(dir_path, label_name)
+        situation_label = np.loadtxt(label_path, dtype='str', delimiter=',')
+        return_objects.append(situation_label)
 
-    return x,beverage_label,situation_label
+    return return_objects
