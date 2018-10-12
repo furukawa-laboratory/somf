@@ -4,7 +4,7 @@ import scipy.spatial.distance as dist
 from sklearn.preprocessing import StandardScaler
 
 class TSOM2_Umatrix:
-    def __init__(self, z1=None,z2=None, x=None, sigma1=0.2,sigma2=0.2, resolution=100, labels1=None,labels2=None, fig_size=[8,8], cmap_type='jet'):
+    def __init__(self, z1=None,z2=None, x=None, sigma1=0.2,sigma2=0.2, resolution=100, labels1=None,labels2=None, fig_size=[4,4], cmap_type='jet'):
         # set input
         self.X = x
         I = self.X.shape[0]
@@ -25,11 +25,11 @@ class TSOM2_Umatrix:
 
         # self.Fig1=plt.subplot(1,2,1,figsize=(fig_size[0], fig_size[1]))
         # self.Fig2 = plt.subplot(1, 2, 2, figsize=(fig_size[0], fig_size[1]))
-        self.Fig1 = plt.figure(figsize=(10, 5))#figsizeで全体のfigの大きさを調整
+        self.Fig1 = plt.figure(figsize=(fig_size[0], fig_size[1]))#figsizeで全体のfigの大きさを調整
         self.Fig1.subplots_adjust(wspace=0.4, hspace=0.2)
         #self.Fig2 = plt.figure(figsize=(fig_size[0], fig_size[1]))
         self.Map1 = self.Fig1.add_subplot(1, 2, 1)
-        plt.tick_params(labelbottom=0, bottom=1)  # subplot(1,2,1)のx軸の削除 0 or 1でないとwarning
+        plt.tick_params(labelbottom=0, bottom=0)  # subplot(1,2,1)のx軸の削除 0 or 1でないとwarning
         plt.tick_params(labelleft=0, left=0)  # subplot(1,2,3)のy軸の削除 0 or 1でないとwarning
         self.Map2 = self.Fig1.add_subplot(1, 2, 2)
         plt.tick_params(labelbottom=0, bottom=0)  # subplot(1,2,1)のx軸の削除 0 or 1でないとwarning
@@ -60,13 +60,13 @@ class TSOM2_Umatrix:
         self.Map1.set_title("U-matrix_mode1")
         self.Map1.imshow(U_matrix_val, interpolation='spline36',
                       extent=[self.Zeta1[:, 0].min(), self.Zeta1[:, 0].max(),
-                              self.Zeta1[:, 1].max(), self.Zeta1[:, 1].min()],
+                              self.Zeta1[:, 1].max(), self.Zeta1[:, 1].min()],#U-matrix自体の大きさはextentで可能
                    cmap=self.Cmap_type, vmax=0.5, vmin=-0.5)
 
         self.Map2.set_title("U-matrix_mode2")
         self.Map2.imshow(U_matrix_val2, interpolation='spline36',
                          extent=[self.Zeta2[:, 0].min(), self.Zeta2[:, 0].max(),
-                                 self.Zeta2[:, 1].max(), self.Zeta2[:, 1].min()],
+                                 self.Zeta2[:, 1].max(), self.Zeta2[:, 1].min()],#U-matrix自体の大きさはextentで可能
                          cmap=self.Cmap_type, vmax=0.5, vmin=-0.5)
         # ラベルの表示
         self.Map1.scatter(x=self.Z1[:, 0], y=self.Z1[:, 1], c='k')

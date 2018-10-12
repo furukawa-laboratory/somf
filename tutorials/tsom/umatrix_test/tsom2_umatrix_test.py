@@ -16,5 +16,5 @@ z1=tsom2.history['z1'][epoch_num-1,:,:]
 z2=tsom2.history['z2'][epoch_num-1,:,:]
 y=tsom2.history['y'][epoch_num-1,:,:,:]
 
-umat=TSOM2_Umatrix(z1=z1,z2=z2, x=X, sigma1=0.2,sigma2=0.2, resolution=10, labels1=animal_label,labels2=None, fig_size=[8,8], cmap_type='jet')
+umat=TSOM2_Umatrix(z1=z1,z2=z2, x=X, sigma1=0.2,sigma2=0.2, resolution=10, labels1=animal_label,labels2=None, fig_size=[8,6], cmap_type='jet')
 umat.draw_umatrix()
