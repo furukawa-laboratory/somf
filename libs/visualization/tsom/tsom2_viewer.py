@@ -46,7 +46,7 @@ class TSOM2_Viewer:
         self.Map2_position = np.c_[map2x_pos.ravel(), map2y_pos.ravel()]  # マップ上の座標
         #add machida///////////////////
         self.label3 = label3
-        self.Map3_position = -np.arange(self.Dim)
+        #self.Map3_position = -np.arange(self.Dim)
         #//////////////////////////////
 
         # コンポーネントプレーン
@@ -54,17 +54,21 @@ class TSOM2_Viewer:
         self.__calc_component(2)
         self.click_map = 0
 
+
         # ----------描画用---------- #
         self.Mapsize = np.sqrt(y.shape[0])
         if fig_size is None:
             self.Fig = plt.figure(figsize=(15, 6))
         else:
             self.Fig = plt.figure(figsize=fig_size)
-        plt.subplots_adjust(right=0.8)#add machida
-        rax = plt.axes([0.85, 0.2, 0.1, 0.5], facecolor='lightgoldenrodyellow')
-        self.Map1 = self.Fig.add_subplot(1, 3, 1)
-        self.Map2 = self.Fig.add_subplot(1, 3, 2)
+        plt.subplots_adjust(right=0.7)#add machida
+        self.Map1 = self.Fig.add_subplot(1, 2, 1)
+        self.Map1.set_title('View 1')
+        self.Map2 = self.Fig.add_subplot(1, 2, 2)
+        self.Map2.set_title('View 2')
+        rax = plt.axes([0.7, 0.25, 0.1, 0.5], facecolor='lightgoldenrodyellow')
         self.radio = RadioButtons(rax, (np.arange(self.Dim)))#add machida
+        self.count_click=None
         # self.Fig.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95)
 
         # 枠線と目盛りの消去
@@ -89,6 +93,18 @@ class TSOM2_Viewer:
         self.noise_map1 = (np.random.rand(self.Winner1.shape[0], 2) - 0.5)
         self.noise_map2 = (np.random.rand(self.Winner2.shape[0], 2) - 0.5)
 
+    def hzfunc(self, label):
+        if self.count_click==int(label):
+            return
+        else:
+            self.count_click=int(label)
+            self.Map3_click_unit = int(label)
+            self.__calc_component(1)
+            self.__calc_component(2)
+            self.__draw_map1()
+            self.__draw_map2()
+            # self.__draw_map3()
+            self.__draw_click_point()
     # ------------------------------ #
     # --- イベント時の処理 ----------- #
     # ------------------------------ #
@@ -114,23 +130,22 @@ class TSOM2_Viewer:
                 self.__calc_component(1)
                 self.click_map = 2
 
-            #add machida///////////////////////////
-            elif event.inaxes == self.Map3.axes:
-                # 右のマップをクリックした時
-                self.Map3_click_unit = -int(click_pos[0, 1])
-                # コンポーネント値計算
-                self.__calc_component(1)
-                self.__calc_component(2)
-                self.click_map = 3
-            #//////////////////////////////////////
+            # #add machida///////////////////////////
+            # elif event.inaxes == self.Map3.axes:
+            #     # 右のマップをクリックした時
+            #     self.Map3_click_unit = -int(click_pos[0, 1])
+            #     # コンポーネント値計算
+            #     self.__calc_component(1)
+            #     self.__calc_component(2)
+            #     self.click_map = 3
+            # #//////////////////////////////////////
 
             else:
                 return
-
             # コンポーネントプレーン表示
             self.__draw_map1()
             self.__draw_map2()
-            self.__draw_map3()
+            #self.__draw_map3()
             self.__draw_click_point()
 
     # マウスオーバー時(in)の処理
@@ -158,21 +173,20 @@ class TSOM2_Viewer:
     def __mouse_leave_fig(self, event):
         self.__draw_map1()
         self.__draw_map2()
-        self.__draw_map3()
+        self.radio.on_clicked(self.hzfunc)
+        #self.__draw_map3()
         self.__draw_click_point()
 
     # ------------------------------ #
     # --- 描画 ---------------------- #
     # ------------------------------ #
-    def hzfunc(label):
-        self.Map3_click_unit = int(label)
-        l.set_ydata(ydata)
-        plt.draw()
+
+
     def draw_map(self):
         # コンポーネントの初期表示(左下が0番目のユニットが来るように行列を上下反転している)
         self.__draw_map1()
         self.__draw_map2()
-        self.radio.on_clicked(hzfunc)
+        self.radio.on_clicked(self.hzfunc)
         #self.__draw_map3()
         self.__draw_click_point()
 
@@ -213,11 +227,11 @@ class TSOM2_Viewer:
                            marker='.', color="white", ms=15, markeredgecolor='black', markeredgewidth=1)
         self.Fig.show()
 
-    def __draw_label_map3(self):
-        for i in range(self.Dim):
-            self.Map3.text(self.Map3_position[i]*0,self.Map3_position[i], i, ha='center', va='bottom', color='black')
-            self.Map3.plot(self.Map3_position[i]*0,self.Map3_position[i],marker='.', color="white", ms=15, markeredgecolor='black', markeredgewidth=1)
-        self.Fig.show()
+    # def __draw_label_map3(self):
+    #     for i in range(self.Dim):
+    #         self.Map3.text(self.Map3_position[i]*0,self.Map3_position[i], i, ha='center', va='bottom', color='black')
+    #         self.Map3.plot(self.Map3_position[i]*0,self.Map3_position[i],marker='.', color="white", ms=15, markeredgecolor='black', markeredgewidth=1)
+    #     self.Fig.show()
 
     # ------------------------------ #
     # --- ラベルの描画(マウスオーバ時) - #
@@ -284,8 +298,8 @@ class TSOM2_Viewer:
                        ".", color="black", ms=30, fillstyle="none")
         self.Map2.plot(self.Map2_position[self.Map2_click_unit, 0], self.Map2_position[self.Map2_click_unit, 1],
                        ".", color="black", ms=30, fillstyle="none")
-        self.Map3.plot(self.Map3_position[self.Map3_click_unit]*0, self.Map3_position[self.Map3_click_unit],
-                       ".", color="blue", ms=30, fillstyle="none")
+        # self.Map3.plot(self.Map3_position[self.Map3_click_unit]*0, self.Map3_position[self.Map3_click_unit],
+        #                ".", color="blue", ms=30, fillstyle="none")
 
         self.Fig.show()
 
@@ -294,6 +308,7 @@ class TSOM2_Viewer:
     # ------------------------------ #
     def __draw_map1(self):
         self.Map1.cla()
+        self.Map1.set_title('View 1')
         # self.Map1.set_xlabel("Wine Map")
         self.__draw_label_map1()
         self.Map1.imshow(self.Map1_val[::], interpolation='spline36',
@@ -304,6 +319,7 @@ class TSOM2_Viewer:
 
     def __draw_map2(self):
         self.Map2.cla()
+        self.Map2.set_title('View 2')
         # self.Map2.set_xlabel("Aroma Map")
         self.Map2.xaxis.set_label_coords(0.5, -0.1)
         self.__draw_label_map2()
@@ -313,10 +329,10 @@ class TSOM2_Viewer:
         self.Map2.set_ylim(-self.Mapsize, 1)
         self.Fig.show()
 
-    def __draw_map3(self):
-        self.Map3.cla()
-        self.__draw_label_map3()
-        self.Fig.show()
+    # def __draw_map3(self):
+    #     self.Map3.cla()
+    #     self.__draw_label_map3()
+    #     self.Fig.show()
 
 
     # ------------------------------ #
