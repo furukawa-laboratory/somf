@@ -25,15 +25,23 @@ class TSOM2_Umatrix:
 
         # self.Fig1=plt.subplot(1,2,1,figsize=(fig_size[0], fig_size[1]))
         # self.Fig2 = plt.subplot(1, 2, 2, figsize=(fig_size[0], fig_size[1]))
-        self.Fig1 = plt.figure(figsize=(fig_size[0], fig_size[1]))#figsizeで全体のfigの大きさを調整
+        self.Fig1 = plt.figure(figsize=(fig_size[0], fig_size[1]))#figsizeで全体のfigの大きさを調整[15,6]が一番綺麗
         self.Fig1.subplots_adjust(wspace=0.4, hspace=0.2)
         #self.Fig2 = plt.figure(figsize=(fig_size[0], fig_size[1]))
         self.Map1 = self.Fig1.add_subplot(1, 2, 1)
+        self.Map1.spines["right"].set_color("none")#枠線を消す
+        self.Map1.spines["left"].set_color("none")#枠線を消す
+        self.Map1.spines["top"].set_color("none")#枠線を消す
+        self.Map1.spines["bottom"].set_color("none")#枠線を消す
         plt.tick_params(labelbottom=0, bottom=0)  # subplot(1,2,1)のx軸の削除 0 or 1でないとwarning
         plt.tick_params(labelleft=0, left=0)  # subplot(1,2,3)のy軸の削除 0 or 1でないとwarning
         self.Map2 = self.Fig1.add_subplot(1, 2, 2)
         plt.tick_params(labelbottom=0, bottom=0)  # subplot(1,2,1)のx軸の削除 0 or 1でないとwarning
         plt.tick_params(labelleft=0, left=0)  # subplot(1,2,3)のy軸の削除 0 or 1でないとwarning
+        self.Map2.spines["right"].set_color("none")#枠線を消す
+        self.Map2.spines["left"].set_color("none")#枠線を消す
+        self.Map2.spines["top"].set_color("none")#枠線を消す
+        self.Map2.spines["bottom"].set_color("none")#枠線を消す
         self.Cmap_type = cmap_type
         self.labels1 = labels1
         self.labels2 = labels2
