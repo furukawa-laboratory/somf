@@ -7,7 +7,7 @@ import scipy.spatial.distance as dist
 np.random.seed(2)
 
 class TSOM2_Viewer:
-    def __init__(self, x, y, winner1, winner2, fig_size=None, label1=None, label2=None):
+    def __init__(self, x, y, winner1, winner2, fig_size=None, label1=None, label2=None, label3=None):
         # ---------- 参照テンソルとデータ ---------- #
         self.Mode1_Num = y.shape[0]
         self.Mode2_Num = y.shape[1]
@@ -29,8 +29,10 @@ class TSOM2_Viewer:
         # ----------コンポーネントプレーン用---------- #
         self.Map1_click_unit = 0  # Map0のクリック位置
         self.Map2_click_unit = 0  # Map1のクリック位置
+        self.Map3_click_unit = 0  # add machida Map3のクリック位置
         self.map1x_num = int(np.sqrt(self.Mode1_Num))  # マップの1辺を算出（正方形が前提）
         self.map2x_num = int(np.sqrt(self.Mode2_Num))  # マップの1辺を算出（正方形が前提）
+
 
         # マップ上の座標
         map1x = np.arange(self.map1x_num)
@@ -41,6 +43,10 @@ class TSOM2_Viewer:
         map2y = -np.arange(self.map2x_num)
         map2x_pos, map2y_pos = np.meshgrid(map2x, map2y)
         self.Map2_position = np.c_[map2x_pos.ravel(), map2y_pos.ravel()]  # マップ上の座標
+        #add machida///////////////////
+        self.label3 = label3
+        self.Map3_position = -np.arange(self.Dim)
+        #//////////////////////////////
 
         # コンポーネントプレーン
         self.__calc_component(1)
@@ -50,11 +56,12 @@ class TSOM2_Viewer:
         # ----------描画用---------- #
         self.Mapsize = np.sqrt(y.shape[0])
         if fig_size is None:
-            self.Fig = plt.figure(figsize=(12, 6))
+            self.Fig = plt.figure(figsize=(15, 6))
         else:
             self.Fig = plt.figure(figsize=fig_size)
-        self.Map1 = self.Fig.add_subplot(1, 2, 1)
-        self.Map2 = self.Fig.add_subplot(1, 2, 2)
+        self.Map1 = self.Fig.add_subplot(1, 3, 1)
+        self.Map2 = self.Fig.add_subplot(1, 3, 2)
+        self.Map3 = self.Fig.add_subplot(1, 3, 3)#add machida
         # self.Fig.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95)
 
         # 枠線と目盛りの消去
@@ -104,12 +111,23 @@ class TSOM2_Viewer:
                 self.__calc_component(1)
                 self.click_map = 2
 
+            #add machida///////////////////////////
+            elif event.inaxes == self.Map3.axes:
+                # 右のマップをクリックした時
+                self.Map3_click_unit = -int(click_pos[0, 1])
+                # コンポーネント値計算
+                self.__calc_component(1)
+                self.__calc_component(2)
+                self.click_map = 3
+            #//////////////////////////////////////
+
             else:
                 return
 
             # コンポーネントプレーン表示
             self.__draw_map1()
             self.__draw_map2()
+            self.__draw_map3()
             self.__draw_click_point()
 
     # マウスオーバー時(in)の処理
@@ -129,7 +147,7 @@ class TSOM2_Viewer:
                 # 右のマップのマウスオーバー処理
                 mouse_over_unit = self.__calc_arg_min_unit(self.Map2_position, click_pos)
                 self.__draw_mouse_over_label_map2(mouse_over_unit)
-
+            
             self.__draw_click_point()
             self.Fig.show()
 
@@ -137,6 +155,7 @@ class TSOM2_Viewer:
     def __mouse_leave_fig(self, event):
         self.__draw_map1()
         self.__draw_map2()
+        self.__draw_map3()
         self.__draw_click_point()
 
     # ------------------------------ #
@@ -146,6 +165,7 @@ class TSOM2_Viewer:
         # コンポーネントの初期表示(左下が0番目のユニットが来るように行列を上下反転している)
         self.__draw_map1()
         self.__draw_map2()
+        self.__draw_map3()
         self.__draw_click_point()
 
         # クリックイベント
@@ -183,6 +203,12 @@ class TSOM2_Viewer:
             self.Map2.plot(self.Map2_position[self.Winner2[i], 0] + epsilon * self.noise_map2[i, 0],
                            self.Map2_position[self.Winner2[i], 1] + epsilon * self.noise_map2[i, 1],
                            marker='.', color="white", ms=15, markeredgecolor='black', markeredgewidth=1)
+        self.Fig.show()
+
+    def __draw_label_map3(self):
+        for i in range(self.Dim):
+            self.Map3.text(self.Map3_position[i]*0,self.Map3_position[i], i, ha='center', va='bottom', color='black')
+            self.Map3.plot(self.Map3_position[i]*0,self.Map3_position[i],marker='.', color="white", ms=15, markeredgecolor='black', markeredgewidth=1)
         self.Fig.show()
 
     # ------------------------------ #
@@ -237,12 +263,22 @@ class TSOM2_Viewer:
     # --- クリック位置の描画 ---------- #
     # ------------------------------ #
     def __draw_click_point(self):
-        if self.click_map == 1:
-            self.Map1.plot(self.Map1_position[self.Map1_click_unit, 0], self.Map1_position[self.Map1_click_unit, 1],
-                           ".", color="black", ms=30, fillstyle="none")
-        elif self.click_map == 2:
-            self.Map2.plot(self.Map2_position[self.Map2_click_unit, 0], self.Map2_position[self.Map2_click_unit, 1],
-                           ".", color="black", ms=30, fillstyle="none")
+        # if self.click_map == 1:
+        #     self.Map1.plot(self.Map1_position[self.Map1_click_unit, 0], self.Map1_position[self.Map1_click_unit, 1],
+        #                    ".", color="black", ms=30, fillstyle="none")
+        # elif self.click_map == 2:
+        #     self.Map2.plot(self.Map2_position[self.Map2_click_unit, 0], self.Map2_position[self.Map2_click_unit, 1],
+        #                    ".", color="black", ms=30, fillstyle="none")
+        # elif self.click_map == 3:
+        #     self.Map3.plot(self.Map3_position[self.Map3_click_unit]*0, self.Map3_position[self.Map3_click_unit],
+        #                    ".", color="blue", ms=30, fillstyle="none")
+        self.Map1.plot(self.Map1_position[self.Map1_click_unit, 0], self.Map1_position[self.Map1_click_unit, 1],
+                       ".", color="black", ms=30, fillstyle="none")
+        self.Map2.plot(self.Map2_position[self.Map2_click_unit, 0], self.Map2_position[self.Map2_click_unit, 1],
+                       ".", color="black", ms=30, fillstyle="none")
+        self.Map3.plot(self.Map3_position[self.Map3_click_unit]*0, self.Map3_position[self.Map3_click_unit],
+                       ".", color="blue", ms=30, fillstyle="none")
+
         self.Fig.show()
 
     # ------------------------------ #
@@ -269,16 +305,23 @@ class TSOM2_Viewer:
         self.Map2.set_ylim(-self.Mapsize, 1)
         self.Fig.show()
 
+    def __draw_map3(self):
+        self.Map3.cla()
+        self.__draw_label_map3()
+        self.Fig.show()
+
+
     # ------------------------------ #
     # --- コンポーネント値の算出 ------ #
     # ------------------------------ #
     def __calc_component(self, map_num):
+        print(self.Map3_click_unit)
         if map_num == 1:
-            temp1 = self.Y[:, self.Map2_click_unit, :]
-            self.Map1_val = np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
+            temp1 = self.Y[:, self.Map2_click_unit, self.Map3_click_unit]
+            self.Map1_val = temp1.reshape((self.map1x_num,self.map1x_num))#np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
         else:
-            temp2 = self.Y[self.Map1_click_unit, :, :]
-            self.Map2_val = np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
+            temp2 = self.Y[self.Map1_click_unit, :, self.Map3_click_unit]
+            self.Map2_val = temp2.reshape((self.map2x_num,self.map2x_num))#np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
 
     # ------------------------------ #
     # --- 最近傍ユニット算出 ---------- #
