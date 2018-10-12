@@ -22,10 +22,18 @@ class TSOM2_Umatrix:
         self.L = self.Z1.shape[1]
 
         # 描画キャンバスの設定
-        self.Fig1 = plt.figure(figsize=(fig_size[0], fig_size[1]))
-        self.Fig2 = plt.figure(figsize=(fig_size[0], fig_size[1]))
-        self.Map1 = self.Fig1.add_subplot(1, 1, 1)
-        self.Map2 = self.Fig2.add_subplot(1, 1, 1)
+
+        # self.Fig1=plt.subplot(1,2,1,figsize=(fig_size[0], fig_size[1]))
+        # self.Fig2 = plt.subplot(1, 2, 2, figsize=(fig_size[0], fig_size[1]))
+        self.Fig1 = plt.figure(figsize=(10, 5))#figsizeで全体のfigの大きさを調整
+        self.Fig1.subplots_adjust(wspace=0.4, hspace=0.2)
+        #self.Fig2 = plt.figure(figsize=(fig_size[0], fig_size[1]))
+        self.Map1 = self.Fig1.add_subplot(1, 2, 1)
+        plt.tick_params(labelbottom=0, bottom=1)  # subplot(1,2,1)のx軸の削除 0 or 1でないとwarning
+        plt.tick_params(labelleft=0, left=0)  # subplot(1,2,3)のy軸の削除 0 or 1でないとwarning
+        self.Map2 = self.Fig1.add_subplot(1, 2, 2)
+        plt.tick_params(labelbottom=0, bottom=0)  # subplot(1,2,1)のx軸の削除 0 or 1でないとwarning
+        plt.tick_params(labelleft=0, left=0)  # subplot(1,2,3)のy軸の削除 0 or 1でないとwarning
         self.Cmap_type = cmap_type
         self.labels1 = labels1
         self.labels2 = labels2
@@ -49,13 +57,13 @@ class TSOM2_Umatrix:
         U_matrix_val2 = dY2_std.reshape((self.Resolution, self.Resolution))
 
         # U-matrix表示
-        self.Map1.set_title("U-matrix")
+        self.Map1.set_title("U-matrix_mode1")
         self.Map1.imshow(U_matrix_val, interpolation='spline36',
                       extent=[self.Zeta1[:, 0].min(), self.Zeta1[:, 0].max(),
                               self.Zeta1[:, 1].max(), self.Zeta1[:, 1].min()],
                    cmap=self.Cmap_type, vmax=0.5, vmin=-0.5)
 
-        self.Map2.set_title("U-matrix2")
+        self.Map2.set_title("U-matrix_mode2")
         self.Map2.imshow(U_matrix_val2, interpolation='spline36',
                          extent=[self.Zeta2[:, 0].min(), self.Zeta2[:, 0].max(),
                                  self.Zeta2[:, 1].max(), self.Zeta2[:, 1].min()],
