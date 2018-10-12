@@ -1,8 +1,7 @@
 import numpy as np
 from scipy.spatial import distance
 from tqdm import tqdm
-from ..tools.create_zeta import create_zeta
-
+from libs.tools.create_zeta import create_zeta
 
 class TSOM2():
     def __init__(self, X, latent_dim, resolution, SIGMA_MAX, SIGMA_MIN, TAU, init='random'):
@@ -127,13 +126,25 @@ class TSOM2():
             self.V = np.einsum('ki,ijd->kjd', R1, self.X)
             self.Y = np.einsum('ki,lj,ijd->kld', R1, R2, self.X)
             # 勝者決定
-            k_star1 = np.argmin(np.sum(np.square(self.U[:, None, :, :] - self.Y[None, :, :, :]), axis=(2, 3)), axis=1)
-            k_star2 = np.argmin(np.sum(np.square(self.V[:, :, None, :] - self.Y[:, None, :, :]), axis=(0, 3)), axis=1)
-            self.Z1 = self.Zeta1[k_star1, :]  # k_starのZの座標N*L(L=2
-            self.Z2 = self.Zeta2[k_star2, :]  # k_starのZの座標N*L(L=2
+            self.k_star1 = np.argmin(np.sum(np.square(self.U[:, None, :, :] - self.Y[None, :, :, :]), axis=(2, 3)), axis=1)
+            self.k_star2 = np.argmin(np.sum(np.square(self.V[:, :, None, :] - self.Y[:, None, :, :]), axis=(0, 3)), axis=1)
+            self.Z1 = self.Zeta1[self.k_star1, :]  # k_starのZの座標N*L(L=2
+            self.Z2 = self.Zeta2[self.k_star2, :]  # k_starのZの座標N*L(L=2
 
             self.history['y'][epoch, :, :] = self.Y
             self.history['z1'][epoch, :] = self.Z1
             self.history['z2'][epoch, :] = self.Z2
             self.history['sigma1'][epoch] = sigma1
             self.history['sigma2'][epoch] = sigma2
+
+if __name__ == '__main__':
+    from libs.datasets.real.beverage import load_data
+    from libs.visualization.tsom.tsom2_viewer import TSOM2_Viewer as TSOM2_V
+    objects=load_data()
+    print(len(objects))
+    X=objects[0]
+    tsom = TSOM2(X,latent_dim=2,resolution=10,SIGMA_MAX=2.0,SIGMA_MIN=0.2,TAU=50)
+    tsom.fit(nb_epoch=10)
+    print(tsom.X.shape,tsom.Y.shape)
+    comp=TSOM2_V(x=tsom.X,y=tsom.Y,winner1=tsom.k_star1,winner2=tsom.k_star2)
+    comp.draw_map()
