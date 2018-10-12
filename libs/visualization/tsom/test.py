@@ -9,24 +9,18 @@ s2 = np.sin(8*np.pi*t)
 
 fig, ax = plt.subplots()
 l, = ax.plot(t, s0, lw=2, color='red')
-plt.subplots_adjust(left=0.3)
+plt.subplots_adjust(right=0.8)
 
-axcolor = 'lightgoldenrodyellow'
-rax = plt.axes([0.05, 0.7, 0.15, 0.15], facecolor=axcolor)
+rax = plt.axes([0.8, 0.2, 0.1, 0.5], facecolor='lightgoldenrodyellow')
 #label_box=['aa','bb','cc','dd']
-label_box=np.arange(4)
+label_box=np.arange(20)
 radio = RadioButtons(rax, (label_box))
 
 A=[s0,s1,s2]
 def hzfunc(label):
-    hzdict = {str(label_box):A}
-    ydata = hzdict[label]
+    ydata = A[int(label)]
     l.set_ydata(ydata)
     plt.draw()
+
 radio.on_clicked(hzfunc)
-
-def stylefunc(label):
-    l.set_linestyle(label)
-    plt.draw()
-
 plt.show()

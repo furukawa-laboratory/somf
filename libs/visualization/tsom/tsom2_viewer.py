@@ -3,6 +3,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import scipy.spatial.distance as dist
+from matplotlib.widgets import RadioButtons
 
 np.random.seed(2)
 
@@ -59,9 +60,11 @@ class TSOM2_Viewer:
             self.Fig = plt.figure(figsize=(15, 6))
         else:
             self.Fig = plt.figure(figsize=fig_size)
+        plt.subplots_adjust(right=0.8)#add machida
+        rax = plt.axes([0.85, 0.2, 0.1, 0.5], facecolor='lightgoldenrodyellow')
         self.Map1 = self.Fig.add_subplot(1, 3, 1)
         self.Map2 = self.Fig.add_subplot(1, 3, 2)
-        self.Map3 = self.Fig.add_subplot(1, 3, 3)#add machida
+        self.radio = RadioButtons(rax, (np.arange(self.Dim)))#add machida
         # self.Fig.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95)
 
         # 枠線と目盛りの消去
@@ -161,11 +164,16 @@ class TSOM2_Viewer:
     # ------------------------------ #
     # --- 描画 ---------------------- #
     # ------------------------------ #
+    def hzfunc(label):
+        self.Map3_click_unit = int(label)
+        l.set_ydata(ydata)
+        plt.draw()
     def draw_map(self):
         # コンポーネントの初期表示(左下が0番目のユニットが来るように行列を上下反転している)
         self.__draw_map1()
         self.__draw_map2()
-        self.__draw_map3()
+        self.radio.on_clicked(hzfunc)
+        #self.__draw_map3()
         self.__draw_click_point()
 
         # クリックイベント
