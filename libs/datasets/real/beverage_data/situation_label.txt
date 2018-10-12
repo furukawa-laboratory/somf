@@ -1,6 +1,6 @@
-Deskwork or studying
-Outdoor work
-Brake time_or_teatime
+Deskwork_or_studying
+Outdoor_work
+Brake_time_or_teatime
 Indoor_leisure
 Sports_or_exercise
 Outdoor_leisure
