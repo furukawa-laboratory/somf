@@ -14,12 +14,12 @@ plt.subplots_adjust(left=0.3)
 axcolor = 'lightgoldenrodyellow'
 rax = plt.axes([0.05, 0.7, 0.15, 0.15], facecolor=axcolor)
 #label_box=['aa','bb','cc','dd']
-label_box=(np.array(4))
+label_box=np.arange(4)
 radio = RadioButtons(rax, (label_box))
 
-
+A=[s0,s1,s2]
 def hzfunc(label):
-    hzdict = {'a': s0, 'b': s1, 'c': s2}
+    hzdict = {str(label_box):A}
     ydata = hzdict[label]
     l.set_ydata(ydata)
     plt.draw()
