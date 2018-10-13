@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial import distance
 from tqdm import tqdm
-from libs.tools.create_zeta import create_zeta
+from ..tools.create_zeta import create_zeta
 
 class TSOM2():
     def __init__(self, X, latent_dim, resolution, SIGMA_MAX, SIGMA_MIN, TAU, init='random'):
@@ -136,3 +136,4 @@ class TSOM2():
             self.history['z2'][epoch, :] = self.Z2
             self.history['sigma1'][epoch] = sigma1
             self.history['sigma2'][epoch] = sigma2
+
