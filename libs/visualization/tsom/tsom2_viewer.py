@@ -97,13 +97,12 @@ class TSOM2_Viewer:
         #labelが文字列だった場合
         #labelがintだった場合
         #labelが何もなかった場合
-        #hzdict = {'2 Hz': s0, '4 Hz': s1, '8 Hz': s2}
-        if self.count_click==int(label):
+        hzdict = {'Deskwork or studying': 0, 'Outdoor work': 1, 'Brake time_or_teatime': 2,'Indoor_leisure':3,'Sports_or_exercise':4,'Outdoor_leisure':5,'In_the_car_train':6,'Lunch_time':7,'Awakening_time':8,'Bed_time':9,'Party_time':10}
+        if self.count_click==hzdict[label]:
             return
         else:
-            print("label is not int")
-            self.count_click=int(label)
-            self.Map3_click_unit = int(label)
+            self.count_click=hzdict[label]
+            self.Map3_click_unit = hzdict[label]
             self.__calc_component(1)
             self.__calc_component(2)
             self.__draw_map1()
