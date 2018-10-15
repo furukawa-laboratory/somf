@@ -63,7 +63,7 @@ class TSOM2_Viewer:
         self.Map1.set_title('View 1')
         self.Map2 = self.Fig.add_subplot(1, 2, 2)
         self.Map2.set_title('View 2')
-        rax = plt.axes([0.7, 0.25, 0.1, 0.5], facecolor='lightgoldenrodyellow')
+        rax = plt.axes([0.7, 0.25, 0.1, 0.5], facecolor='lightgoldenrodyellow',aspect='equal')
         self.radio = RadioButtons(rax, (np.arange(self.Dim)))
         self.count_click=None
         # self.Fig.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95)
