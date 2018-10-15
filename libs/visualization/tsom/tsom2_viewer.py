@@ -8,7 +8,7 @@ from matplotlib.widgets import RadioButtons
 np.random.seed(2)
 
 class TSOM2_Viewer:
-    def __init__(self, y, winner1, winner2, fig_size=None, label1=None, label2=None, label3=None):
+    def __init__(self, y, winner1, winner2, fig_size=None, label1=None, label2=None, button_label=None):
         # ---------- 参照テンソルとデータ ---------- #
         self.Mode1_Num = y.shape[0]
         self.Mode2_Num = y.shape[1]
@@ -43,7 +43,7 @@ class TSOM2_Viewer:
         map2x_pos, map2y_pos = np.meshgrid(map2x, map2y)
         self.Map2_position = np.c_[map2x_pos.ravel(), map2y_pos.ravel()]  # マップ上の座標
 
-        self.label3 = label3#add machida
+        self.button_label = button_label#add machida
 
 
         # コンポーネントプレーン
@@ -64,7 +64,7 @@ class TSOM2_Viewer:
         self.Map2 = self.Fig.add_subplot(1, 2, 2)
         self.Map2.set_title('View 2')
         rax = plt.axes([0.7, 0.25, 0.1, 0.5], facecolor='lightgoldenrodyellow',aspect='equal')
-        self.radio = RadioButtons(rax, (np.arange(self.Dim)))
+        self.radio = RadioButtons(rax, button_label)
         self.count_click=None
         # self.Fig.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95)
 
@@ -301,7 +301,6 @@ class TSOM2_Viewer:
     # --- コンポーネント値の算出 ------ #
     # ------------------------------ #
     def __calc_component(self, map_num):
-        print(self.Map3_click_unit)
         if map_num == 1:
             temp1 = self.Y[:, self.Map2_click_unit, self.Map3_click_unit]
             self.Map1_val = temp1.reshape((self.map1x_num,self.map1x_num))#np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
