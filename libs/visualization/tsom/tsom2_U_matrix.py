@@ -4,7 +4,7 @@ import scipy.spatial.distance as dist
 from sklearn.preprocessing import StandardScaler
 
 class TSOM2_Umatrix:
-    def __init__(self, z1=None,z2=None, x=None, sigma1=0.2,sigma2=0.2, resolution=100, labels1=None,labels2=None, fig_size=[4,4], cmap_type='jet'):
+    def __init__(self, z1=None,z2=None, x=None, sigma1=0.2,sigma2=0.2, resolution=100, labels1=None,labels2=None, fig_size=[15,6], cmap_type='jet'):
         # set input
         self.X = x
         I = self.X.shape[0]
