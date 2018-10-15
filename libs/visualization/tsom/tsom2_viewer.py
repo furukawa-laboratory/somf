@@ -43,7 +43,10 @@ class TSOM2_Viewer:
         map2x_pos, map2y_pos = np.meshgrid(map2x, map2y)
         self.Map2_position = np.c_[map2x_pos.ravel(), map2y_pos.ravel()]  # マップ上の座標
 
-        self.button_label = button_label#add machida
+        #label
+        self.label1=label1
+        self.label2=label2
+        self.button_label = button_label
 
 
         # コンポーネントプレーン
@@ -90,10 +93,15 @@ class TSOM2_Viewer:
         self.noise_map1 = (np.random.rand(self.Winner1.shape[0], 2) - 0.5)
         self.noise_map2 = (np.random.rand(self.Winner2.shape[0], 2) - 0.5)
 
-    def hzfunc(self, label):
+    def hzfunc(self, label):#radioボタンを押した時にどういう処理をするか
+        #labelが文字列だった場合
+        #labelがintだった場合
+        #labelが何もなかった場合
+        #hzdict = {'2 Hz': s0, '4 Hz': s1, '8 Hz': s2}
         if self.count_click==int(label):
             return
         else:
+            print("label is not int")
             self.count_click=int(label)
             self.Map3_click_unit = int(label)
             self.__calc_component(1)
@@ -191,7 +199,7 @@ class TSOM2_Viewer:
         for i in range(self.Winner1.shape[0]):
             self.Map1.text(self.Map1_position[self.Winner1[i], 0] + epsilon * self.noise_map1[i, 0],
                            self.Map1_position[self.Winner1[i], 1] + epsilon * self.noise_map1[i, 1],
-                           i + 1, ha='center', va='bottom', color='black')
+                           self.label1[i], ha='center', va='bottom', color='black')
         self.Map1.scatter(self.Map1_position[self.Winner1[:], 0] + epsilon * self.noise_map1[:, 0],
                           self.Map1_position[self.Winner1[:], 1] + epsilon * self.noise_map1[:, 1],
                           c="white",linewidths=1,edgecolors="black")
@@ -203,7 +211,7 @@ class TSOM2_Viewer:
         for i in range(self.Winner2.shape[0]):
             self.Map2.text(self.Map2_position[self.Winner2[i], 0] + epsilon * self.noise_map2[i, 0],
                            self.Map2_position[self.Winner2[i], 1] + epsilon * self.noise_map2[i, 1],
-                           i + 1, ha='center', va='bottom', color='black')
+                           self.label2[i], ha='center', va='bottom', color='black')
         self.Map2.scatter(self.Map2_position[self.Winner2[:], 0] + epsilon * self.noise_map2[:, 0],
                           self.Map2_position[self.Winner2[:], 1] + epsilon * self.noise_map2[:, 1],
                           c="white", linewidths=1, edgecolors="black")
