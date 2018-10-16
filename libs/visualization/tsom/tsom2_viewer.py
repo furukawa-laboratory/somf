@@ -48,9 +48,10 @@ class TSOM2_Viewer:
         self.label2=label2
         self.button_label = button_label
 
-        if button_label is None:
+        if button_label is None:#radioボタンにラベルが与えられなかったときの処理(観測データ次元分の番号を振る)
             self.button_label=np.arange(self.Dim)
             values = np.arange(self.Dim)
+            #radioボタンにラベルをはる際に辞書を作成
             dict_keys = []
             for i in np.arange(self.Dim):
                 dict_keys.append(str(self.button_label[i]))
@@ -87,7 +88,6 @@ class TSOM2_Viewer:
         else:
             self.radio = RadioButtons(rax, np.arange(self.Dim))
         self.count_click=None
-        # self.Fig.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95)
 
         # 枠線と目盛りの消去
         self.Map1.spines["right"].set_color("none")
@@ -111,11 +111,11 @@ class TSOM2_Viewer:
         self.noise_map1 = (np.random.rand(self.Winner1.shape[0], 2) - 0.5)
         self.noise_map2 = (np.random.rand(self.Winner2.shape[0], 2) - 0.5)
 
-    def hzfunc(self, label):#radioボタンを押した時にどういう処理をするか
+    def hzfunc(self, label):#radioボタンを押した時の処理
 
         if self.count_click==self.hzdict[label]:
          return
-        else:#どういう場合?
+        else:
             self.count_click=self.hzdict[label]
             self.Map3_click_unit = self.hzdict[label]
             self.__calc_component(1)
@@ -299,7 +299,6 @@ class TSOM2_Viewer:
     def __draw_map1(self):
         self.Map1.cla()
         self.Map1.set_title('View 1')
-        # self.Map1.set_xlabel("Wine Map")
         self.__draw_label_map1()
         self.Map1.imshow(self.Map1_val[::], interpolation='spline36',
                          extent=[0, self.Map1_val.shape[0] - 1, -self.Map1_val.shape[1] + 1, 0], cmap="rainbow")
