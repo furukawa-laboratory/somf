@@ -48,6 +48,22 @@ class TSOM2_Viewer:
         self.label2=label2
         self.button_label = button_label
 
+        if button_label is None:
+            self.button_label=np.arange(self.Dim)
+            values = np.arange(self.Dim)
+            dict_keys = []
+            for i in np.arange(self.Dim):
+                dict_keys.append(str(self.button_label[i]))
+            self.hzdict = dict(zip(dict_keys, values))  # e.g.Deskwork_or_studyingが与えられたら0を返す
+
+        else:
+            values = np.arange(self.Dim)
+            # radioボタンにラベルをはる際に辞書を作成
+            dict_keys = []
+            for i in np.arange(self.Dim):
+                dict_keys.append(str(self.button_label[i]))
+            self.hzdict = dict(zip(dict_keys, values))  # e.g.Deskwork_or_studyingが与えられたら0を返す
+
         # コンポーネントプレーン
         self.__calc_component(1)
         self.__calc_component(2)
@@ -96,23 +112,12 @@ class TSOM2_Viewer:
         self.noise_map2 = (np.random.rand(self.Winner2.shape[0], 2) - 0.5)
 
     def hzfunc(self, label):#radioボタンを押した時にどういう処理をするか
-        #値がintか,文字列で処理を変える必要がある(labelの)
-        #labelが文字列だった場合
-        #ボタンは,str型になる
 
-        #辞書の作成
-        values = np.arange(self.Dim)
-        hzdict = dict(zip(self.button_label, values))  # buttonのラベルが与えられたらint値を返すような辞書の作成. e.g.Deskwork_or_studyingが与えられたら0を返す
-
-        if self.button_label[0] is int:
-            label=int(label)
-            return label
-
-        if self.count_click==hzdict[label]:
-            return
+        if self.count_click==self.hzdict[label]:
+         return
         else:#どういう場合?
-            self.count_click=hzdict[label]
-            self.Map3_click_unit = hzdict[label]
+            self.count_click=self.hzdict[label]
+            self.Map3_click_unit = self.hzdict[label]
             self.__calc_component(1)
             self.__calc_component(2)
             self.__draw_map1()
