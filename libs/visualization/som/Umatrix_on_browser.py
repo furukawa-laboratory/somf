@@ -1,12 +1,14 @@
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import scipy.spatial.distance as dist
 from sklearn.preprocessing import StandardScaler
-import matplotlib.animation
+# import matplotlib.animation
+from plotly.offline import plot
+import plotly.graph_objs as go
 
 class SOM_Umatrix:
     def __init__(self, X=None, Z=None, sigma=0.2, resolution=100,
-                 labels=None, fig_size=[6,6], title_text='U-matrix', cmap_type='jet',
+                 labels=None, fig_size=[6,6], title_text='U-matrix', cmap_type='Jet',
                  interpolation_method='spline36', repeat=False, interval=40):
         # インプットが無効だった時のエラー処理
         if Z is None:
@@ -57,16 +59,16 @@ class SOM_Umatrix:
         self.K = resolution ** self.L
 
         # 描画キャンバスの設定
-        self.Fig = plt.figure(figsize=(fig_size[0], fig_size[1]))
-        self.Map = self.Fig.add_subplot(1, 1, 1)
+        # self.Fig = plt.figure(figsize=(fig_size[0], fig_size[1]))
+        # self.Map = self.Fig.add_subplot(1, 1, 1)
         self.Cmap_type = cmap_type
         self.labels = labels
         if self.labels is None:
             self.labels = np.arange(self.N) + 1
-        self.interpolation_method = interpolation_method
+        # self.interpolation_method = interpolation_method
         self.title_text = title_text
-        self.repeat = repeat
-        self.interval = interval
+        # self.repeat = repeat
+        # self.interval = interval
 
         # 潜在空間の代表点の設定
         self.Zeta = np.meshgrid(np.linspace(self.Z_allepoch[:, :, 0].min(), self.Z_allepoch[:, :, 0].max(), self.resolution),
@@ -82,34 +84,52 @@ class SOM_Umatrix:
         sigma = self.sigma_allepoch[0]
 
         # U-matrix表示用の値を算出
-        dY_std = self.__calc_umatrix(Z,sigma)
-        U_matrix_val = dY_std.reshape((self.resolution, self.resolution))
+        #dY_std = self.__calc_umatrix(Z,sigma)
+        #U_matrix_val = dY_std.reshape((self.resolution, self.resolution))
+        U_matrix_val = self.__calc_umatrix(Z,sigma)
 
         # U-matrix表示
-        self.Map.set_title(self.title_text)
-        self.Im = self.Map.imshow(U_matrix_val, interpolation=self.interpolation_method,
-                      extent=[self.Zeta[:, 0].min(), self.Zeta[:, 0].max(),
-                              self.Zeta[:, 1].max(), self.Zeta[:, 1].min()],
-                   cmap=self.Cmap_type, vmax=0.5, vmin=-0.5, animated=True)
+        # self.Map.set_title(self.title_text)
+        # self.Im = self.Map.imshow(U_matrix_val, interpolation=self.interpolation_method,
+        #               extent=[self.Zeta[:, 0].min(), self.Zeta[:, 0].max(),
+        #                       self.Zeta[:, 1].max(), self.Zeta[:, 1].min()],
+        #            cmap=self.Cmap_type, vmax=0.5, vmin=-0.5, animated=True)
 
+        trace_scat = go.Scatter(x=Z[:,0],y=Z[:,1],
+                                mode='markers+text',
+                                text=self.labels,
+                                textposition='bottom center')
+        trace_umatrix = go.Heatmap(x=self.Zeta[:,0],y=self.Zeta[:,1],
+                                   z=U_matrix_val,colorscale=self.Cmap_type,
+                                   zsmooth='best')
         # ラベルの表示
-        self.Scat = self.Map.scatter(x=Z[:, 0], y=Z[:, 1], c='k')
+        # self.Scat = self.Map.scatter(x=Z[:, 0], y=Z[:, 1], c='k')
+        layout = go.Layout(
+            width = 800,
+            height = 800,
+            showlegend=False,
+            title = self.title_text
+        )
+        data = [trace_scat]
+        fig = go.Figure(data=data,layout=layout)
+        plot(fig)
+
 
 
         # 勝者位置が重なった時用の処理
-        self.Label_Texts = []
-        self.epsilon = 0.04 * (self.Z_allepoch.max() - self.Z_allepoch.min())
-        for i in range(self.N):
-            count = 0
-            for j in range(i):
-                if np.allclose(Z[j, :], Z[i, :]):
-                    count += 1
-            Label_Text = self.Map.text(Z[i, 0], Z[i, 1] + self.epsilon * count, self.labels[i], color='k')
-            self.Label_Texts.append(Label_Text)
+        # self.Label_Texts = []
+        # self.epsilon = 0.04 * (self.Z_allepoch.max() - self.Z_allepoch.min())
+        # for i in range(self.N):
+        #     count = 0
+        #     for j in range(i):
+        #         if np.allclose(Z[j, :], Z[i, :]):
+        #             count += 1
+        #     Label_Text = self.Map.text(Z[i, 0], Z[i, 1] + self.epsilon * count, self.labels[i], color='k')
+        #     self.Label_Texts.append(Label_Text)
 
         # ani = matplotlib.animation.FuncAnimation(self.Fig, self.update, interval=self.interval, blit=False,
         #                                    repeat=self.repeat, frames=self.T)
-        plt.show()
+        # plt.show()
 
     # def update(self, epoch):
     #     Z = self.Z_allepoch[epoch,:,:]
@@ -152,6 +172,7 @@ class SOM_Umatrix:
         # 表示用の値を算出（標準化）
         sc = StandardScaler()
         dY_std = sc.fit_transform(dYdZ_norm[:, np.newaxis])
+        # dY_std = sc.fit_transform(dYdZ_norm[])
 
 
-        return np.clip(dY_std / 4.0, -0.5, 0.5)
+        return np.clip(dY_std.ravel() / 4.0, -0.5, 0.5)
