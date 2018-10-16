@@ -48,7 +48,6 @@ class TSOM2_Viewer:
         self.label2=label2
         self.button_label = button_label
 
-
         # コンポーネントプレーン
         self.__calc_component(1)
         self.__calc_component(2)
@@ -67,7 +66,10 @@ class TSOM2_Viewer:
         self.Map2 = self.Fig.add_subplot(1, 2, 2)
         self.Map2.set_title('View 2')
         rax = plt.axes([0.7, 0.25, 0.1, 0.5], facecolor='lightgoldenrodyellow',aspect='equal')
-        self.radio = RadioButtons(rax, button_label)
+        if not button_label is None:
+            self.radio = RadioButtons(rax, button_label)
+        else:
+            self.radio = RadioButtons(rax, np.arange(self.Dim))
         self.count_click=None
         # self.Fig.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95)
 
@@ -94,14 +96,21 @@ class TSOM2_Viewer:
         self.noise_map2 = (np.random.rand(self.Winner2.shape[0], 2) - 0.5)
 
     def hzfunc(self, label):#radioボタンを押した時にどういう処理をするか
+        #値がintか,文字列で処理を変える必要がある(labelの)
         #labelが文字列だった場合
-        #labelがintだった場合
-        #labelが何もなかった場合
-        values=np.arange(self.Dim)
-        hzdict=dict(zip(self.button_label,values))#buttonのラベルが与えられたらint値を返すような辞書の作成. e.g.Deskwork_or_studyingが与えられたら0を返す
+        #ボタンは,str型になる
+
+        #辞書の作成
+        values = np.arange(self.Dim)
+        hzdict = dict(zip(self.button_label, values))  # buttonのラベルが与えられたらint値を返すような辞書の作成. e.g.Deskwork_or_studyingが与えられたら0を返す
+
+        if self.button_label[0] is int:
+            label=int(label)
+            return label
+
         if self.count_click==hzdict[label]:
             return
-        else:
+        else:#どういう場合?
             self.count_click=hzdict[label]
             self.Map3_click_unit = hzdict[label]
             self.__calc_component(1)
@@ -196,8 +205,9 @@ class TSOM2_Viewer:
     # 左のマップ
     def __draw_label_map1(self):
         epsilon = 0.02 * (self.Map1_position.max() - self.Map1_position.min())
-        for i in range(self.Winner1.shape[0]):
-            self.Map1.text(self.Map1_position[self.Winner1[i], 0] + epsilon * self.noise_map1[i, 0],
+        if not self.label1 is None:#ラベルを与えばそのラベルを出力,そうでないなら出力しない
+            for i in range(self.Winner1.shape[0]):
+                self.Map1.text(self.Map1_position[self.Winner1[i], 0] + epsilon * self.noise_map1[i, 0],
                            self.Map1_position[self.Winner1[i], 1] + epsilon * self.noise_map1[i, 1],
                            self.label1[i], ha='center', va='bottom', color='black')
         self.Map1.scatter(self.Map1_position[self.Winner1[:], 0] + epsilon * self.noise_map1[:, 0],
@@ -208,8 +218,9 @@ class TSOM2_Viewer:
     # 右のマップ
     def __draw_label_map2(self):
         epsilon = 0.02 * (self.Map2_position.max() - self.Map2_position.min())
-        for i in range(self.Winner2.shape[0]):
-            self.Map2.text(self.Map2_position[self.Winner2[i], 0] + epsilon * self.noise_map2[i, 0],
+        if not self.label2 is None:  # ラベルを与えばそのラベルを出力,そうでないなら出力しない
+            for i in range(self.Winner2.shape[0]):
+                self.Map2.text(self.Map2_position[self.Winner2[i], 0] + epsilon * self.noise_map2[i, 0],
                            self.Map2_position[self.Winner2[i], 1] + epsilon * self.noise_map2[i, 1],
                            self.label2[i], ha='center', va='bottom', color='black')
         self.Map2.scatter(self.Map2_position[self.Winner2[:], 0] + epsilon * self.noise_map2[:, 0],
