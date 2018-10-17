@@ -110,7 +110,7 @@ class SOM_Umatrix:
             showlegend=False,
             title = self.title_text
         )
-        data = [trace_scat]
+        data = [trace_umatrix,trace_scat]
         fig = go.Figure(data=data,layout=layout)
         plot(fig)
 
