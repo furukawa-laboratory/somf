@@ -9,7 +9,7 @@ import plotly.graph_objs as go
 class SOM_Umatrix:
     def __init__(self, X=None, Z=None, sigma=0.2, resolution=100,
                  labels=None, fig_size=[6,6], title_text='U-matrix', cmap_type='Jet',
-                 interpolation_method='spline36', repeat=False, interval=40):
+                 zmin=-2.8, zmax=2.8):
         # インプットが無効だった時のエラー処理
         if Z is None:
             raise ValueError('please input winner point')
@@ -69,6 +69,9 @@ class SOM_Umatrix:
         self.title_text = title_text
         # self.repeat = repeat
         # self.interval = interval
+        self.zmin = zmin
+        self.zmax = zmax
+
 
         # 潜在空間の代表点の設定
         self.Zeta = np.meshgrid(np.linspace(self.Z_allepoch[:, :, 0].min(), self.Z_allepoch[:, :, 0].max(), self.resolution),
@@ -101,7 +104,7 @@ class SOM_Umatrix:
                                 textposition='bottom center')
         trace_umatrix = go.Heatmap(x=self.Zeta[:,0],y=self.Zeta[:,1],
                                    z=U_matrix_val,colorscale=self.Cmap_type,
-                                   zsmooth='best')
+                                   zsmooth='best',zmax=self.zmax,zmin=self.zmin)
         # ラベルの表示
         # self.Scat = self.Map.scatter(x=Z[:, 0], y=Z[:, 1], c='k')
         layout = go.Layout(
@@ -175,4 +178,5 @@ class SOM_Umatrix:
         # dY_std = sc.fit_transform(dYdZ_norm[])
 
 
-        return np.clip(dY_std.ravel() / 4.0, -0.5, 0.5)
+        return np.clip(dY_std.ravel(), -2.0, 2.0)
+        #return dY_std.ravel()
