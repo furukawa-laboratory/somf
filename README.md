@@ -43,9 +43,10 @@ GitHub-flowと呼ばれる方法を採用します．以下の流れです．
 2. Create a branch. ブランチを切る．
    - name issue number at prefix, compact representation about the work. ブランチ名はIssue番号を先頭につけて，そのあと作業内容を簡潔に書く．
 3. Push at an appropriate frequency. 適宜pushをする．
-4. completing the work, create pull request. 作業がひと段落したらpull requestを出す．
+4. Completing the work, create pull request. 作業がひと段落したらpull requestを出す．
+   - Don't forget to write issue number. Issueの番号を必ず書いてください．
    - must request review to someone. レビューを必ず他の人に依頼すること．
-   - Doctor students can merge only. Dの学生だけがマージが可能．
+      - Doctor students can merge only. Dの学生だけがマージが可能．
 
 GitHub-flowに関してはこちら  
 [GitHub Flow ～GitHubを活用するブランチモデル～](https://tracpath.com/bootcamp/learning_git_github_flow.html)
