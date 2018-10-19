@@ -4,7 +4,7 @@ about: Create a report to help us improve
 
 ---
 
-** target library 対象となるライブラリ（コード）**
+**target library 対象となるライブラリ（コード）** どのコードでバグが起こっているのか明確ならばそれを書く
 
 **Describe the bug バグの説明**
 A clear and concise description of what the bug is.
