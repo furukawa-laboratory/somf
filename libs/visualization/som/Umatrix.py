@@ -89,7 +89,7 @@ class SOM_Umatrix:
         self.Im = self.Map.imshow(U_matrix_val, interpolation=self.interpolation_method,
                       extent=[self.Zeta[:, 0].min(), self.Zeta[:, 0].max(),
                               self.Zeta[:, 1].max(), self.Zeta[:, 1].min()],
-                   cmap=self.Cmap_type, vmax=0.5, vmin=-0.5, animated=True)
+                   cmap=self.Cmap_type,vmin=-2.8,vmax=2.8, animated=True)
 
         # ラベルの表示
         self.Scat = self.Map.scatter(x=Z[:, 0], y=Z[:, 1], c='k')
@@ -146,6 +146,7 @@ class SOM_Umatrix:
         # dYdZの算出
         dRdZ = V - R[:, :, np.newaxis] * V_mean                                                     # KxNxL
         dYdZ = np.einsum("knl,nd->kld", dRdZ, self.X)     # KxLxD
+        #dYdZ_norm = np.sqrt(np.sum(dYdZ ** 2, axis=(1, 2)))                                        # Kx1
         dYdZ_norm = np.sum(dYdZ ** 2, axis=(1, 2))                                                  # Kx1
 
         # 表示用の値を算出（標準化）
@@ -153,4 +154,5 @@ class SOM_Umatrix:
         dY_std = sc.fit_transform(dYdZ_norm[:, np.newaxis])
 
 
-        return np.clip(dY_std / 4.0, -0.5, 0.5)
+        return np.clip(dY_std, -2.0, 2.0)
+        #return dY_std
