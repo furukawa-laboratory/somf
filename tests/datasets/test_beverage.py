@@ -7,10 +7,14 @@ class TestBeverageDataset(unittest.TestCase):
         X,label_beverage,label_situation = load_data(ret_beverage_label=True,ret_situation_label=True)
         self.assertTrue(isinstance(X,np.ndarray))
         self.assertEqual(X.ndim,3)
-        label_beverage_direct = np.loadtxt('../libs/datasets/real/beverage_data/beverage_label.txt',dtype='str', delimiter=',')
-        label_situation_direct = np.loadtxt('../libs/datasets/real/beverage_data/situation_label.txt',dtype='str', delimiter=',')
+        label_beverage_direct = np.loadtxt('../../libs/datasets/real/beverage_data/beverage_label.txt',dtype='str', delimiter=',')
+        label_situation_direct = np.loadtxt('../../libs/datasets/real/beverage_data/situation_label.txt',dtype='str', delimiter=',')
         self.assertTrue((label_beverage==label_beverage_direct).all())
         self.assertTrue((label_situation==label_situation_direct).all())
+        for label in label_beverage:
+            self.assertTrue(label.find("b'")==-1)
+        for label in label_situation:
+            self.assertTrue(label.find("b'")==-1)
         print(label_beverage)
         print(label_situation)
 
