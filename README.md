@@ -1,5 +1,5 @@
-# What is this? 何のリポジトリ？
-古川研メンバーが共通して用いるようなライブラリを共有するためのリポジトリ．
+# What is this?
+古川研メンバーが共通して用いるようなライブラリを共有するためのリポジトリ．  
 This is Repository to share library which all members use.
 
 # Directories ディレクトリ構成
@@ -16,10 +16,10 @@ This is Repository to share library which all members use.
 └── tutorials               # アルゴリズムのチュートリアルを実行するファイル置き場
 ```
 
-# How to use? 使い方
+# How to use?
 
 ## ライブラリをユーザーとして使うとき
-gitの**submodule**機能を用いて自分のリポジトリにflibを導入してください．
+gitの**submodule**機能を用いて自分のリポジトリにflibを導入してください．  
 Please introduce flib into your repository by using **submodule** which is git function.
 
 submoduleは簡単に言うとリポジトリの中にリポジトリを入れる機能です．これを使うと以下のようなことができます
