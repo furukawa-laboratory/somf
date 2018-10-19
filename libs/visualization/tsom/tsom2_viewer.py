@@ -3,11 +3,12 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import scipy.spatial.distance as dist
+from matplotlib.widgets import RadioButtons
 
 np.random.seed(2)
 
 class TSOM2_Viewer:
-    def __init__(self, x, y, winner1, winner2, fig_size=None, label1=None, label2=None):
+    def __init__(self, y, winner1, winner2, fig_size=None, label1=None, label2=None, button_label=None):
         # ---------- 参照テンソルとデータ ---------- #
         self.Mode1_Num = y.shape[0]
         self.Mode2_Num = y.shape[1]
@@ -15,12 +16,10 @@ class TSOM2_Viewer:
             # 1次元の場合
             self.Dim = 1
             self.Y = y[:, :, np.newaxis]
-            self.X = x[:, :, np.newaxis]
         else:
             # 2次元の場合
             self.Dim = y.shape[2]
             self.Y = y
-            self.X = x
 
         # ---------- 勝者 ---------- #
         self.Winner1 = winner1
@@ -29,8 +28,10 @@ class TSOM2_Viewer:
         # ----------コンポーネントプレーン用---------- #
         self.Map1_click_unit = 0  # Map0のクリック位置
         self.Map2_click_unit = 0  # Map1のクリック位置
+        self.Map3_click_unit = 0  # add machida Map3のクリック位置
         self.map1x_num = int(np.sqrt(self.Mode1_Num))  # マップの1辺を算出（正方形が前提）
         self.map2x_num = int(np.sqrt(self.Mode2_Num))  # マップの1辺を算出（正方形が前提）
+
 
         # マップ上の座標
         map1x = np.arange(self.map1x_num)
@@ -42,20 +43,51 @@ class TSOM2_Viewer:
         map2x_pos, map2y_pos = np.meshgrid(map2x, map2y)
         self.Map2_position = np.c_[map2x_pos.ravel(), map2y_pos.ravel()]  # マップ上の座標
 
+        #label
+        self.label1=label1
+        self.label2=label2
+        self.button_label = button_label
+
+        if button_label is None:#radioボタンにラベルが与えられなかったときの処理(観測データ次元分の番号を振る)
+            self.button_label=np.arange(self.Dim)
+            values = np.arange(self.Dim)
+            #radioボタンにラベルをはる際に辞書を作成
+            dict_keys = []
+            for i in np.arange(self.Dim):
+                dict_keys.append(str(self.button_label[i]))
+            self.hzdict = dict(zip(dict_keys, values))  # e.g.Deskwork_or_studyingが与えられたら0を返す
+
+        else:
+            values = np.arange(self.Dim)
+            # radioボタンにラベルをはる際に辞書を作成
+            dict_keys = []
+            for i in np.arange(self.Dim):
+                dict_keys.append(str(self.button_label[i]))
+            self.hzdict = dict(zip(dict_keys, values))  # e.g.Deskwork_or_studyingが与えられたら0を返す
+
         # コンポーネントプレーン
         self.__calc_component(1)
         self.__calc_component(2)
         self.click_map = 0
 
+
         # ----------描画用---------- #
         self.Mapsize = np.sqrt(y.shape[0])
         if fig_size is None:
-            self.Fig = plt.figure(figsize=(12, 6))
+            self.Fig = plt.figure(figsize=(15, 6))
         else:
             self.Fig = plt.figure(figsize=fig_size)
+        plt.subplots_adjust(right=0.7)
         self.Map1 = self.Fig.add_subplot(1, 2, 1)
+        self.Map1.set_title('View 1')
         self.Map2 = self.Fig.add_subplot(1, 2, 2)
-        # self.Fig.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95)
+        self.Map2.set_title('View 2')
+        rax = plt.axes([0.7, 0.25, 0.1, 0.5], facecolor='lightgoldenrodyellow',aspect='equal')
+        if not button_label is None:
+            self.radio = RadioButtons(rax, button_label)
+        else:
+            self.radio = RadioButtons(rax, np.arange(self.Dim))
+        self.count_click=None
 
         # 枠線と目盛りの消去
         self.Map1.spines["right"].set_color("none")
@@ -79,6 +111,18 @@ class TSOM2_Viewer:
         self.noise_map1 = (np.random.rand(self.Winner1.shape[0], 2) - 0.5)
         self.noise_map2 = (np.random.rand(self.Winner2.shape[0], 2) - 0.5)
 
+    def hzfunc(self, label):#radioボタンを押した時の処理
+
+        if self.count_click==self.hzdict[label]:
+         return
+        else:
+            self.count_click=self.hzdict[label]
+            self.Map3_click_unit = self.hzdict[label]
+            self.__calc_component(1)
+            self.__calc_component(2)
+            self.__draw_map1()
+            self.__draw_map2()
+            self.__draw_click_point()
     # ------------------------------ #
     # --- イベント時の処理 ----------- #
     # ------------------------------ #
@@ -104,9 +148,9 @@ class TSOM2_Viewer:
                 self.__calc_component(1)
                 self.click_map = 2
 
+
             else:
                 return
-
             # コンポーネントプレーン表示
             self.__draw_map1()
             self.__draw_map2()
@@ -129,7 +173,7 @@ class TSOM2_Viewer:
                 # 右のマップのマウスオーバー処理
                 mouse_over_unit = self.__calc_arg_min_unit(self.Map2_position, click_pos)
                 self.__draw_mouse_over_label_map2(mouse_over_unit)
-
+            
             self.__draw_click_point()
             self.Fig.show()
 
@@ -137,15 +181,19 @@ class TSOM2_Viewer:
     def __mouse_leave_fig(self, event):
         self.__draw_map1()
         self.__draw_map2()
+        self.radio.on_clicked(self.hzfunc)
         self.__draw_click_point()
 
     # ------------------------------ #
     # --- 描画 ---------------------- #
     # ------------------------------ #
+
+
     def draw_map(self):
         # コンポーネントの初期表示(左下が0番目のユニットが来るように行列を上下反転している)
         self.__draw_map1()
         self.__draw_map2()
+        self.radio.on_clicked(self.hzfunc)
         self.__draw_click_point()
 
         # クリックイベント
@@ -162,28 +210,29 @@ class TSOM2_Viewer:
     # 左のマップ
     def __draw_label_map1(self):
         epsilon = 0.02 * (self.Map1_position.max() - self.Map1_position.min())
-        for i in range(self.Winner1.shape[0]):
-            self.Map1.text(self.Map1_position[self.Winner1[i], 0] + epsilon * self.noise_map1[i, 0],
+        if not self.label1 is None:#ラベルを与えばそのラベルを出力,そうでないなら出力しない
+            for i in range(self.Winner1.shape[0]):
+                self.Map1.text(self.Map1_position[self.Winner1[i], 0] + epsilon * self.noise_map1[i, 0],
                            self.Map1_position[self.Winner1[i], 1] + epsilon * self.noise_map1[i, 1],
-                           i + 1, ha='center', va='bottom', color='black')
-
-            self.Map1.plot(self.Map1_position[self.Winner1[i], 0] + epsilon * self.noise_map1[i, 0],
-                           self.Map1_position[self.Winner1[i], 1] + epsilon * self.noise_map1[i, 1],
-                           marker='.', color="white", ms=15, markeredgecolor='black', markeredgewidth=1)
+                           self.label1[i], ha='center', va='bottom', color='black')
+        self.Map1.scatter(self.Map1_position[self.Winner1[:], 0] + epsilon * self.noise_map1[:, 0],
+                          self.Map1_position[self.Winner1[:], 1] + epsilon * self.noise_map1[:, 1],
+                          c="white",linewidths=1,edgecolors="black")
         self.Fig.show()
 
     # 右のマップ
     def __draw_label_map2(self):
         epsilon = 0.02 * (self.Map2_position.max() - self.Map2_position.min())
-        for i in range(self.Winner2.shape[0]):
-            self.Map2.text(self.Map2_position[self.Winner2[i], 0] + epsilon * self.noise_map2[i, 0],
+        if not self.label2 is None:  # ラベルを与えばそのラベルを出力,そうでないなら出力しない
+            for i in range(self.Winner2.shape[0]):
+                self.Map2.text(self.Map2_position[self.Winner2[i], 0] + epsilon * self.noise_map2[i, 0],
                            self.Map2_position[self.Winner2[i], 1] + epsilon * self.noise_map2[i, 1],
-                           i + 1, ha='center', va='bottom', color='black')
-
-            self.Map2.plot(self.Map2_position[self.Winner2[i], 0] + epsilon * self.noise_map2[i, 0],
-                           self.Map2_position[self.Winner2[i], 1] + epsilon * self.noise_map2[i, 1],
-                           marker='.', color="white", ms=15, markeredgecolor='black', markeredgewidth=1)
+                           self.label2[i], ha='center', va='bottom', color='black')
+        self.Map2.scatter(self.Map2_position[self.Winner2[:], 0] + epsilon * self.noise_map2[:, 0],
+                          self.Map2_position[self.Winner2[:], 1] + epsilon * self.noise_map2[:, 1],
+                          c="white", linewidths=1, edgecolors="black")
         self.Fig.show()
+
 
     # ------------------------------ #
     # --- ラベルの描画(マウスオーバ時) - #
@@ -237,12 +286,11 @@ class TSOM2_Viewer:
     # --- クリック位置の描画 ---------- #
     # ------------------------------ #
     def __draw_click_point(self):
-        if self.click_map == 1:
-            self.Map1.plot(self.Map1_position[self.Map1_click_unit, 0], self.Map1_position[self.Map1_click_unit, 1],
-                           ".", color="black", ms=30, fillstyle="none")
-        elif self.click_map == 2:
-            self.Map2.plot(self.Map2_position[self.Map2_click_unit, 0], self.Map2_position[self.Map2_click_unit, 1],
-                           ".", color="black", ms=30, fillstyle="none")
+        self.Map1.plot(self.Map1_position[self.Map1_click_unit, 0], self.Map1_position[self.Map1_click_unit, 1],
+                       ".", color="black", ms=30, fillstyle="none")
+        self.Map2.plot(self.Map2_position[self.Map2_click_unit, 0], self.Map2_position[self.Map2_click_unit, 1],
+                       ".", color="black", ms=30, fillstyle="none")
+
         self.Fig.show()
 
     # ------------------------------ #
@@ -250,7 +298,7 @@ class TSOM2_Viewer:
     # ------------------------------ #
     def __draw_map1(self):
         self.Map1.cla()
-        # self.Map1.set_xlabel("Wine Map")
+        self.Map1.set_title('View 1')
         self.__draw_label_map1()
         self.Map1.imshow(self.Map1_val[::], interpolation='spline36',
                          extent=[0, self.Map1_val.shape[0] - 1, -self.Map1_val.shape[1] + 1, 0], cmap="rainbow")
@@ -260,6 +308,7 @@ class TSOM2_Viewer:
 
     def __draw_map2(self):
         self.Map2.cla()
+        self.Map2.set_title('View 2')
         # self.Map2.set_xlabel("Aroma Map")
         self.Map2.xaxis.set_label_coords(0.5, -0.1)
         self.__draw_label_map2()
@@ -269,16 +318,18 @@ class TSOM2_Viewer:
         self.Map2.set_ylim(-self.Mapsize, 1)
         self.Fig.show()
 
+
+
     # ------------------------------ #
     # --- コンポーネント値の算出 ------ #
     # ------------------------------ #
     def __calc_component(self, map_num):
         if map_num == 1:
-            temp1 = self.Y[:, self.Map2_click_unit, :]
-            self.Map1_val = np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
+            temp1 = self.Y[:, self.Map2_click_unit, self.Map3_click_unit]
+            self.Map1_val = temp1.reshape((self.map1x_num,self.map1x_num))#np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
         else:
-            temp2 = self.Y[self.Map1_click_unit, :, :]
-            self.Map2_val = np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
+            temp2 = self.Y[self.Map1_click_unit, :, self.Map3_click_unit]
+            self.Map2_val = temp2.reshape((self.map2x_num,self.map2x_num))#np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
 
     # ------------------------------ #
     # --- 最近傍ユニット算出 ---------- #
