@@ -35,7 +35,7 @@ gitの**submodule**機能を用いて自分のリポジトリにflibを導入し
 [Git submoduleの押さえておきたい理解ポイントのまとめ - Qiita](https://qiita.com/kinpira/items/3309eb2e5a9a422199e9)
 
 ### submoduleで導入した後の設定（Pycharm）
-Pycharm上で利用する場合は，flibのディレクトリをSource rootに設定すると，flibのチュートリアルコードと同様の書き方でライブラリを利用することができます．ただし，大元のリポジトリの中にflibと同じ名前のディレクトリがあったりするとコンフリクトを起こしたりするので注意してください．
+Pycharm上で利用する場合は，flibのディレクトリをSource rootに設定すると，flibのチュートリアルコードと同様の書き方でライブラリを利用することができます．ただし，大元のリポジトリの中にflib内のディレクトリと同じ名前のディレクトリがあるするとコンフリクトを起こしたりするので注意してください．
 
 ## How to request bug fix and new feature? バグ修正や新機能追加の依頼の出し方
 Please create **Issues**, use template.  
@@ -52,8 +52,9 @@ GitHub-flowと呼ばれる方法を採用します．以下の流れです．
    - must request review to someone. レビューを必ず他の人に依頼すること．
       - Doctor students can merge only. Dの学生だけがマージが可能．
 
-GitHub-flowに関してはこちら  
+GitHub-flowに関してはこちらを参照してください．  
 [GitHub Flow ～GitHubを活用するブランチモデル～](https://tracpath.com/bootcamp/learning_git_github_flow.html)
+
 
 # Note 諸注意
 このリポジトリにあるライブラリはあくまでラボメンバー皆で作って行くものです．バグのない完成したものではありません．なのでエンドユーザー感覚で完全にブラックボックスとして使わないでください．masterにマージされているライブラリでも，デバッグをやるぐらいの心づもりで利用してください．また，欲しい機能は自分で作ったりIssueで提案したり，積極的なcontributeを期待しています！
