@@ -1,5 +1,5 @@
 # What is this?
-This is Repository to share library which all members use.
+This is Repository to share library which all members use.  
 古川研メンバーが共通して用いるようなライブラリを共有するためのリポジトリ．  
 
 
@@ -20,18 +20,22 @@ This is Repository to share library which all members use.
 # How to use?
 
 ## How to introduce into your repository リポジトリへの導入方法
-gitの**submodule**機能を用いて自分のリポジトリにflibを導入してください．  
-Please introduce flib into your repository by using **submodule** which is git function. search "submodule git" on google!
+Please introduce flib into your repository by using **submodule** which is git function. search "submodule git" on google!  
+gitの**submodule**機能を用いて自分のリポジトリにflibを導入してください．
 
-submoduleは簡単に言うとリポジトリの中にリポジトリを入れる機能です．これを使うと以下のようなことができます
+
+※submoduleは簡単に言うとリポジトリの中にリポジトリを入れる機能です．これを使うと以下のようなことができます
 - 自分の研究プロジェクトのリポジトリ内にflibを入れることができる（自分のリポジトリからflibにあるライブラリを利用できる）
 - リモートのflibでプッシュがあるとそれをフェッチしてマージできる（もちろんそれをしないことも可能）
 
 ネット上ではコマンドラインからの導入の解説がほどんどですが，ある程度source treeで管理することもできます．
 
-詳しくは以下をチェックしてください．  
+詳しくは以下をチェックするか検索してみてください．  
 [Git submodule の基礎 - Qiita](https://qiita.com/sotarok/items/0d525e568a6088f6f6bb)  
 [Git submoduleの押さえておきたい理解ポイントのまとめ - Qiita](https://qiita.com/kinpira/items/3309eb2e5a9a422199e9)
+
+### submoduleで導入した後の設定（Pycharm）
+Pycharm上で利用する場合は，flibのディレクトリをSource rootに設定すると，flibのチュートリアルコードと同様の書き方でライブラリを利用することができます．ただし，大元のリポジトリの中にflibと同じ名前のディレクトリがあったりするとコンフリクトを起こしたりするので注意してください．
 
 ## How to request bug fix and new feature? バグ修正や新機能追加の依頼の出し方
 Please create **Issues**, use template.  
