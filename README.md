@@ -54,3 +54,6 @@ GitHub-flowと呼ばれる方法を採用します．以下の流れです．
 
 GitHub-flowに関してはこちら  
 [GitHub Flow ～GitHubを活用するブランチモデル～](https://tracpath.com/bootcamp/learning_git_github_flow.html)
+
+# Note 諸注意
+このリポジトリにあるライブラリはあくまでラボメンバー皆で作って行くものです．バグのない完成したものではありません．なのでエンドユーザー感覚で完全にブラックボックスとして使わないでください．masterにマージされているライブラリでも，デバッグをやるぐらいの心づもりで利用してください．また，欲しい機能は自分で作ったりIssueで提案したり，積極的なcontributeを期待しています！
