@@ -66,8 +66,8 @@ class SqTSOM2_Umatrix:
         # ラベルの表示
         self.Map1.scatter(x=self.Z1[:, 0], y=self.Z1[:, 1], c='k')
         umatrix_val = (np.random.rand(20, 20) - 0.5) * 2
-        if self.labels1 is None:
-            self.labels1 = np.arange(self.N) + 1
+        if self.labels is None:
+            self.labels = np.arange(self.N) + 1
 
         # 勝者位置が重なった時用の処理
         epsilon = 0.04 * (self.Z1.max() - self.Z1.min())
@@ -76,7 +76,7 @@ class SqTSOM2_Umatrix:
             for j in range(i):
                 if np.allclose(self.Z1[j, :], self.Z1[i, :]):
                     count += 1
-            self.Map1.text(self.Z1[i, 0], self.Z1[i, 1] + epsilon * count, self.labels1[i], color='k')
+            self.Map1.text(self.Z1[i, 0], self.Z1[i, 1] + epsilon * count, self.labels[i], color='k')
         print('finish')
         plt.show()
 
