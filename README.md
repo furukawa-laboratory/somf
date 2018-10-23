@@ -7,14 +7,14 @@ This is Repository to share library which all members use.
 
 ```
 .
-├── libs                    # ライブラリの置き場
-│   ├── datasets            # データセットを返す関数
-│   ├── models              # SOMなどの学習アルゴリズムのクラス
-│   ├── tools               # あらゆるライブラリで共通して用いるような汎用的なもの
-│   └── visualization       # 描画用のライブラリ
-├── tests                   # 開発した学習アルゴリズムが正しく動作するかどうかチェックするための実行ファイル置き場．
-│                           # プルリクエストのレビューの際の検証コードはここに置く
-└── tutorials               # アルゴリズムのチュートリアルを実行するファイル置き場
+├── libs                    # libraries ライブラリ
+│   ├── datasets            # module to return datasets データセットを返すモジュール
+│   ├── models              # class of models such as SOM, TSOM... SOMやTSOMなどの学習アルゴリズムのクラス
+│   ├── tools               # utility tools あらゆるライブラリで共通して用いるような汎用的なもの
+│   └── visualization       # module to visualize such as U-matrix, Component Plane... 描画用のライブラリ
+├── tests                   # code to test libraries 開発した学習アルゴリズムが正しく動作するかどうかチェックするための実行ファイル置き場．
+│                           # place test code when you review pull request プルリクエストのレビューの際の検証コードはここに置く
+└── tutorials               # tutorial of libraries アルゴリズムのチュートリアルを実行するファイル置き場
 ```
 
 # How to use?
