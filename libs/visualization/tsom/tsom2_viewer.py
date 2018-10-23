@@ -2,9 +2,12 @@ import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+from mpl_toolkits.mplot3d import Axes3D
 from sklearn.preprocessing import StandardScaler
 import scipy.spatial.distance as dist
 from matplotlib.widgets import RadioButtons
+from sklearn.decomposition import PCA
 
 np.random.seed(2)
 
@@ -505,8 +508,6 @@ class TSOM2_Viewer:
         self.Map2.set_ylim(-self.Mapsize, 1)
         self.Fig.show()
 
-
-
     # ------------------------------ #
     # --- コンポーネント値の算出 ------ #
     # ------------------------------ #
@@ -528,3 +529,90 @@ class TSOM2_Viewer:
         return unit[0]
 
 
+# first hatano write code case of D=1
+class TSOM2_PCA:
+    def __init__(self, x=None, y=None, k_star=None, l_star=None, Kx=None, Ky=None, Lx=None, Ly=None, labels1=None, labels2=None):
+        self.X = x
+        self.I = self.X.shape[0]
+        self.J = self.X.shape[1]
+        self.X = self.X.reshape((self.I, self.J))
+        self.Y = y
+        self.K = self.Y.shape[0]
+        self.L = self.Y.shape[1]
+        self.Kx = Kx
+        self.Ky = Ky
+        self.Lx = Lx
+        self.Ly = Ly
+        self.k_star = k_star
+        self.l_star = l_star
+        self.labels1 = labels1
+        self.labels2 = labels2
+
+    def draw_pca(self):
+        # color scale of X
+        scale_mode1 = self.X.sum(axis=0) / self.X.sum(axis=0).max()
+        scale_mode2 = self.X.sum(axis=1) / self.X.sum(axis=1).max()
+        fig_k = plt.figure()
+        ax_k = Axes3D(fig_k)
+        fig_l = plt.figure()
+        ax_l = Axes3D(fig_l)
+        if self.Kx != 1 and self.Ky != 1 and self.Lx != 1 and self.Ly != 1:
+            pca_k = PCA(n_components=3)
+            pca_l = PCA(n_components=3)
+            X_pca_mode1 = pca_k.fit_transform(self.X.reshape((self.I, self.J)))
+            X_pca_mode2 = pca_l.fit_transform(self.X.reshape((self.I, self.J)).T)
+            Y_pca_k = pca_k.transform(self.Y[:, self.l_star, :].reshape((self.K, self.J))).reshape((self.Kx, self.Ky, 3))
+            Y_pca_l = pca_l.transform(self.Y[self.k_star, :, :].reshape((self.I, self.L)).T).reshape((self.Lx, self.Ly, 3))
+            ax_K.plot_wireframe(Y_pca_k[:, :, 0], Y_pca_k[:, :, 1], Y_pca_k[:, :, 2], color='k')
+            ax_L.plot_wireframe(Y_pca_l[:, :, 0], Y_pca_l[:, :, 1], Y_pca_l[:, :, 2], color='k')
+            ax_K.scatter(X_pca_mode1[:, 0], X_pca_mode1[:, 1], X_pca_mode1[:, 2],
+                         c=[cm.jet(scale_mode1[i]) for i in range(self.I)])
+            ax_L.scatter(X_pca_mode2[:, 0], X_pca_mode2[:, 1], X_pca_mode2[:, 2],
+                         c=[cm.jet(scale_mode2[i]) for i in range(self.I)])
+            for d, l, s in zip(X_pca_mode1, self.labels1, scale_mode1):
+                ax_K.text(d[0], d[1], d[2], str(l), color=cm.jet(s))
+            for d, l, s in zip(X_pca_mode2, self.labels2, scale_mode2):
+                ax_L.text(d[0], d[1], d[2], str(l), color=cm.jet(s))
+            ax_k.set_xlim(X_pca_mode1[:, 0].min(), X_pca_mode1[:, 0].max())
+            ax_l.set_xlim(X_pca_mode2[:, 0].min(), X_pca_mode2[:, 0].max())
+            ax_k.set_ylim(X_pca_mode1[:, 1].min(), X_pca_mode1[:, 1].max())
+            ax_l.set_ylim(X_pca_mode2[:, 1].min(), X_pca_mode2[:, 1].max())
+            ax_k.set_zlim(X_pca_mode1[:, 2].min(), X_pca_mode1[:, 2].max())
+            ax_l.set_zlim(X_pca_mode2[:, 2].min(), X_pca_mode2[:, 2].max())
+            ax_k.set_xlabel('X axis')
+            ax_l.set_xlabel('X axis')
+            ax_k.set_ylabel('Y axis')
+            ax_l.set_ylabel('Y axis')
+            ax_k.set_zlabel('Z axis')
+            ax_l.set_zlabel('Z axis')
+            plt.show()
+        else:
+            pca_k = PCA(n_components=3)
+            pca_l = PCA(n_components=3)
+            X_pca_mode1 = pca_K.fit_transform(self.X.reshape((self.I, self.J)))
+            X_pca_mode2 = pca_L.fit_transform(self.X.reshape((self.I, self.J)).T)
+            Y_pca_k = pca_k.transform(self.Y[:, self.l_star, :].reshape((self.K, self.J)))
+            Y_pca_l = pca_l.transform(self.Y[self.k_star, :, :].reshape((self.I, self.L)).T)
+            ax_k.plot3D(Y_pca_k[:, 0], Y_pca_k[:, 1], Y_pca_k[:, 2], color='k')
+            ax_l.plot3D(Y_pca_l[:, 0], Y_pca_l[:, 1], Y_pca_l[:, 2], color='k')
+            ax_k.scatter(X_pca_mode1[:, 0], X_pca_mode1[:, 1], X_pca_mode1[:, 2],
+                         c=[cm.jet(scale_mode1[i]) for i in range(self.I)])
+            ax_l.scatter(X_pca_mode2[:, 0], X_pca_mode2[:, 1], X_pca_mode2[:, 2],
+                         c=[cm.jet(scale_mode2[i]) for i in range(self.I)])
+            for d, l, s in zip(X_pca_mode1, self.labels1, scale_mode1):
+                ax_k.text(d[0], d[1], d[2], str(l), color=cm.jet(s))
+            for d, l, s in zip(X_pca_mode2, self.labels2, scale_mode2):
+                ax_l.text(d[0], d[1], d[2], str(l), color=cm.jet(s))
+            ax_k.set_xlim(X_pca_mode1[:, 0].min(), X_pca_mode1[:, 0].max())
+            ax_l.set_xlim(X_pca_mode2[:, 0].min(), X_pca_mode2[:, 0].max())
+            ax_k.set_ylim(X_pca_mode1[:, 1].min(), X_pca_mode1[:, 1].max())
+            ax_l.set_ylim(X_pca_mode2[:, 1].min(), X_pca_mode2[:, 1].max())
+            ax_k.set_zlim(X_pca_mode1[:, 2].min(), X_pca_mode1[:, 2].max())
+            ax_l.set_zlim(X_pca_mode2[:, 2].min(), X_pca_mode2[:, 2].max())
+            ax_k.set_xlabel('X axis')
+            ax_l.set_xlabel('X axis')
+            ax_k.set_ylabel('Y axis')
+            ax_l.set_ylabel('Y axis')
+            ax_k.set_zlabel('Z axis')
+            ax_l.set_zlabel('Z axis')
+            plt.show()
