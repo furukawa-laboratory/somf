@@ -3,6 +3,7 @@ name: Feature request 機能追加リクエスト
 about: Suggest an idea for this project
 
 ---
+
 **target code 対象となるコード** 明確に分かっているならば書く
 
 **Is your feature request related to a problem? Please describe. この機能追加リクエストは何かの問題に関連していますか？**
