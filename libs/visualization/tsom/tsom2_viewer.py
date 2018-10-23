@@ -2,16 +2,9 @@ import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-<<<<<<< HEAD
-<<<<<<< HEAD
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.preprocessing import StandardScaler
-=======
->>>>>>> parent of 8e75650... add visualization of TSOM2 U_matrix
-=======
-from sklearn.preprocessing import StandardScaler
->>>>>>> master
 import scipy.spatial.distance as dist
 from matplotlib.widgets import RadioButtons
 from sklearn.decomposition import PCA
@@ -534,9 +527,6 @@ class TSOM2_Viewer:
         distance = dist.cdist(zeta, click_point)
         unit = np.argmin(distance, axis=0)
         return unit[0]
-<<<<<<< HEAD
-<<<<<<< HEAD
-
 
 # first hatano write code case of D=1
 class TSOM2_PCA:
@@ -625,9 +615,3 @@ class TSOM2_PCA:
             ax_k.set_zlabel('Z axis')
             ax_l.set_zlabel('Z axis')
             plt.show()
-=======
->>>>>>> parent of 8e75650... add visualization of TSOM2 U_matrix
-=======
-
-
->>>>>>> master
