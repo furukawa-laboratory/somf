@@ -108,7 +108,7 @@ class SOM:
 
         # Matrix computing distance between each reference vectors and the Best Matching Unit
         # Shape : Number_of_Reference_Vectors x Number_of_Input_Data_Vectors
-        H = tf.reshape(tf.pow(self.dist_test(self.Zeta, self.Z), 2), shape=[self.n * self.m, self.number_vectors])
+        H = tf.reshape(tf.pow(self.dist(self.Zeta, self.Z), 2), shape=[self.n * self.m, self.number_vectors])
 
         # Matrix computing the neighboorhood based on the distance Matrix H for each Reference Vectors
         # Shape : Number_of_Reference_Vectors x Number_of_Input_Data_Vectors
