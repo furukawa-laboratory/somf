@@ -7,7 +7,6 @@ import tensorflow as tf
 from tqdm import tqdm
 
 
-
 class SOM:
 
     #########################################################################################################################
@@ -15,26 +14,29 @@ class SOM:
     #  SOM Algorithm, Batch Implementation powered by Tensorflow
     #
     #  TODO :
-    # 
+    #
     #  - Fix an issue that causes visual oscillation while using 3D learning process
-    #	 (if it comes from the class) 
+    #	 (if it comes from the class)
+    #  - Test for match with base Algorithm : problem with the difference in computation betwwen cdist and pairwise_dist
+    #  - Meshgrid implementation on Tensorflow ?
+    #  
     #########################################################################################################################
 
-    def __init__(self, dim, number_vectors, epochs=50, n=10, m=10, sigma_min=0.3, sigma_max=2.2, tau=50):
-    	"""
-		Initializing the SOM Network through a TensorFlow graph
+    def __init__(self, dim, number_vectors, epochs=50, n=10, m=10, sigma_min=0.3, sigma_max=2.2, tau=50, init='rand'):
+        """
+        Initializing the SOM Network through a TensorFlow graph
 
-		:param dim: Dimension of the Input Data
-		:param number_vectors: Number of Vectors in the Input Data array
-		:param epochs: Number of epochs for iteration. Default is 50
-		:param n: Length of the visualisation map. Default is 10
-		:param m: Width pf the visuqlisqtion map. Default is 10
-		:param signa_min: Minimum value for sigma. Default is 0.3
-		:param sigma_max: Maximum value for sigma. Default is 2.2
-		:param tau: Learning rate. Default is 50
+        :param dim: Dimension of the Input Data
+        :param number_vectors: Number of Vectors in the Input Data array
+        :param epochs: Number of epochs for iteration. Default is 50
+        :param n: Length of the visualisation map. Default is 10
+        :param m: Width pf the visuqlisqtion map. Default is 10
+        :param signa_min: Minimum value for sigma. Default is 0.3
+        :param sigma_max: Maximum value for sigma. Default is 2.2
+        :param tau: Learning rate. Default is 50
 
-    	"""
-        print('Initializing SOM Tensorflow Graph...')
+        """
+        print('\nInitializing SOM Tensorflow Graph...\n')
 
         # Parameters initializing
         self.number_vectors = number_vectors
@@ -50,12 +52,13 @@ class SOM:
         self.historyZ = np.zeros((epochs, self.number_vectors, 2))
         self.historyY = np.zeros((epochs, self.n * self.m, self.dimension))
         self.historyS = np.zeros(epochs)
+        self.historyB = np.zeros((epochs, self.number_vectors, 1))
+
 
         # Setting the graph used by TensorFlow
         self.graph = tf.Graph()
 
         with self.graph.as_default():
-        	
             # Placeholder for the Input_data
             self.input_data = tf.placeholder(shape=[self.number_vectors, self.dimension], dtype=tf.float64)
 
@@ -63,57 +66,59 @@ class SOM:
 
             # Weights vectors (Y), BMU and Vectors image in 2D (Z and Zeta), initialized at random
             self.Y = tf.Variable(tf.random_normal(shape=[self.n * self.m, self.dimension], dtype=tf.float64))
-            self.Zeta = tf.Variable(
-                tf.reshape(tf.stack(np.meshgrid(np.linspace(-1, 1, self.n), np.linspace(-1, 1, self.m)), axis=2),
-                           shape=[self.n * self.m, 2]))
-            self.Z = tf.Variable(tf.random_uniform(shape=[self.number_vectors, 2], dtype=tf.float64)*2.0-1.0)
+            zeta = np.dstack(np.meshgrid(np.linspace(-1, 1, self.n), np.linspace(-1, 1, self.m))).reshape(self.n*self.m, 2)
+            self.Zeta = tf.constant(zeta, dtype=tf.float64)
+
+            if isinstance(init, str) and init == 'rand':
+                self.Z = tf.Variable(tf.random_uniform(shape=[self.number_vectors, 2], dtype=tf.float64) * 2.0 - 1.0)
+
+            elif isinstance(init, np.ndarray) and init.shape == (self.number_vectors, 2):
+                self.Z = tf.Variable(initial_value=init, dtype=tf.float64)
+
+            else:
+                raise ValueError("invalid init: {}".format(init))
 
             # Variable to store sigma value
             self.sigma_value = tf.Variable(tf.zeros(shape=(), dtype=tf.float64))
 
             # Assign value of sigma depending on iteration number
-            self.sigma_update = self.sigma_value.assign(self.sigma())
+            self.sigma_update = tf.assign(self.sigma_value, self.sigma())
 
             ################################### COOPERATION AND ADAPTATION STEP ########################################
 
-            # Compute the new weights
-            R = self.neighboor_update()
-
-            # Update the node weights
-            self.train_update = tf.assign(self.Y, R)
+            # Compute & Update the new weights
+            self.train_update = tf.assign(self.Y, self.neighboor_update())
 
             ########################################## COMPETITIVE STEP ################################################
 
             # Return a list with the number of each Best Best Matching Unit for each Input Vectors
-            bmu_nodes = self.winning_nodes()
+            self.bmu_nodes = self.winning_nodes()
 
             # BMU Vectors extractions, each vector is a 2 dimension one (for mapping)
             self.Z_update = tf.assign(self.Z,
-                                      tf.reshape(tf.gather(self.Zeta, bmu_nodes), shape=[self.number_vectors, 2]))
+                                      tf.reshape(tf.gather(self.Zeta, self.bmu_nodes), shape=[self.number_vectors, 2]))
 
             # Initializing Session and Variable
             self.session = tf.Session()
             self.session.run(tf.global_variables_initializer())
 
-            print('Ready !')
+            print('\nReady !\n')
 
-    
     def neighboor_update(self):
-    	"""
-		Computing the new weights for the Weights Tensor (Y)
-		See Batch SOM Algorithm for details
+        """
+        Computing the new weights for the Weights Tensor (Y)
+        See Batch SOM Algorithm for details
 
-		:returns: A Tensor of shape (Number_of_Reference_Vectors, Dimension)
-    	"""
+        :returns: A Tensor of shape (Number_of_Reference_Vectors, Dimension)
+        """
 
         # Matrix computing distance between each reference vectors and the Best Matching Unit
         # Shape : Number_of_Reference_Vectors x Number_of_Input_Data_Vectors
-        H = tf.reshape(tf.pow(self.dist(self.Zeta, self.Z), 2), shape=[self.n * self.m, self.number_vectors])
+        H = tf.reshape(tf.pow(self.pairwise_dist(self.Zeta, self.Z), 2), shape=[self.n * self.m, self.number_vectors])
 
         # Matrix computing the neighboorhood based on the distance Matrix H for each Reference Vectors
         # Shape : Number_of_Reference_Vectors x Number_of_Input_Data_Vectors
-        G = tf.reshape(tf.exp(-H / (2 * tf.pow(self.sigma_value, 2))), shape=[self.n * self.m, self.number_vectors])
-
+        G = tf.reshape(tf.exp(-H / (2 * tf.pow(self.sigma_update, 2))), shape=[self.n * self.m, self.number_vectors])
         # Computing invert Matrix of Sum
         # Shape : Number_of_Reference_Vectors x 1
         L = tf.expand_dims(tf.reduce_sum(G, axis=1), 1)
@@ -127,72 +132,67 @@ class SOM:
         # Shape : Number_of_Reference_Vectors x Number_of_Dimensions
         return B @ self.input_data
 
-    
     def sigma(self):
-    	"""
-		Computing the evolution of sigma based on the iteration number
-		Wrapping the function max using py_func to get a tensor
+        """
+        Computing the evolution of sigma based on the iteration number
+        Wrapping the function max using py_func to get a tensor
 
-		:returns: The value of sigma for this iteration
-    	"""
+        :returns: The value of sigma for this iteration
+        """
         return tf.py_func(max, (
-        tf.cast(self.sigma_min, tf.float64), tf.cast(self.sigma_max * (1 - (self.iter_no / self.tau)), tf.float64)),
-                            tf.float64)
-        
+            tf.cast(self.sigma_min, tf.float64), tf.cast(self.sigma_max * (1 - (self.iter_no / self.tau)), tf.float64)),
+                          tf.float64)
 
-    
     def winning_nodes(self):
-    	"""
-		Return the list of the Best Matching Units by computing the distance between
-		the Weights Tensor and the Input Data Tensor
+        """
+        Return the list of the Best Matching Units by computing the distance between
+        the Weights Tensor and the Input Data Tensor
 
-		:returns: A Tensor of shape (Number_of_Input_vectors, 1) containing the list of 
-		Best Matching Unit
-    	"""
-        return tf.transpose(tf.argmin([self.dist(self.Y, self.input_data)], 1))
+        :returns: A Tensor of shape (Number_of_Input_vectors, 1) containing the list of
+        Best Matching Unit
+        """
+        return tf.transpose(tf.argmin([self.pairwise_dist(self.Y, self.input_data)], 1))
 
-    def dist(self, x, y):
-    	"""
-		Pairwise computation between tensors Euclidean Distance
-    	Credits : https://stackoverflow.com/questions/43839120/compute-the-pairwise-distance-between-each-pair-of-the-two-collections-of-inputs
-    	
-    	:param x: First Tensor 2D
-    	:param y: Second Tensor 2D
-    	:returns: A Distance Tensor of shape (x[0], y[0])
+    def pairwise_dist(self, A, B):
+        """
+        Computes pairwise distances between each elements of A and each elements of B.
+        Args:
+          A,    [m,d] matrix
+          B,    [n,d] matrix
+        Returns:
+          D,    [m,n] matrix of pairwise distances
 
-    	"""
+        Credits : https://gist.github.com/mbsariyildiz/34cdc26afb630e8cae079048eef91865
+        """
+        with tf.variable_scope('pairwise_dist'):
+            # squared norms of each row in A and B
+            na = tf.reduce_sum(tf.square(A), 1)
+            nb = tf.reduce_sum(tf.square(B), 1)
 
-        p1 = tf.matmul(
-            tf.expand_dims(tf.reduce_sum(tf.square(x), 1), 1),
-            tf.ones(shape=(1, y.shape[0]), dtype=tf.float64)
-        )
-        p2 = tf.transpose(tf.matmul(
-            tf.reshape(tf.reduce_sum(tf.square(y), 1), shape=[-1, 1]),
-            tf.ones(shape=(x.shape[0], 1), dtype=tf.float64),
-            transpose_b=True
-        ))
+            # na as a row and nb as a co"lumn vectors
+            na = tf.reshape(na, [-1, 1])
+            nb = tf.reshape(nb, [1, -1])
 
-        res = tf.sqrt(tf.add(p1, p2) - 2 * tf.matmul(x, y, transpose_b=True))
+            # return pairwise euclidead difference matrix
+            D = tf.sqrt(tf.maximum(na - 2 * tf.matmul(A, B, False, True) + nb, 0.0))
+        return D
 
-        return res
-
-    
     def predict(self, data):
-    	"""
-		Launch prediction on data
+        """
+        Launch prediction on data
 
-		:param data: An array of data to predict on
-    	"""
-        print('Predicting out of {0} epochs'.format(self.epochs))
+        :param data: An array of data to predict on
+        """
+        print('\nPredicting out of {0} epochs\n'.format(self.epochs))
         bar = tqdm(range(self.epochs))
 
         for i in bar:
             # Computing each iteration for the whole batch (ie : Update the weights each iteration) + Saving history
-            self.historyY[i], self.historyZ[i], self.historyS[i] = self.session.run(
-                [self.train_update, self.Z_update, self.sigma_update],
+            self.historyS[i], self.historyY[i], self.historyZ[i], self.historyB[i] = self.session.run(
+                [self.sigma_update, self.train_update, self.Z_update, self.bmu_nodes],
                 feed_dict={self.input_data: data, self.iter_no: i})
 
-        print('Closing Tensorflow Session...\n')
+        print('\nClosing Tensorflow Session...\n')
 
         # Closing tf session
         self.session.close()
