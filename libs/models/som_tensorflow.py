@@ -15,11 +15,8 @@ class SOM:
     #
     #  TODO :
     #
-    #  - Fix an issue that causes visual oscillation while using 3D learning process
-    #	 (if it comes from the class)
-    #  - Test for match with base Algorithm : problem with the difference in computation betwwen cdist and pairwise_dist
     #  - Meshgrid implementation on Tensorflow ?
-    #  
+    #
     #########################################################################################################################
 
     def __init__(self, dim, number_vectors, epochs=50, n=10, m=10, sigma_min=0.3, sigma_max=2.2, tau=50, init='rand'):
@@ -52,7 +49,7 @@ class SOM:
         self.historyZ = np.zeros((epochs, self.number_vectors, 2))
         self.historyY = np.zeros((epochs, self.n * self.m, self.dimension))
         self.historyS = np.zeros(epochs)
-        self.historyB = np.zeros((epochs, self.number_vectors, 1))
+        self.historyB = np.zeros((epochs, self.number_vectors, self.n * self.m))
 
 
         # Setting the graph used by TensorFlow
@@ -92,7 +89,8 @@ class SOM:
             ########################################## COMPETITIVE STEP ################################################
 
             # Return a list with the number of each Best Best Matching Unit for each Input Vectors
-            self.bmu_nodes = self.winning_nodes()
+            self.bmu_nodes = tf.reshape(self.winning_nodes(), shape=[self.number_vectors])
+
 
             # BMU Vectors extractions, each vector is a 2 dimension one (for mapping)
             self.Z_update = tf.assign(self.Z,
@@ -151,7 +149,11 @@ class SOM:
         :returns: A Tensor of shape (Number_of_Input_vectors, 1) containing the list of
         Best Matching Unit
         """
-        return tf.transpose(tf.argmin([self.pairwise_dist(self.Y, self.input_data)], 1))
+
+        self.dist = self.pairwise_dist(self.input_data, self.train_update)
+
+        return tf.argmin(self.dist, 1)
+
 
     def pairwise_dist(self, A, B):
         """
@@ -189,7 +191,7 @@ class SOM:
         for i in bar:
             # Computing each iteration for the whole batch (ie : Update the weights each iteration) + Saving history
             self.historyS[i], self.historyY[i], self.historyZ[i], self.historyB[i] = self.session.run(
-                [self.sigma_update, self.train_update, self.Z_update, self.bmu_nodes],
+                [self.sigma_update, self.train_update, self.Z_update, self.dist],
                 feed_dict={self.input_data: data, self.iter_no: i})
 
         print('\nClosing Tensorflow Session...\n')
