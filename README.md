@@ -12,6 +12,7 @@ This is Repository to share library which all members use.
 │   ├── models              # class of models such as SOM, TSOM... SOMやTSOMなどの学習アルゴリズムのクラス
 │   ├── tools               # utility tools あらゆるライブラリで共通して用いるような汎用的なもの
 │   └── visualization       # module to visualize such as U-matrix, Component Plane... 描画用のライブラリ
+├── playground              # prototype code with playing 試しに作ってみた系のコード
 ├── tests                   # code to test libraries 開発した学習アルゴリズムが正しく動作するかどうかチェックするための実行ファイル置き場．
 │                           # place test code when you review pull request プルリクエストのレビューの際の検証コードはここに置く
 └── tutorials               # tutorial of libraries アルゴリズムのチュートリアルを実行するファイル置き場
