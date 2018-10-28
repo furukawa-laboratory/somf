@@ -51,13 +51,13 @@ GitHub-flowと呼ばれる方法を採用します．以下の流れです．
 4. Completing the work, create pull request. 作業がひと段落したらpull requestを出す．
    - Don't forget to write issue number. Issueの番号を必ず書いてください．
    - must request review to someone. レビューを必ず他の人に依頼すること．
-   - Doctor students can merge only. Dの学生だけがマージが可能．
+   - Only doctors students can merge. Dの学生だけがマージが可能．
 
 GitHub-flowに関してはこちらを参照してください．  
 [GitHub Flow ～GitHubを活用するブランチモデル～](https://tracpath.com/bootcamp/learning_git_github_flow.html)
 
 
 # Note 諸注意
-Libraries in this repository are made by every lab member. It is not a finished product without bugs. So do not use it as a black box with the feeling that you are an end user. Even for codes that are merged with master, please use it with a feeling of debugging. Also, please create issue or make what you want. We are expecting your positive contribute!
+Libraries in this repository are made by every lab members. It is not a finished product without bugs. So do not use it as a black box as an end user would. Even for codes that are merged with master, please keep in mind there might be some bugs. Also, please create issues or features request topic. We are expecting your positive contribution !
 
 このリポジトリにあるライブラリはあくまでラボメンバー皆で作って行くものです．バグのない完成したものではありません．なのでエンドユーザー感覚で完全にブラックボックスとして使わないでください．masterにマージされているライブラリでも，デバッグをやるぐらいの心づもりで利用してください．また，欲しい機能は自分で作ったりIssueで提案したり，積極的なcontributeを期待しています！
