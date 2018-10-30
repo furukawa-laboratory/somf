@@ -158,7 +158,7 @@ class SOM:
 
         with tf.name_scope('Sigma_computation'):
 
-            return tf.maximum(self.sigma_min, self.sigma_max*(1 - (self.iter_no/self.tau)))
+            return tf.maximum(tf.cast(self.sigma_min, tf.float64), self.sigma_max*(1 - (self.iter_no/self.tau)))
 
     def winning_nodes(self):
         """
