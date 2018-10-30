@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../../')
 
-import libs.models.som_tensorflow as SOM
+from libs.models.som_tensorflow import SOM
 from libs.visualization.som.Umatrix import SOM_Umatrix
 from libs.datasets.artificial import animal
 
