@@ -57,44 +57,53 @@ class SOM:
 
         with self.graph.as_default():
             # Placeholder for the Input_data
-            self.input_data = tf.placeholder(shape=[self.number_vectors, self.dimension], dtype=tf.float64)
+            self.input_data = tf.placeholder(shape=[self.number_vectors, self.dimension], dtype=tf.float64, name='Input_Data')
 
-            self.iter_no = tf.placeholder(dtype=tf.float64)
+            self.iter_no = tf.placeholder(dtype=tf.float64, name='Current_Iteration_Number')
 
             # Weights vectors (Y), BMU and Vectors image in 2D (Z and Zeta), initialized at random
-            self.Y = tf.Variable(tf.random_normal(shape=[self.n * self.m, self.dimension], dtype=tf.float64))
-            zeta = np.dstack(np.meshgrid(np.linspace(-1, 1, self.n), np.linspace(-1, 1, self.m))).reshape(self.n*self.m, 2)
-            self.Zeta = tf.constant(zeta, dtype=tf.float64)
+            with tf.name_scope('Weights_Tensor'):
+                self.Y = tf.Variable(tf.random_normal(shape=[self.n * self.m, self.dimension], dtype=tf.float64))
+
+            with tf.name_scope('Zeta_Matrix'):
+                zeta = np.dstack(np.meshgrid(np.linspace(-1, 1, self.n), np.linspace(-1, 1, self.m))).reshape(self.n*self.m, 2)
+                self.Zeta = tf.constant(zeta, dtype=tf.float64)
 
             if isinstance(init, str) and init == 'rand':
-                self.Z = tf.Variable(tf.random_uniform(shape=[self.number_vectors, 2], dtype=tf.float64) * 2.0 - 1.0)
+                with tf.name_scope('Z'):
+                    self.Z = tf.Variable(tf.random_uniform(shape=[self.number_vectors, 2], dtype=tf.float64) * 2.0 - 1.0)
 
             elif isinstance(init, np.ndarray) and init.shape == (self.number_vectors, 2):
-                self.Z = tf.Variable(initial_value=init, dtype=tf.float64)
+                with tf.name_scope('Z'):
+                    self.Z = tf.Variable(initial_value=init, dtype=tf.float64)
 
             else:
                 raise ValueError("invalid init: {}".format(init))
 
-            # Variable to store sigma value
-            self.sigma_value = tf.Variable(tf.zeros(shape=(), dtype=tf.float64))
+            with tf.name_scope('Sigma'):
+                # Variable to store sigma value
+                self.sigma_value = tf.Variable(tf.zeros(shape=(), dtype=tf.float64), name='Sigma_value')
 
-            # Assign value of sigma depending on iteration number
-            self.sigma_update = tf.assign(self.sigma_value, self.sigma())
+                # Assign value of sigma depending on iteration number
+                self.sigma_update = tf.assign(self.sigma_value, self.sigma(), name='Updating_Sigma_Value')
 
             ################################### COOPERATION AND ADAPTATION STEP ########################################
 
             # Compute & Update the new weights
-            self.train_update = tf.assign(self.Y, self.neighboor_update())
+            with tf.name_scope('Updating_Weights_Y'):
+                self.train_update = tf.assign(self.Y, self.neighboor_update())
 
             ########################################## COMPETITIVE STEP ################################################
 
             # Return a list with the number of each Best Best Matching Unit for each Input Vectors
-            self.bmu_nodes = tf.reshape(self.winning_nodes(), shape=[self.number_vectors])
+            with tf.name_scope('Getting_BMU_Nodes'):
+                self.bmu_nodes = tf.reshape(self.winning_nodes(), shape=[self.number_vectors])
 
 
             # BMU Vectors extractions, each vector is a 2 dimension one (for mapping)
-            self.Z_update = tf.assign(self.Z,
-                                      tf.reshape(tf.gather(self.Zeta, self.bmu_nodes), shape=[self.number_vectors, 2]))
+            with tf.name_scope('Updating_Z'):
+                self.Z_update = tf.assign(self.Z,
+                                      tf.reshape(tf.gather(self.Zeta, self.bmu_nodes, name='Choosing_Zeta_Based_On_BMU'), shape=[self.number_vectors, 2]))
 
             # Initializing Session and Variable
             self.session = tf.Session()
@@ -110,25 +119,34 @@ class SOM:
         :returns: A Tensor of shape (Number_of_Reference_Vectors, Dimension)
         """
 
-        # Matrix computing distance between each reference vectors and the Best Matching Unit
-        # Shape : Number_of_Reference_Vectors x Number_of_Input_Data_Vectors
-        H = tf.reshape(tf.pow(self.pairwise_dist(self.Zeta, self.Z), 2), shape=[self.n * self.m, self.number_vectors])
+        with tf.name_scope('New_Weights_Computation'):
 
-        # Matrix computing the neighboorhood based on the distance Matrix H for each Reference Vectors
-        # Shape : Number_of_Reference_Vectors x Number_of_Input_Data_Vectors
-        G = tf.reshape(tf.exp(-H / (2 * tf.pow(self.sigma_update, 2))), shape=[self.n * self.m, self.number_vectors])
-        # Computing invert Matrix of Sum
-        # Shape : Number_of_Reference_Vectors x 1
-        L = tf.expand_dims(tf.reduce_sum(G, axis=1), 1)
-        Linv = tf.convert_to_tensor(np.reciprocal(L))
+            # Matrix computing distance between each reference vectors and the Best Matching Unit
+            # Shape : Number_of_Reference_Vectors x Number_of_Input_Data_Vectors
+            with tf.name_scope('Neighboors_Distance_Matrix'):
+                H = tf.reshape(tf.pow(self.pairwise_dist(self.Zeta, self.Z), 2), shape=[self.n * self.m, self.number_vectors])
 
-        # Matrix computing the sum between the G Matrix and the invertMatrix
-        # Shape : Number_of_Reference_Vectors x Number_of_Input_Vectors
-        B = G * Linv
+            # Matrix computing the neighboorhood based on the distance Matrix H for each Reference Vectors
+            # Shape : Number_of_Reference_Vectors x Number_of_Input_Data_Vectors
+            with tf.name_scope('Determining_Neighboorhood'):
+                G = tf.reshape(tf.exp(-H / (2 * tf.pow(self.sigma_update, 2))), shape=[self.n * self.m, self.number_vectors])
 
-        # Computing the wieghts
-        # Shape : Number_of_Reference_Vectors x Number_of_Dimensions
-        return B @ self.input_data
+
+            # Computing invert Matrix of Sum
+            # Shape : Number_of_Reference_Vectors x 1
+            with tf.name_scope('Computing_Invert_Sum_Distance'):
+                L = tf.expand_dims(tf.reduce_sum(G, axis=1), 1)
+                Linv = tf.convert_to_tensor(np.reciprocal(L))
+
+            # Matrix computing the sum between the G Matrix and the invertMatrix
+            # Shape : Number_of_Reference_Vectors x Number_of_Input_Vectors
+            with tf.name_scope('Sum_betwwen_Neighboorhood_Matrix_and_Invert_Sum'):
+                B = G * Linv
+
+            # Computing the weights
+            # Shape : Number_of_Reference_Vectors x Number_of_Dimensions
+            with tf.name_scope('Computing_Weights'):
+                return B @ self.input_data
 
     def sigma(self):
         """
@@ -137,9 +155,10 @@ class SOM:
 
         :returns: The value of sigma for this iteration
         """
-        return tf.py_func(max, (
-            tf.cast(self.sigma_min, tf.float64), tf.cast(self.sigma_max * (1 - (self.iter_no / self.tau)), tf.float64)),
-                          tf.float64)
+
+        with tf.name_scope('Sigma_computation'):
+
+            return tf.maximum(tf.cast(self.sigma_min, tf.float64), self.sigma_max*(1 - (self.iter_no/self.tau)))
 
     def winning_nodes(self):
         """
@@ -150,9 +169,11 @@ class SOM:
         Best Matching Unit
         """
 
-        self.dist = self.pairwise_dist(self.input_data, self.train_update)
+        with tf.name_scope('Winning_node'):
 
-        return tf.argmin(self.dist, 1)
+            self.dist = self.pairwise_dist(self.input_data, self.train_update)
+
+            return tf.argmin(self.dist, 1, name='Argmin')
 
 
     def pairwise_dist(self, A, B):
@@ -166,7 +187,7 @@ class SOM:
 
         Credits : https://gist.github.com/mbsariyildiz/34cdc26afb630e8cae079048eef91865
         """
-        with tf.variable_scope('pairwise_dist'):
+        with tf.name_scope('Pairwise_Distance'):
             # squared norms of each row in A and B
             na = tf.reduce_sum(tf.square(A), 1)
             nb = tf.reduce_sum(tf.square(B), 1)
@@ -179,20 +200,29 @@ class SOM:
             D = tf.sqrt(tf.maximum(na - 2 * tf.matmul(A, B, False, True) + nb, 0.0))
         return D
 
-    def predict(self, data):
+    def predict(self, data, graph=False):
         """
         Launch prediction on data
 
         :param data: An array of data to predict on
+        :param graph: Default is False. Save the graph to be visualised in tensorboard (default directory 'output'
+        will be at the same location of the file using the algorith;.
         """
         print('\nPredicting out of {0} epochs\n'.format(self.epochs))
         bar = tqdm(range(self.epochs))
+
+
+
 
         for i in bar:
             # Computing each iteration for the whole batch (ie : Update the weights each iteration) + Saving history
             self.historyS[i], self.historyY[i], self.historyZ[i], self.historyB[i] = self.session.run(
                 [self.sigma_update, self.train_update, self.Z_update, self.dist],
                 feed_dict={self.input_data: data, self.iter_no: i})
+
+        if graph == True:
+            writer = tf.summary.FileWriter('output', self.session.graph)
+            writer.close()
 
         print('\nClosing Tensorflow Session...\n')
 
