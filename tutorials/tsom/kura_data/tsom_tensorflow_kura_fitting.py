@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from libs.datasets.artificial.kura_tsom import load_kura_tsom
-from libs.models.tsom import TSOM2
+from libs.models.tsom_tensorflow import TSOM2 as ts
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation as animation
 
@@ -28,9 +28,9 @@ sigma2_min=0.1
 sigma2_zero=1.2
 
 
-tsom2=TSOM2(X,latent_dim=(1,1),resolution=(10,15),SIGMA_MAX=(sigma1_zero,sigma2_zero),
-                  SIGMA_MIN=sigma1_min, TAU=(tau1,tau2))
-tsom2.fit(nb_epoch=250)
+tsom2 = ts(X.shape[2], [X.shape[0], X.shape[1]], latentdim=[1,1], epochs=250, n=[10, 15], m=[10,15], sigma_max=[sigma1_zero,sigma2_zero], sigma_min=[sigma1_min, sigma2_min], tau=[tau1, tau2])
+
+tsom2.predict(X)
 #観測空間の描画
 
 fig = plt.figure()
@@ -38,7 +38,7 @@ ax = Axes3D(fig)
 def plot(i):
     ax.cla()
     ax.scatter(X[:,:, 0], X[:,:, 1], X[:,:, 2])
-    ax.plot_wireframe(tsom2.history['y'][i,:, :, 0], tsom2.history['y'][i,:, :, 1], tsom2.history['y'][i,:, :, 2])
+    ax.plot_wireframe(tsom2.historyY[i,:, :, 0], tsom2.historyY[i,:, :, 1], tsom2.historyY[i,:, :, 2])
     plt.title(' t=' + str(i))
 
 ani = animation.FuncAnimation(fig, plot, frames=250,interval=100)
