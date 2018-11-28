@@ -14,8 +14,6 @@ class SOM:
 
         self.D = X.shape[1]
 
-
-
         if latent_dim == 1:
             self.L = latent_dim
             self.Zeta = np.linspace(-1.0, 1.0, resolution)[:,np.newaxis]
