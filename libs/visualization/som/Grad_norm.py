@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import scipy.spatial.distance as dist
 from sklearn.preprocessing import StandardScaler
 import matplotlib.animation
-from ...tools.calc_umatrix import calc_umatrix
+from ...tools.calc_grad_norm_of_ks import calc_grad_norm_of_ks as calc_grad_norm
 
 
 class Grad_Norm:
@@ -83,7 +83,7 @@ class Grad_Norm:
         sigma = self.sigma_allepoch[0]
 
         # Grad_norm表示用の値を算出
-        dY_std = calc_umatrix(Zeta=self.Zeta, Z=Z, X=self.X, sigma=sigma) # return value in [-2.0,2.0]
+        dY_std = calc_grad_norm(Zeta=self.Zeta, Z=Z, X=self.X, sigma=sigma) # return value in [-2.0,2.0]
         U_matrix_val = dY_std.reshape((self.resolution, self.resolution))
 
         # Grad_norm表示
@@ -115,7 +115,7 @@ class Grad_Norm:
         Z = self.Z_allepoch[epoch, :, :]
         sigma = self.sigma_allepoch[epoch]
 
-        dY_std = calc_umatrix(Zeta=self.Zeta, Z=Z, X=self.X, sigma=sigma) # return value in [-2.0,2.0]
+        dY_std = calc_grad_norm(Zeta=self.Zeta, Z=Z, X=self.X, sigma=sigma) # return value in [-2.0,2.0]
         U_matrix_val = dY_std.reshape((self.resolution, self.resolution))
         self.Im.set_array(U_matrix_val)
         self.Scat.set_offsets(Z)
