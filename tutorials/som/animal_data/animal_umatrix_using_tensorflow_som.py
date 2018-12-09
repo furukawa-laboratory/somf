@@ -2,7 +2,7 @@ import sys
 sys.path.append('../../')
 
 from libs.models.som_tensorflow import SOM
-from libs.visualization.som.Umatrix import SOM_Umatrix
+from libs.visualization.som.Grad_norm import SOM_Umatrix
 from libs.datasets.artificial import animal
 
 
