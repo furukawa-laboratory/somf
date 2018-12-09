@@ -3,7 +3,7 @@ import scipy.spatial.distance as dist
 from sklearn.preprocessing import StandardScaler
 
 # U-matrix表示用の値（勾配）を算出
-def calc_umatrix(Zeta, X, Z, sigma, clipping_value=[-2.0, 2.0]):
+def calc_grad_norm_of_ks(Zeta, X, Z, sigma, clipping_value=[-2.0, 2.0]):
     # H, G, Rの算出
     dist_z = dist.cdist(Zeta, Z, 'sqeuclidean')
     H = np.exp(-dist_z / (2 * sigma * sigma))
