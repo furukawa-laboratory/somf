@@ -6,9 +6,9 @@ import matplotlib.animation
 from ...tools.calc_umatrix import calc_umatrix
 
 
-class SOM_Umatrix:
+class Grad_Norm:
     def __init__(self, X=None, Z=None, sigma=0.2, resolution=100,
-                 labels=None, fig_size=[6, 6], title_text='U-matrix', cmap_type='jet',
+                 labels=None, fig_size=[6, 6], title_text='Grad_norm', cmap_type='jet',
                  interpolation_method='spline36', repeat=False, interval=40):
         # インプットが無効だった時のエラー処理
         if Z is None:
@@ -75,18 +75,18 @@ class SOM_Umatrix:
             np.linspace(self.Z_allepoch[:, :, 1].min(), self.Z_allepoch[:, :, 1].max(), self.resolution))
         self.Zeta = np.dstack(self.Zeta).reshape(self.K, self.L)
 
-    # U-matrix表示
+    # Grad_norm表示
     def draw_umatrix(self):
 
-        # U-matrixの初期状態を表示する
+        # Grad_normの初期状態を表示する
         Z = self.Z_allepoch[0, :, :]
         sigma = self.sigma_allepoch[0]
 
-        # U-matrix表示用の値を算出
+        # Grad_norm表示用の値を算出
         dY_std = calc_umatrix(Zeta=self.Zeta, Z=Z, X=self.X, sigma=sigma) # return value in [-2.0,2.0]
         U_matrix_val = dY_std.reshape((self.resolution, self.resolution))
 
-        # U-matrix表示
+        # Grad_norm表示
         self.Map.set_title(self.title_text)
         self.Im = self.Map.imshow(U_matrix_val, interpolation=self.interpolation_method,
                                   extent=[self.Zeta[:, 0].min(), self.Zeta[:, 0].max(),
