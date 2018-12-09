@@ -4,7 +4,7 @@ import sys
 sys.path.append('../../')
 
 from libs.models.som import SOM
-from libs.visualization.som.Grad_norm import SOM_Umatrix
+from libs.visualization.som.Grad_norm import Grad_Norm
 from libs.datasets.artificial import animal
 
 
@@ -27,10 +27,10 @@ if __name__ == '__main__':
     som = SOM(X, latent_dim=latent_dim, resolution=resolution, sigma_max=sigma_max, sigma_min=sigma_min, tau=tau)
     som.fit(nb_epoch=nb_epoch)
 
-    som_umatrix = SOM_Umatrix(X=X,
-                              Z=som.history['z'],
-                              sigma=som.history['sigma'],
-                              labels=labels,
-                              resolution=umat_resolution,
-                              title_text=title_text)
+    som_umatrix = Grad_Norm(X=X,
+                            Z=som.history['z'],
+                            sigma=som.history['sigma'],
+                            labels=labels,
+                            resolution=umat_resolution,
+                            title_text=title_text)
     som_umatrix.draw_umatrix()
