@@ -4,7 +4,7 @@ import sys
 sys.path.append('../../')
 
 from libs.models.som import SOM
-from libs.visualization.som.Umatrix import SOM_Umatrix
+from libs.visualization.som.Grad_norm import Grad_Norm
 from libs.datasets.artificial import animal
 
 
@@ -17,8 +17,8 @@ if __name__ == '__main__':
     latent_dim = 2
     seed = 1
 
-    title_text= "animal map"
-    umat_resolution = 100 # U-matrix表示の解像度
+    title="animal map"
+    umat_resolution = 100 #U-matrix表示の解像度
 
     X, labels = animal.load_data()
 
@@ -27,10 +27,13 @@ if __name__ == '__main__':
     som = SOM(X, latent_dim=latent_dim, resolution=resolution, sigma_max=sigma_max, sigma_min=sigma_min, tau=tau)
     som.fit(nb_epoch=nb_epoch)
 
-    som_umatrix = SOM_Umatrix(X=X,
-                              Z=som.history['z'],
-                              sigma=som.history['sigma'],
-                              labels=labels,
-                              resolution=umat_resolution,
-                              title_text=title_text)
+    Z = som.Z
+    sigma = som.history['sigma'][-1]
+
+    som_umatrix = Grad_Norm(X=X,
+                            Z=Z,
+                            sigma=sigma,
+                            labels=labels,
+                            title_text=title,
+                            resolution=umat_resolution)
     som_umatrix.draw_umatrix()
