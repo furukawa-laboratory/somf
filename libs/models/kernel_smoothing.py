@@ -4,8 +4,16 @@ from scipy.spatial import distance as dist
 
 
 class KernelSmoothing:
-    def __init__(self, sigma):
-        self.sigma = sigma
+    def __init__(self, sigma=None):
+        if sigma is not None:
+            pass
+        else:
+            raise ValueError("sigma must be input:{}".format(sigma))
+
+        if isinstance(sigma, float):
+            self.sigma = sigma
+        else:
+            raise ValueError("invalid sigma:{}".format(sigma))
 
     def _check_correct_ndarray(self, array, array_name):
         if isinstance(array, np.ndarray):
