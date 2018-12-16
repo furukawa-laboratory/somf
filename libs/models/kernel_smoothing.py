@@ -40,7 +40,7 @@ class KernelSmoothing:
     def predict(self, Xnew):
         # check format of Xnew
         self._check_correct_ndarray(Xnew, "Xnew")
-        Xnew = Xnew.copy().reshape(Xnew[0], -1)
+        Xnew = Xnew.reshape(Xnew.shape[0], -1)
         if Xnew.shape[1] != self.input_dim:
             raise ValueError("X and Xnew must be same dimension")
 
@@ -62,7 +62,7 @@ class KernelSmoothing:
     def calc_gradient(self, Xnew):
         # check format of Xnew
         self._check_correct_ndarray(Xnew, "Xnew")
-        Xnew = Xnew.reshape(Xnew[0], -1)
+        Xnew = Xnew.reshape(Xnew.shape[0], -1)
         if Xnew.shape[1] != self.input_dim:
             raise ValueError("X and Xnew must be same dimension")
 
@@ -77,12 +77,6 @@ class KernelSmoothing:
         return dFdX
 
     def calc_gradient_sqnorm(self, Xnew):
-        # check format of Xnew
-        self._check_correct_ndarray(Xnew, "Xnew")
-        Xnew = Xnew.reshape(Xnew[0], -1)
-        if Xnew.shape[1] != self.input_dim:
-            raise ValueError("X and Xnew must be same dimension")
-
         # calculate gradient squared norm of Xnew
         dFdX = self.calc_gradient(Xnew)
         return np.sum(dFdX ** 2, axis=(1, 2))  # K
