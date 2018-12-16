@@ -13,30 +13,32 @@ def _main():
     nb_samples = 100
     x_noise_sigma = 0.1
     x = np.random.rand(nb_samples) * 2.0 - 1.0
-    y = generate(x) + np.random.normal(0.0, x_noise_sigma, x.shape)
+    y = func(x) + np.random.normal(0.0, x_noise_sigma, x.shape)
 
-    # Set parameter
-    sigma = 0.2
+    # Set parameter of ks
+    sigma = 0.1
 
     # Set parameter to visualize
-    xnew = np.linspace(-1.2,1.2,200)
+    nb_new_samples = 200
+    xnew = np.linspace(-1.2,1.2,nb_new_samples)
+    f_true = func(xnew)
 
     # Fit and predict by kernel smoothing
     ks = KernelSmoothing(sigma=sigma)
     ks.fit(x,y)
     f_ks = ks.predict(xnew)
 
-
-
+    # Plot training samples and estimated function
     fig = plt.figure(figsize=[5,3])
     ax = fig.add_subplot(1,1,1)
-    ax.scatter(x,y,label='samples')
+    ax.scatter(x,y,label='samples', s=8)
     ax.plot(xnew,f_ks,label='ks')
+    ax.plot(xnew,f_true,label='true')
     plt.legend()
     plt.show()
 
 
-def generate(x):
+def func(x):
     return 0.6 * x + 0.3 * (x**2.0) + 0.7 * (x**3.0)
 
 
