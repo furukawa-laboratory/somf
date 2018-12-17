@@ -10,7 +10,7 @@ class KernelSmoothing:
         else:
             raise ValueError("sigma must be input:{}".format(sigma))
 
-        if isinstance(sigma, float):
+        if isinstance(sigma, float) and sigma > 0.0:
             self.sigma = sigma
         else:
             raise ValueError("invalid sigma:{}".format(sigma))
