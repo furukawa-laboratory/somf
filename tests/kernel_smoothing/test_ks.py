@@ -1,6 +1,7 @@
 import unittest
 
 import numpy as np
+from scipy.spatial import distance as dist
 
 from libs.models import KernelSmoothing
 from libs.models.som_use_for import SOMUseFor
@@ -62,28 +63,43 @@ class TestKS(unittest.TestCase):
         with self.assertRaises(ValueError):
             grad = ks.calc_gradient_sqnorm(dummy_Xnew_2d)
 
-    # def test_numpy_vs_usefor(self):
-    #     N = 100
-    #     D = 3
-    #     L = 2
-    #     resolution = 10
-    #     M = resolution ** L
-    #     seed = 100
-    #     np.random.seed(seed)
-    #     X = np.random.normal(0, 1, (N, D))
-    #     Zinit = np.random.rand(N,L)
-    #
-    #     nb_epoch = 200
-    #     SIGMA_MAX = 2.2
-    #     SIGMA_MIN = 0.1
-    #     TAU = 50
-    #     som_numpy = SOM(X,L,resolution,SIGMA_MAX,SIGMA_MIN,TAU,init=Zinit)
-    #     som_use_for = SOMUseFor(X,L,resolution,SIGMA_MAX,SIGMA_MIN,TAU,init=Zinit)
-    #
-    #     som_numpy.fit(nb_epoch=nb_epoch)
-    #     som_use_for.fit(nb_epoch=nb_epoch)
-    #
-    #     np.testing.assert_allclose(som_numpy.history['y'],som_use_for.history['y'])
+    def test_macthing_results_ks_in_som_and_som_use_for(self):
+        N = 100
+        D = 3
+        L = 2
+        resolution = 10
+        M = resolution ** L
+        seed = 100
+        np.random.seed(seed)
+        X = np.random.normal(0, 1, (N, D))
+        Zinit = np.random.rand(N,L)
+
+        nb_epoch = 300
+        SIGMA_MAX = 2.2
+        SIGMA_MIN = 0.1
+        TAU = 50
+
+        # learn som_use_for
+        som_use_for = SOMUseFor(X,L,resolution,SIGMA_MAX,SIGMA_MIN,TAU,init=Zinit)
+        som_use_for.fit(nb_epoch=nb_epoch)
+
+
+        # calculate som algorithm using KernelSmoothing
+        Zeta = som_use_for.Zeta.copy()
+        Z = Zinit
+        historyY = np.zeros((nb_epoch,M,D))
+        for epoch in range(nb_epoch):
+            sigma = max(SIGMA_MIN, SIGMA_MAX * ( 1 - (epoch / TAU) ) )
+            ks = KernelSmoothing(sigma=sigma)
+            ks.fit(X=Z, Y=X)
+            Y = ks.predict(Zeta)
+            Dist = dist.cdist(X, Y)
+            bmus = Dist.argmin(axis=1)
+            Z = Zeta[bmus, :]
+            historyY[epoch] = Y
+
+        # compare two results
+        np.testing.assert_allclose(historyY,som_use_for.history['y'])
 
 
 if __name__ == "__main__":
