@@ -12,7 +12,7 @@ class KernelSmoothingTheano(KernelSmoothing):
         self.X = theano.shared(self.X.copy())
         self.Y = theano.shared(self.Y.copy())
 
-    def _difine_ks(self):
+    def _difine_ks(self,flag='map'):
         xnew = tt.dmatrix('xnew')
         xnew1 = xnew.dimshuffle(0, 'x', 1)
         Delta = xnew1 - self.X[np.newaxis,:,:]
@@ -22,9 +22,14 @@ class KernelSmoothingTheano(KernelSmoothing):
         GInv = 1.0 / G
         R = H * GInv
         F = tt.dot(R, self.Y)
-        mapping = theano.function(inputs=[xnew], outputs=[F])
+        Grad = tt.grad(tt.sum(F),xnew)
 
-        return mapping
+        if flag=='map':
+            func = theano.function(inputs=[xnew], outputs=[F])
+            return func
+        elif flag=='grad':
+            func = theano.function(inputs=[xnew], outputs=[Grad])
+            return func
     def predict(self, Xnew):
         # check format of Xnew
         self._check_correct_ndarray(Xnew, "Xnew")
@@ -32,12 +37,30 @@ class KernelSmoothingTheano(KernelSmoothing):
         if Xnew.shape[1] != self.input_dim:
             raise ValueError("X and Xnew must be same dimension")
 
-        mapping = self._difine_ks()
+        func = self._difine_ks('map')
 
-        fnew, = mapping(Xnew)
+        fnew, = func(Xnew)
         return fnew
 
-    # def calc_gradient(self, Xnew):
+    def calc_gradient(self, Xnew):
+        # check format of Xnew
+        self._check_correct_ndarray(Xnew, "Xnew")
+        Xnew = Xnew.reshape(Xnew.shape[0], -1)
+        if Xnew.shape[1] != self.input_dim:
+            raise ValueError("X and Xnew must be same dimension")
+
+        if self.Y.get_value().shape[1] != 1:
+            raise ValueError("not support 2 or more dimension of Y")
+
+        func = self._difine_ks('grad')
+        grad_new, = func(Xnew)
+        return grad_new
+
+    def calc_gradient_sqnorm(self, Xnew):
+        # calculate gradient squared norm of Xnew
+        dFdX = self.calc_gradient(Xnew)
+        return np.sum(dFdX ** 2, axis=(1, 2))  # K
+
 
 
     # def _calc_standardized_coefficient(self, Xnew):
@@ -65,8 +88,3 @@ class KernelSmoothingTheano(KernelSmoothing):
     #     dRdX = V - R[:, :, np.newaxis] * V_mean  # KxNxL
     #     dFdX = np.einsum("knl,nd->kdl", dRdX, self.Y)  # KxDxL
     #     return dFdX
-    #
-    # def calc_gradient_sqnorm(self, Xnew):
-    #     # calculate gradient squared norm of Xnew
-    #     dFdX = self.calc_gradient(Xnew)
-    #     return np.sum(dFdX ** 2, axis=(1, 2))  # K
