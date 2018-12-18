@@ -15,15 +15,16 @@ class KernelSmoothingTheano(KernelSmoothing):
     def _difine_ks(self):
         xnew = tt.dmatrix('xnew')
         xnew1 = xnew.dimshuffle(0, 'x', 1)
-        Delta = xnew1 - self.X
+        Delta = xnew1 - self.X[np.newaxis,:,:]
         Dist = tt.sum(tt.square(Delta), axis=2)
-        H = tt.exp(0.5*Dist/(self.sigma*self.sigma))
+        H = tt.exp(-0.5*Dist/(self.sigma*self.sigma))
         G = tt.sum(H, axis=1).dimshuffle(0, 'x')
         GInv = 1.0 / G
         R = H * GInv
         F = tt.dot(R, self.Y)
+        mapping = theano.function(inputs=[xnew], outputs=[F])
 
-        return F
+        return mapping
     def predict(self, Xnew):
         # check format of Xnew
         self._check_correct_ndarray(Xnew, "Xnew")
@@ -31,10 +32,10 @@ class KernelSmoothingTheano(KernelSmoothing):
         if Xnew.shape[1] != self.input_dim:
             raise ValueError("X and Xnew must be same dimension")
 
-        F = self._difine_ks()
-        mapping = theano.function(inputs=[xnew], outputs=[F])
+        mapping = self._difine_ks()
 
-        return mapping(Xnew)
+        fnew, = mapping(Xnew)
+        return fnew
 
     # def calc_gradient(self, Xnew):
 
