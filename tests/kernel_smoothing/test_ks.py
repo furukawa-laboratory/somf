@@ -75,7 +75,7 @@ class TestKS(unittest.TestCase):
         X = np.random.normal(0, 1, (N, D))
         Zinit = np.random.rand(N,L)
 
-        nb_epoch = 300
+        nb_epoch = 50
         SIGMA_MAX = 2.2
         SIGMA_MIN = 0.1
         TAU = 50
@@ -106,7 +106,7 @@ class TestKS(unittest.TestCase):
         nb_samples = 500
         nb_new_samples = 750
         input_dim = 5
-        output_dim = 3
+        output_dim = 1
         seed = 100
         np.random.seed(seed)
         X = np.random.normal(0.0,1.0,(nb_samples,input_dim))
@@ -117,12 +117,19 @@ class TestKS(unittest.TestCase):
         ks_numpy = KernelSmoothing(sigma)
         ks_numpy.fit(X,Y)
         f_numpy = ks_numpy.predict(Xnew)
+        grad_numpy = ks_numpy.calc_gradient(Xnew)
+        grad_sq_norm_numpy = ks_numpy.calc_gradient_sqnorm(Xnew)
 
         ks_theano = KernelSmoothingTheano(sigma)
         ks_theano.fit(X,Y)
         f_theano = ks_theano.predict(Xnew)
+        grad_theano = ks_theano.calc_gradient(Xnew)
+        grad_sq_norm_theano = ks_theano.calc_gradient_sqnorm(Xnew)
 
         np.testing.assert_allclose(f_numpy,f_theano)
+        np.testing.assert_allclose(grad_numpy.reshape(nb_new_samples,input_dim),grad_theano,atol=1e-14)# default value is atol=0.0
+        np.testing.assert_allclose(grad_sq_norm_numpy,grad_sq_norm_theano,atol=1e-20)# default value is atol=0.0
+        # Because np.std(grad_theano) = 2.5377, the different seems to be very small value.
 
 
 
