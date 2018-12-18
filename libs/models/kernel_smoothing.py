@@ -68,7 +68,7 @@ class KernelSmoothing:
 
         # calculate gradient of Xnew (size: Xnew.shape[0] x output_dim x input_dim)
         R = self._calc_standardized_coefficient(Xnew)
-        V = R[:, :, np.newaxis] * (self.X[np.newaxis, :, :] - Xnew[:, np.newaxis, :])  # KxNxL
+        V = R[:, :, np.newaxis] * (self.X[np.newaxis, :, :] - Xnew[:, np.newaxis, :]) / (self.sigma * self.sigma)  # KxNxL
         V_mean = V.sum(axis=1)[:, np.newaxis, :]  # Kx1xL
 
         # calculate true gradient squared norm
