@@ -64,7 +64,7 @@ class TestKS(unittest.TestCase):
         with self.assertRaises(ValueError):
             grad = ks.calc_gradient_sqnorm(dummy_Xnew_2d)
 
-    def test_macthing_results_ks_in_som_and_som_use_for(self):
+    def test_matching_using_for_only(self):
         N = 100
         D = 3
         L = 2
