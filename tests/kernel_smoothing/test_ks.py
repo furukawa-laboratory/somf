@@ -73,7 +73,7 @@ class TestKS(unittest.TestCase):
         seed = 100
         np.random.seed(seed)
         X = np.random.normal(0, 1, (N, D))
-        Zinit = np.random.rand(N,L)
+        Zinit = np.random.rand(N, L)
 
         nb_epoch = 50
         SIGMA_MAX = 2.2
@@ -81,16 +81,15 @@ class TestKS(unittest.TestCase):
         TAU = 50
 
         # learn som_use_for
-        som_use_for = SOMUseFor(X,L,resolution,SIGMA_MAX,SIGMA_MIN,TAU,init=Zinit)
+        som_use_for = SOMUseFor(X, L, resolution, SIGMA_MAX, SIGMA_MIN, TAU, init=Zinit)
         som_use_for.fit(nb_epoch=nb_epoch)
-
 
         # calculate som algorithm using KernelSmoothing
         Zeta = som_use_for.Zeta.copy()
         Z = Zinit
-        historyY = np.zeros((nb_epoch,M,D))
+        historyY = np.zeros((nb_epoch, M, D))
         for epoch in range(nb_epoch):
-            sigma = max(SIGMA_MIN, SIGMA_MAX * ( 1 - (epoch / TAU) ) )
+            sigma = max(SIGMA_MIN, SIGMA_MAX * (1 - (epoch / TAU)))
             ks = KernelSmoothing(sigma=sigma)
             ks.fit(X=Z, Y=X)
             Y = ks.predict(Zeta)
@@ -100,37 +99,37 @@ class TestKS(unittest.TestCase):
             historyY[epoch] = Y
 
         # compare two results
-        np.testing.assert_allclose(historyY,som_use_for.history['y'])
+        np.testing.assert_allclose(historyY, som_use_for.history['y'])
 
     def test_matching_theano(self):
         nb_samples = 500
         nb_new_samples = 750
         input_dim = 5
-        output_dim = 1 # Theano ver doesn't follow output_dim > 1 in calculation of gradient
+        output_dim = 1  # Theano ver doesn't follow output_dim > 1 in calculation of gradient
         seed = 100
         np.random.seed(seed)
-        X = np.random.normal(0.0,1.0,(nb_samples,input_dim))
-        Y = np.random.normal(0.0,1.0,(nb_samples,output_dim))
-        Xnew = np.random.normal(0.0,1.0,(nb_new_samples,input_dim))
+        X = np.random.normal(0.0, 1.0, (nb_samples, input_dim))
+        Y = np.random.normal(0.0, 1.0, (nb_samples, output_dim))
+        Xnew = np.random.normal(0.0, 1.0, (nb_new_samples, input_dim))
 
         sigma = 0.2
         ks_numpy = KernelSmoothing(sigma)
-        ks_numpy.fit(X,Y)
+        ks_numpy.fit(X, Y)
         f_numpy = ks_numpy.predict(Xnew)
         grad_numpy = ks_numpy.calc_gradient(Xnew)
         grad_sq_norm_numpy = ks_numpy.calc_gradient_sqnorm(Xnew)
 
         ks_theano = KernelSmoothingTheano(sigma)
-        ks_theano.fit(X,Y)
+        ks_theano.fit(X, Y)
         f_theano = ks_theano.predict(Xnew)
         grad_theano = ks_theano.calc_gradient(Xnew)
         grad_sq_norm_theano = ks_theano.calc_gradient_sqnorm(Xnew)
 
-        np.testing.assert_allclose(f_numpy,f_theano)
-        np.testing.assert_allclose(grad_numpy.reshape(nb_new_samples,input_dim),grad_theano,atol=1e-14)# default value is atol=0.0
-        np.testing.assert_allclose(grad_sq_norm_numpy,grad_sq_norm_theano,atol=1e-20)# default value is atol=0.0
+        np.testing.assert_allclose(f_numpy, f_theano)
+        np.testing.assert_allclose(grad_numpy.reshape(nb_new_samples, input_dim), grad_theano,
+                                   atol=1e-14)  # default value is atol=0.0
+        np.testing.assert_allclose(grad_sq_norm_numpy, grad_sq_norm_theano, atol=1e-20)  # default value is atol=0.0
         # Because np.std(grad_theano) = 2.5377, the different seems to be very small value.
-
 
 
 if __name__ == "__main__":
