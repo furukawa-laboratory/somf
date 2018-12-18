@@ -106,7 +106,7 @@ class TestKS(unittest.TestCase):
         nb_samples = 500
         nb_new_samples = 750
         input_dim = 5
-        output_dim = 1
+        output_dim = 1 # Theano ver doesn't follow output_dim > 1 in calculation of gradient
         seed = 100
         np.random.seed(seed)
         X = np.random.normal(0.0,1.0,(nb_samples,input_dim))
