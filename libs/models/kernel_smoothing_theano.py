@@ -59,7 +59,7 @@ class KernelSmoothingTheano(KernelSmoothing):
     def calc_gradient_sqnorm(self, Xnew):
         # calculate gradient squared norm of Xnew
         dFdX = self.calc_gradient(Xnew)
-        return np.sum(dFdX ** 2, axis=(1, 2))  # K
+        return np.sum(dFdX ** 2, axis=1)  # K
 
 
 
