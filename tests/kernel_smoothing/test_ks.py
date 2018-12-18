@@ -4,6 +4,7 @@ import numpy as np
 from scipy.spatial import distance as dist
 
 from libs.models import KernelSmoothing
+from libs.models import KernelSmoothingTheano
 from libs.models.som_use_for import SOMUseFor
 
 
@@ -100,6 +101,29 @@ class TestKS(unittest.TestCase):
 
         # compare two results
         np.testing.assert_allclose(historyY,som_use_for.history['y'])
+
+    def test_matching_theano(self):
+        nb_samples = 500
+        nb_new_samples = 750
+        input_dim = 5
+        output_dim = 3
+        seed = 100
+        np.random.seed(seed)
+        X = np.random.normal(0.0,1.0,(nb_samples,input_dim))
+        Y = np.random.normal(0.0,1.0,(nb_samples,output_dim))
+        Xnew = np.random.normal(0.0,1.0,(nb_new_samples,input_dim))
+
+        sigma = 0.2
+        ks_numpy = KernelSmoothing(sigma)
+        ks_numpy.fit(X,Y)
+        f_numpy = ks_numpy.predict(Xnew)
+
+        ks_theano = KernelSmoothingTheano(sigma)
+        ks_theano.fit(X,Y)
+        f_theano = ks_theano.predict(Xnew)
+
+        np.testing.assert_allclose(f_numpy,f_theano)
+
 
 
 if __name__ == "__main__":
