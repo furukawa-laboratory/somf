@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from libs.models import KernelSmoothing
+from .kernel_smoothing import KernelSmoothing
 import theano
 import theano.tensor as tt
 
