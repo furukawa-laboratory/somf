@@ -66,7 +66,7 @@ def anime_learning_process_3d(X, Y_allepoch, labels=None,
     ax.set_ylim(Xmid[1] - Xrange, Xmid[1] + Xrange)
     ax.set_zlim(Xmid[2] - Xrange, Xmid[2] + Xrange)
 
-    if repeat:
+    if repeat or save_gif:
         num_frames = nb_epoch
     else:
         num_frames = nb_epoch * 5
