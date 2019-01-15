@@ -4,6 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 def create_data(nb_samples1, nb_samples2,
+                frequency=3.0/8.0,
                 observed_dim=1, retz=False):
     z1 = np.random.rand(nb_samples1) * 2.0 - 1.0
     z2 = np.random.rand(nb_samples2) * 2.0 - 1.0
@@ -11,7 +12,7 @@ def create_data(nb_samples1, nb_samples2,
     x = np.zeros((nb_samples1, nb_samples2, observed_dim))
 
     zz1, zz2 = np.meshgrid(z2, z1)
-    observed_data = np.sin(0.75 * np.pi * (zz1 + zz2))
+    observed_data = np.sin(2.0 * np.pi * frequency * (zz1 + zz2))
 
     x[:, :, 0] = observed_data
     z = np.concatenate((zz1[:, :, None], zz2[:, :, None]), axis=2)
