@@ -15,3 +15,8 @@
 - retz: bool
    - 真の潜在変数を返すかどうか指定するbool値
    - デフォルトはFalse
+   
+   
+**returns**
+- x: ndarray
+   - shape=(nb_samples1, nb_samples2, observed_dim)
