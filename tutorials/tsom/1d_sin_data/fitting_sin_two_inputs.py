@@ -22,20 +22,20 @@ def _main():
     X_som = X_tsom.reshape(nb_samples1 * nb_samples2, observed_dim)
 
     # set learning parameter
-    nb_epoch = 55
+    nb_epoch = 25
     ## som
     latent_dim_som = 2
     resolution_som = 15
     SigmaMax_som = 2.0
     SigmaMin_som = 0.2
-    Tau_som = 50
+    Tau_som = 25
 
     ## tsom
     latent_dims_tsom = [1, 1]
     resolutions_tsom = [15, 15]
     SigmaMins_tsom = [0.2, 0.2]
     SigmaMaxs_tsom = [2.0, 2.0]
-    Taus_tsom = [50, 50]
+    Taus_tsom = [25, 25]
 
     # learn
     ## som
