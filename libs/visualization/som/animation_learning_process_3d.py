@@ -5,7 +5,7 @@ import matplotlib.animation
 from sklearn.decomposition import PCA
 
 #サブモジュールに反映されているのかテスト
-
+#document_analysisから更新したらどうなる?
 def update_graph(epoch, X, Y_allepoch_mesh, labels, ax, title_text, nb_epoch):
     if epoch >= nb_epoch:
         epoch = nb_epoch - 1
