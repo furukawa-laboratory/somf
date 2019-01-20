@@ -4,8 +4,10 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation
 from sklearn.decomposition import PCA
 
-#サブモジュールに反映されているのかテスト
-#document_analysisから更新したらどうなる?
+#まずは,データに色付けできるようにする
+#Xをlistにして各クラスのやつを入れる(色は中で適当に作る)
+
+
 def update_graph(epoch, X, Y_allepoch_mesh, labels, ax, title_text, nb_epoch):
     if epoch >= nb_epoch:
         epoch = nb_epoch - 1
@@ -16,7 +18,11 @@ def update_graph(epoch, X, Y_allepoch_mesh, labels, ax, title_text, nb_epoch):
     graph.set_data(data[:,:,0], data[:,:,1])
     graph.set_3d_properties(data[:,:,2])
     """
-    ax.scatter(X[:,0],X[:,1],X[:,2],color='g')
+    #ax.scatter(X[:, 0], X[:, 1], X[:, 2], color='g')
+    ax.scatter(X[0:30, 0], X[0:30, 1], X[0:30, 2], color='red')
+    ax.scatter(X[30:60, 0], X[30:60, 1], X[30:60, 2], color='black')
+    ax.scatter(X[60:90, 0], X[60:90, 1], X[60:90, 2], color='g')
+
     if labels is not None:
         for n in range(len(labels)):
             ax.text(X[n,0],X[n,1],X[n,2],labels[n])
@@ -27,10 +33,11 @@ def update_graph(epoch, X, Y_allepoch_mesh, labels, ax, title_text, nb_epoch):
     ax.set_title(title_text+', epoch={}'.format(epoch))
 
 
+#Xは最初list
 def anime_learning_process_3d(X, Y_allepoch, labels=None,
                               title_text='observation space',
                               repeat=True, save_gif=False):
-
+    
     fig = plt.figure()
     ax = fig.add_subplot(1,1,1,aspect='equal', projection='3d')
     ax_pos = ax.get_position()
