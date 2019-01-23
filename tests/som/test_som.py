@@ -30,5 +30,26 @@ class TestSOM(unittest.TestCase):
 
         np.testing.assert_allclose(som_numpy.history['y'],som_use_for.history['y'])
 
+    def test_init(self):
+        N = 100
+        D = 3
+        L = 2
+        resolution = 10
+        seed = 100
+        np.random.seed(seed)
+        X = np.random.normal(0, 1, (N, D))
+        Zinit = np.random.rand(N,L)
+
+        inits = ['random', 'random_bmu', Zinit]
+
+        SIGMA_MAX = 2.2
+        SIGMA_MIN = 0.1
+        TAU = 50
+
+        for init in inits:
+            som = SOM(X,L,resolution,SIGMA_MAX,SIGMA_MIN,TAU,init=init)
+
+
+
 if __name__ == "__main__":
     unittest.main()
