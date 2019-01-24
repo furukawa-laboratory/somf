@@ -55,8 +55,8 @@ if __name__ == '__main__':
     y3 = np.random.rand(nb_samples)
     list_y = [y1, y2, y3]
 
-    fig = plt.figure(figsize=[9, 4])
     nb_patterns = len(list_y)
+    fig = plt.figure(figsize=[3*nb_patterns, 4])
     for i, y in enumerate(list_y):
         MI = calc_mutual_information(x=x, y=y,
                                      nb_bins=nb_bins, bias=bias, normalize=False)
