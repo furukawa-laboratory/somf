@@ -49,7 +49,7 @@ if __name__ == '__main__':
     nb_bins = 100
     bias = 0.001
 
-    np.random.rand(seed)
+    np.random.seed(seed)
 
     x = np.linspace(-1.0, 1.0, nb_samples)
     y1 = x
