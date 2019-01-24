@@ -8,6 +8,8 @@ def calc_mutual_information(x, y, normalize=False, nb_bins=100, bias=0.01):
     y_1d = np.squeeze(y)
     if x_1d.ndim != 1 or y_1d.ndim != 1:
         raise ValueError('now, this function follow latent_dim = 1 only.')
+    if x_1d.shape != y_1d.shape:
+        raise ValueError('x and y have to be same size')
 
     # make histogram
     hist_x, bin_edges = np.histogram(x_1d, bins=nb_bins)
