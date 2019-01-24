@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+from scipy.stats import invwishart
 
 from libs.tools import calc_mutual_information
 
@@ -11,7 +12,7 @@ class TestCalcMutualInformation(unittest.TestCase):
         nb_bins = 100
         bias = 0.0
 
-        np.random.rand(seed)
+        np.random.seed(seed)
 
         x = np.linspace(-1.0, 1.0, nb_samples)
         y1 = x
@@ -40,6 +41,36 @@ class TestCalcMutualInformation(unittest.TestCase):
         y = np.random.rand(101)
         with self.assertRaises(ValueError):
             calc_mutual_information(x=x,y=y)
+
+    def test_compare_analytical_value(self):
+        nb_samples = 100000
+        seed = 500
+        nb_patterns = 10
+
+        nb_bins = 100
+        bias = 0.0001
+
+        np.random.seed(seed)
+
+        mean = np.zeros(2)
+        df = 3.0
+        scale = 2.0 * np.array([[1.0,0.5],[0.5,1.0]])
+        iw = invwishart(df=df,scale=scale)
+        covs = iw.rvs(nb_patterns)
+
+        for cov in covs:
+            x_2d = np.random.multivariate_normal(mean,cov,nb_samples)
+
+            NMI_func = calc_mutual_information(x_2d[:,0],x_2d[:,1],
+                                               nb_bins=nb_bins,
+                                               bias=bias,
+                                               normalize=True)
+            rho = cov[0,1] / np.sqrt(cov[0,0]*cov[1,1])
+            MI_analytical = -0.5 * np.log(1.0 - (rho**2.0))
+            entropy0 = 0.5 * (1+np.log(cov[0,0])+np.log(2.0*np.pi))
+            entropy1 = 0.5 * (1+np.log(cov[1,1])+np.log(2.0*np.pi))
+            NMI_analytical = MI_analytical / (0.5 * (entropy0+entropy1))
+            print('diff={}'.format(NMI_func-NMI_analytical))
 
 
 
