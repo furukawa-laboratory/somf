@@ -1,36 +1,48 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def calc_mutual_information(x, y, nb_bins=100, bias=0.0001):
-    if x.shape[1] != 1 or y.shape[1] != 1:
+def calc_mutual_information(x, y, normalize=False, nb_bins=100, bias=0.01):
+    x_1d = np.squeeze(x)
+    y_1d = np.squeeze(y)
+    if x_1d.ndim != 1 or y_1d.ndim != 1:
         raise ValueError('now, this function follow latent_dim = 1 only')
 
-    hist_true,bin_edges = np.histogram(x.ravel(), bins=nb_bins)
-    hist_estimate,bin_edges = np.histogram(y.ravel(), bins=nb_bins)
-    hist_joint,x_edges,y_edges = np.histogram2d(x.ravel(), y.ravel(), bins=nb_bins)
+    hist_x,bin_edges = np.histogram(x_1d, bins=nb_bins)
+    hist_y,bin_edges = np.histogram(y_1d, bins=nb_bins)
+    hist_joint,x_edges,y_edges = np.histogram2d(x_1d, y_1d, bins=nb_bins)
 
-    hist_true = hist_true.astype(np.float32) + bias
-    hist_estimate = hist_estimate.astype(np.float32) + bias
-    prob_true = hist_true / hist_true.sum()
-    prob_estimate = hist_estimate / hist_estimate.sum()
+    hist_x = hist_x.astype(np.float32) + bias
+    hist_y = hist_y.astype(np.float32) + bias
+    hist_joint = hist_joint.astype(np.float32) + np.sqrt(bias)
+    prob_true = hist_x / hist_x.sum()
+    prob_estimate = hist_y / hist_y.sum()
     prob_joint = hist_joint.astype(np.float32) / np.sum(hist_joint.astype(np.float32))
 
 
-    MI_numpy = 0.0
+    MI = 0.0
     for k1 in range(nb_bins):
         for k2 in range(nb_bins):
             if prob_joint[k1][k2] != 0:
-                MI_numpy += prob_joint[k1][k2] * np.log(prob_joint[k1][k2]/(prob_true[k1] * prob_estimate[k2]))
+                MI += prob_joint[k1][k2] * np.log(prob_joint[k1][k2]/(prob_true[k1] * prob_estimate[k2]))
+            else:
+                print('0!')
+    # Using numpy, this calculation can be implemented by
+    # MI = np.nan_to_num(prob_joint * np.log(prob_joint/(prob_true[:,None]*prob_estimate[None,:]))).sum()
+    # However, if prob_joint[k1][k2] = 0, python interpreter warn.
+    if normalize:
+        pass
+    else:
+        pass
 
 
-
-    return MI_numpy
+    return MI
 
 
 if __name__ == '__main__':
-    nb_samples = 5000
+    nb_samples = 10000
     seed = 100
-    nb_bins = 20
+    nb_bins = 10
+    bias = 0.001
 
     np.random.rand(seed)
 
@@ -43,7 +55,7 @@ if __name__ == '__main__':
     fig = plt.figure(figsize=[9,3])
     nb_patterns = len(list_Z_estimate)
     for i,Z_estimate in enumerate(list_Z_estimate):
-        MI = calc_mutual_information(x=Z_true, y=Z_estimate, nb_bins=nb_bins)
+        MI = calc_mutual_information(x=Z_true, y=Z_estimate, nb_bins=nb_bins, bias=bias)
 
         ax = fig.add_subplot(1,nb_patterns,i+1)
 
