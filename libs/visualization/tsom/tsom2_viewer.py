@@ -7,6 +7,11 @@ import scipy.spatial.distance as dist
 from matplotlib.widgets import RadioButtons
 
 np.random.seed(2)
+#やること
+#label問題を解決する
+#figureのタイトルを追加できるようにする
+#行列を与えた場合は,自動的にbottunを入れないようにする
+
 
 class TSOM2_Umatrix:
     def __init__(self, z1=None, z2=None, x=None, sigma1=0.2,sigma2=0.2, resolution=100, labels1=None, labels2=None, fig_size=[15, 15], cmap_type='jet'):
