@@ -194,7 +194,7 @@ class TSOM2_Umatrix:
         return umat_val
 
 
-class TSOM2_Viewer:
+class TSOM2_Conditional_Component_Plane:
     def __init__(self, y, winner1, winner2, fig_size=None, label1=None, label2=None, button_label=None):
         # ---------- 参照テンソルとデータ ---------- #
         self.Mode1_Num = y.shape[0]
