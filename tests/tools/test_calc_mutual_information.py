@@ -47,14 +47,14 @@ class TestCalcMutualInformation(unittest.TestCase):
         seed = 500
         nb_patterns = 10
 
-        nb_bins = 100
+        nb_bins = 1000
         bias = 0.0001
 
         np.random.seed(seed)
 
         mean = np.zeros(2)
         df = 3.0
-        scale = 2.0 * np.array([[1.0,0.5],[0.5,1.0]])
+        scale = 2.0 * np.array([[1.0,0.0],[0.0,1.0]])
         iw = invwishart(df=df,scale=scale)
         covs = iw.rvs(nb_patterns)
 
@@ -67,10 +67,10 @@ class TestCalcMutualInformation(unittest.TestCase):
                                                normalize=True)
             rho = cov[0,1] / np.sqrt(cov[0,0]*cov[1,1])
             MI_analytical = -0.5 * np.log(1.0 - (rho**2.0))
-            entropy0 = 0.5 * (1+np.log(cov[0,0])+np.log(2.0*np.pi))
-            entropy1 = 0.5 * (1+np.log(cov[1,1])+np.log(2.0*np.pi))
+            entropy0 = 0.5 * (1.0 + np.log(cov[0,0]) + np.log(2.0*np.pi))
+            entropy1 = 0.5 * (1.0 + np.log(cov[1,1]) + np.log(2.0*np.pi))
             NMI_analytical = MI_analytical / (0.5 * (entropy0+entropy1))
-            print('diff={}'.format(NMI_func-NMI_analytical))
+            print('func={},analy={}'.format(NMI_func,NMI_analytical))
 
 
 
