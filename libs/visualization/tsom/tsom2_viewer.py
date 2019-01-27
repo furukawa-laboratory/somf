@@ -199,6 +199,9 @@ class TSOM2_Umatrix:
         return umat_val
 
 
+#まずは,dimが1の時は,button labelを出さないようにする
+    #そのために,まずは,labelのクリックのやつとCCPのクリックのやつをそれぞれ分ける
+
 class TSOM2_Conditional_Component_Plane:
     def __init__(self, y, winner1, winner2, fig_size=None, label1=None, label2=None, button_label=None):
         # ---------- 参照テンソルとデータ ---------- #
@@ -208,6 +211,7 @@ class TSOM2_Conditional_Component_Plane:
             # 1次元の場合
             self.Dim = 1
             self.Y = y[:, :, np.newaxis]
+
         else:
             # 2次元の場合
             self.Dim = y.shape[2]
@@ -274,7 +278,8 @@ class TSOM2_Conditional_Component_Plane:
         self.Map1.set_title('View 1')
         self.Map2 = self.Fig.add_subplot(1, 2, 2)
         self.Map2.set_title('View 2')
-        rax = plt.axes([0.7, 0.25, 0.1, 0.5], facecolor='lightgoldenrodyellow',aspect='equal')
+        #rax = plt.axes([0.7, 0.25, 0.1, 0.5], facecolor='lightgoldenrodyellow',aspect='equal')
+        rax = plt.axes([0.8, 0.25, 0.1, 0.1], facecolor='lightgoldenrodyellow',aspect='equal')
         if not button_label is None:
             self.radio = RadioButtons(rax, button_label)
         else:
@@ -303,8 +308,8 @@ class TSOM2_Conditional_Component_Plane:
         self.noise_map1 = (np.random.rand(self.Winner1.shape[0], 2) - 0.5)
         self.noise_map2 = (np.random.rand(self.Winner2.shape[0], 2) - 0.5)
 
-    def hzfunc(self, label):#radioボタンを押した時の処理
-
+    # radioボタンを押した時の処理
+    def hzfunc(self, label):
         if self.count_click==self.hzdict[label]:
          return
         else:
@@ -382,18 +387,18 @@ class TSOM2_Conditional_Component_Plane:
 
 
     def draw_map(self):
-        # コンポーネントの初期表示(左下が0番目のユニットが来るように行列を上下反転している)
-        self.__draw_map1()
-        self.__draw_map2()
-        self.radio.on_clicked(self.hzfunc)
-        self.__draw_click_point()
+        #コンポーネントの初期表示(左下が0番目のユニットが来るように行列を上下反転している)
+        self.__draw_map1()#View1のMapを描画
+        self.__draw_map2()#View2のMapを描画
+        self.radio.on_clicked(self.hzfunc)#labelbuttonのクリック.radio buttonがクリックされたら()ないの関数を動作する
+        self.__draw_click_point()#どこを指定しているかを表示
 
-        # クリックイベント
-        self.Fig.canvas.mpl_connect('button_press_event', self.__onclick_fig)
+        #クリックイベント
+        self.Fig.canvas.mpl_connect('button_press_event', self.__onclick_fig)#Map上のクリックした番号を取得,CCPの計算を行い,CCPを描画
 
-        # マウスオーバーイベント
-        self.Fig.canvas.mpl_connect('motion_notify_event', self.__mouse_over_fig)
-        self.Fig.canvas.mpl_connect('axes_leave_event', self.__mouse_leave_fig)
+        #マウスオーバーイベント
+        self.Fig.canvas.mpl_connect('motion_notify_event', self.__mouse_over_fig)#Map内をクリックした時の動作
+        self.Fig.canvas.mpl_connect('axes_leave_event', self.__mouse_leave_fig)#Map害をクリックした時の動作
         plt.show()
 
     # ------------------------------ #
@@ -501,7 +506,6 @@ class TSOM2_Conditional_Component_Plane:
     def __draw_map2(self):
         self.Map2.cla()
         self.Map2.set_title('View 2')
-        # self.Map2.set_xlabel("Aroma Map")
         self.Map2.xaxis.set_label_coords(0.5, -0.1)
         self.__draw_label_map2()
         self.Map2.imshow(self.Map2_val[::], interpolation='spline36',
