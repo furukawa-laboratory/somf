@@ -52,7 +52,7 @@ class TestTSOM2(unittest.TestCase):
 
         # learn
 
-        tsom_tensorflow.predict(X)
+        tsom_tensorflow.predict(X, graph=True)
 
 
 
