@@ -230,7 +230,7 @@ class TSOM2():
             D = tf.sqrt(tf.maximum(na - 2 * tf.matmul(A, B, False, True) + nb, 0.0))
         return D
 
-    def predict(self, data, graph=False):
+    def predict(self, data, graph=True):
         """
         Launch prediction on data
 
