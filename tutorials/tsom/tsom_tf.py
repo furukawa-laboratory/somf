@@ -3,7 +3,7 @@ import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
 
-from ..tools.create_zeta import create_zeta
+from libs.tools.create_zeta import create_zeta
 
 class TSOM2():
     def __init__(self, N1, N2, observed_dim, latent_dim, epochs, resolution, SIGMA_MAX, SIGMA_MIN, TAU, init='random'):
@@ -114,8 +114,8 @@ class TSOM2():
                 self.sigma2_value = tf.Variable(tf.zeros(shape=(), dtype=tf.float64), name='Sigma2_value')
 
                 # Assign value of sigma depending on iteration number
-                self.sigma1_update = tf.assign(self.sigma1_value, self.sigma(), name='Updating_Sigma1_Value')
-                self.sigma2_update = tf.assign(self.sigma2_value, self.sigma(), name='Updating_Sigma2_Value')
+                self.sigma1_update = tf.assign(self.sigma1_value, self.sigma()[0], name='Updating_Sigma1_Value')
+                self.sigma2_update = tf.assign(self.sigma2_value, self.sigma()[1], name='Updating_Sigma2_Value')
 
             with tf.name_scope('Weights_Tensor'):
                 self.U = tf.Variable(tf.random_normal(shape=[self.N1, self.K2, self.observed_dim], dtype=tf.float64))
@@ -150,13 +150,6 @@ class TSOM2():
                                                          name='Choosing_Zeta_Based_On_BMU'),
                                                shape=[self.N2, 2]))
 
-            # History saving for BMU, Weights and sigma value
-            self.historyZ1 = np.zeros((epochs, self.N1, self.latent_dim1))
-            self.historyZ2 = np.zeros((epochs, self.N2, self.latent_dim2))
-            self.historyY = np.zeros((epochs, self.K1, self.K2, self.observed_dim))
-            self.historyS1 = np.zeros(epochs)
-            self.historyS2 = np.zeros(epochs)
-
             # Initializing Session and Variable
             self.session = tf.Session()
             self.session.run(tf.global_variables_initializer())
@@ -170,15 +163,15 @@ class TSOM2():
                 H1 = tf.reshape(tf.pow(self.pairwise_dist(self.Zeta1, self.Z1), 2), shape=[self.K1, self.N1])
                 H2 = tf.reshape(tf.pow(self.pairwise_dist(self.Zeta2, self.Z2), 2), shape=[self.K2, self.N2])
 
-                # Matrix computing the neighboorhood based on the distance Matrix H for each Reference Vectors
+            # Matrix computing the neighboorhood based on the distance Matrix H for each Reference Vectors
             with tf.name_scope('Determining_Neighboorhood'):
                 G1 = tf.reshape(tf.exp(-H1 / (2 * tf.pow(self.sigma1_update, 2))), shape=[self.K1, self.N1])
                 G2 = tf.reshape(tf.exp(-H2 / (2 * tf.pow(self.sigma2_update, 2))), shape=[self.K2, self.N2])
 
             # Computing invert Matrix of Sum
             with tf.name_scope('Computing_Invert_Sum_Distance'):
-                L1 = tf.expand_dims(tf.reduce_sum(G1, axis=1), 1)
-                L1inv = tf.reciprocal(L1)
+                L1 = tf.expand_dims(tf.reduce_sum(G1, axis=1), 1)   # K1*N1
+                L1inv = tf.reciprocal(L1)                           # K1*N1
                 L2 = tf.expand_dims(tf.reduce_sum(G2, axis=1), 1)
                 L2inv = tf.reciprocal(L2)
 
@@ -186,12 +179,13 @@ class TSOM2():
             with tf.name_scope('Sum_betwwen_Neighboorhood_Matrix_and_Invert_Sum'):
                 R1 = G1 * L1inv
                 R2 = G2 * L2inv
+                print(R1.shape)
 
             # Computing the weights
             with tf.name_scope('Computing_Weights'):
-                U = np.einsum('lj,ijd->ild', R2, self.input_data)
-                V = np.einsum('ki,ijd->kjd', R1, self.input_data)
-                Y = np.einsum('ki,lj,ijd->kld', R1, R2, self.input_data)
+                U = tf.einsum('lj,ijd->ild', R2, self.input_data)
+                V = tf.einsum('ki,ijd->kjd', R1, self.input_data)
+                Y = tf.einsum('ki,lj,ijd->kld', R1, R2, self.input_data)
                 return U, V, Y
 
     def sigma(self):
@@ -244,13 +238,22 @@ class TSOM2():
         :param graph: Default is False. Save the graph to be visualised in tensorboard (default directory 'output'
         will be at the same location of the file using the algorith;.
         """
+        self.bmu1 = np.zeros((self.epochs, data.shape[0]), dtype=np.int64)
+        self.bmu2 = np.zeros((self.epochs, data.shape[1]), dtype=np.int64)
+        # History saving for BMU, Weights and sigma value
+        self.historyZ1 = np.zeros((self.epochs, self.N1, self.latent_dim1))
+        self.historyZ2 = np.zeros((self.epochs, self.N2, self.latent_dim2))
+        self.historyY = np.zeros((self.epochs, self.K1, self.K2, self.observed_dim))
+        self.historyS1 = np.zeros(self.epochs)
+        self.historyS2 = np.zeros(self.epochs)
         print('\nPredicting out of {0} epochs\n'.format(self.epochs))
         bar = tqdm(range(self.epochs))
         for i in bar:
             # Computing each iteration for the whole batch (ie : Update the weights each iteration) + Saving history
-            self.historyS1[i], self.historyS2[i], self.historyY[i], self.historyZ1[i], self.historyZ2[
+            self.historyS1[i], self.historyS2[i], self.historyY[i, :, :], self.historyZ1[i, :], self.historyZ2[i, :], self.bmu1[i], self.bmu2[
                 i] = self.session.run(
-                [self.sigma1_update, self.sigma2_update, self.train_update_Y, self.Z1_update, self.Z2_update],
+                [self.sigma1_update, self.sigma2_update, self.Y, self.Z1_update, self.Z2_update, self.bmu1_nodes,
+                 self.bmu2_nodes],
                 feed_dict={self.input_data: data, self.iter_no: i})
 
         if graph == True:
