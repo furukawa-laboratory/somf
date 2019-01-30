@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 import scipy.spatial.distance as dist
 from matplotlib.widgets import RadioButtons
+from adjustText import adjust_text
 
 np.random.seed(2)
 #やること
@@ -408,13 +409,19 @@ class TSOM2_Conditional_Component_Plane:
     def __draw_label_map1(self):
         epsilon = 0.02 * (self.Map1_position.max() - self.Map1_position.min())
         if not self.label1 is None:#ラベルを与えばそのラベルを出力,そうでないなら出力しない
-            for i in range(self.Winner1.shape[0]):
-                self.Map1.text(self.Map1_position[self.Winner1[i], 0] + epsilon * self.noise_map1[i, 0],
-                           self.Map1_position[self.Winner1[i], 1] + epsilon * self.noise_map1[i, 1],
-                           self.label1[i], ha='center', va='bottom', color='black')
-        self.Map1.scatter(self.Map1_position[self.Winner1[:], 0] + epsilon * self.noise_map1[:, 0],
-                          self.Map1_position[self.Winner1[:], 1] + epsilon * self.noise_map1[:, 1],
-                          c="white",linewidths=1,edgecolors="black")
+            texts = [self.Map1.text(self.Map1_position[self.Winner1[i], 0], self.Map1_position[self.Winner1[i], 1], self.label1[i], ha='center', va='bottom') for i in range(self.Winner1.shape[0])]
+            adjust_text(texts)
+            # for i in range(self.Winner1.shape[0]):
+            #     self.Map1.text(self.Map1_position[self.Winner1[i], 0] + epsilon * self.noise_map1[i, 0],
+            #                self.Map1_position[self.Winner1[i], 1] + epsilon * self.noise_map1[i, 1],
+            #                self.label1[i], ha='center', va='bottom', color='black')
+        self.Map1.scatter(self.Map1_position[self.Winner1[:], 0] ,
+        self.Map1_position[self.Winner1[:], 1] ,
+        c = "white", linewidths = 1, edgecolors = "black")
+
+        # self.Map1.scatter(self.Map1_position[self.Winner1[:], 0] + epsilon * self.noise_map1[:, 0],
+        #                   self.Map1_position[self.Winner1[:], 1] + epsilon * self.noise_map1[:, 1],
+        #                   c="white",linewidths=1,edgecolors="black")
         self.Fig.show()
 
     # 右のマップ
