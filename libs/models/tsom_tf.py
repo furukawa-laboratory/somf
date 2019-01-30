@@ -5,6 +5,7 @@ from tqdm import tqdm
 
 from ..tools.create_zeta import create_zeta
 
+
 class TSOM2():
     def __init__(self, N1, N2, observed_dim, latent_dim, epochs, resolution, SIGMA_MAX, SIGMA_MIN, TAU, init='random'):
 
@@ -54,6 +55,9 @@ class TSOM2():
         else:
             raise ValueError("invalid resolution: {}".format(resolution))
 
+        self.K1 = resolution1 * resolution1
+        self.K2 = resolution2 * resolution2
+
         # 潜在空間の設定
         if type(latent_dim) is int:  # latent_dimがintであればどちらのモードも潜在空間の次元は同じ
             self.latent_dim1 = latent_dim
@@ -65,13 +69,6 @@ class TSOM2():
         else:
             raise ValueError("invalid latent_dim: {}".format(latent_dim))
             # latent_dimがlist,float,3次元以上はエラー
-
-        # History saving for BMU, Weights and sigma value
-        self.historyZ1 = np.zeros((epochs, self.N1, self.latent_dim1))
-        self.historyZ2 = np.zeros((epochs, self.N2, self.latent_dim2))
-        self.historyY = np.zeros((epochs, self.K1, self.K2, self.observed_dim))
-        self.historyS1 = np.zeros(epochs)
-        self.historyS2 = np.zeros(epochs)
 
         # Setting the graph used by TensorFlow
         self.graph = tf.Graph()
@@ -89,13 +86,13 @@ class TSOM2():
                                          include_min_max=True)
                 self.Zeta2 = create_zeta(-1.0, 1.0, latent_dim=self.latent_dim2, resolution=resolution2,
                                          include_min_max=True)
-                self.K1 = self.Zeta1.shape[0]
-                self.K2 = self.Zeta2.shape[0]
 
             if isinstance(init, str) and init == 'rand':
                 with tf.name_scope('Z'):
-                    self.Z1 = tf.Variable(tf.random_uniform(shape=[self.N1, self.latent_dim1], dtype=tf.float64) * 2.0 - 1.0)
-                    self.Z2 = tf.Variable(tf.random_uniform(shape=[self.N2, self.latent_dim2], dtype=tf.float64) * 2.0 - 1.0)
+                    self.Z1 = tf.Variable(
+                        tf.random_uniform(shape=[self.N1, self.latent_dim1], dtype=tf.float64) * 2.0 - 1.0)
+                    self.Z2 = tf.Variable(
+                        tf.random_uniform(shape=[self.N2, self.latent_dim2], dtype=tf.float64) * 2.0 - 1.0)
 
             elif isinstance(init, (tuple, list)) and len(init) == 2:
                 if isinstance(init[0], np.ndarray) and init[0].shape == (self.N1, self.latent_dim1):
@@ -143,13 +140,22 @@ class TSOM2():
             # BMU Vectors extractions, each vector is a 2 dimension one (for mapping)
             with tf.name_scope('Updating_Z'):
                 self.Z1_update = tf.assign(self.Z1,
-                                          tf.reshape(
-                                              tf.gather(self.Zeta1, self.bmu1_nodes, name='Choosing_Zeta_Based_On_BMU'),
-                                              shape=[self.N1, 2]))
+                                           tf.reshape(
+                                               tf.gather(self.Zeta1, self.bmu1_nodes,
+                                                         name='Choosing_Zeta_Based_On_BMU'),
+                                               shape=[self.N1, 2]))
                 self.Z2_update = tf.assign(self.Z2,
-                                          tf.reshape(
-                                              tf.gather(self.Zeta2, self.bmu2_nodes, name='Choosing_Zeta_Based_On_BMU'),
-                                              shape=[self.N2, 2]))
+                                           tf.reshape(
+                                               tf.gather(self.Zeta2, self.bmu2_nodes,
+                                                         name='Choosing_Zeta_Based_On_BMU'),
+                                               shape=[self.N2, 2]))
+
+            # History saving for BMU, Weights and sigma value
+            self.historyZ1 = np.zeros((epochs, self.N1, self.latent_dim1))
+            self.historyZ2 = np.zeros((epochs, self.N2, self.latent_dim2))
+            self.historyY = np.zeros((epochs, self.K1, self.K2, self.observed_dim))
+            self.historyS1 = np.zeros(epochs)
+            self.historyS2 = np.zeros(epochs)
 
             # Initializing Session and Variable
             self.session = tf.Session()
@@ -159,7 +165,6 @@ class TSOM2():
 
     def neighboor_update(self):
         with tf.name_scope('New_Weights_Computation'):
-
             # Matrix computing distance between each reference vectors and the Best Matching Unit
             with tf.name_scope('Neighboors_Distance_Matrix'):
                 H1 = tf.reshape(tf.pow(self.pairwise_dist(self.Zeta1, self.Z1), 2), shape=[self.K1, self.N1])
@@ -191,14 +196,20 @@ class TSOM2():
 
     def sigma(self):
         with tf.name_scope('Sigma_computation'):
-            sigma1 = tf.maximum(tf.cast(self.SIGMA1_MIN, tf.float64), self.SIGMA1_MAX*(1 - (self.iter_no/self.TAU1)))
-            sigma2 = tf.maximum(tf.cast(self.SIGMA2_MIN, tf.float64), self.SIGMA2_MAX*(1 - (self.iter_no/self.TAU2)))
+            sigma1 = tf.maximum(tf.cast(self.SIGMA1_MIN, tf.float64),
+                                self.SIGMA1_MAX * (1 - (self.iter_no / self.TAU1)))
+            sigma2 = tf.maximum(tf.cast(self.SIGMA2_MIN, tf.float64),
+                                self.SIGMA2_MAX * (1 - (self.iter_no / self.TAU2)))
             return sigma1, sigma2
 
     def winning_nodes(self):
         with tf.name_scope('Winning_node'):
-            self.bmu1_nodes = tf.argmin(tf.reduce_sum(tf.square(self.train_update_U[:, None, :, :] - self.train_update_Y[None, :, :, :]), axis=(2, 3)), axis=1)
-            self.bmu2_nodes = tf.argmin(tf.reduce_sum(tf.square(self.train_update_V[:, :, None, :] - self.train_update_Y[:, None, :, :]), axis=(0, 3)), axis=1)
+            self.bmu1_nodes = tf.argmin(
+                tf.reduce_sum(tf.square(self.train_update_U[:, None, :, :] - self.train_update_Y[None, :, :, :]),
+                              axis=(2, 3)), axis=1)
+            self.bmu2_nodes = tf.argmin(
+                tf.reduce_sum(tf.square(self.train_update_V[:, :, None, :] - self.train_update_Y[:, None, :, :]),
+                              axis=(0, 3)), axis=1)
             return self.bmu1_nodes, self.bmu2_nodes
 
     def pairwise_dist(self, A, B):
@@ -237,7 +248,8 @@ class TSOM2():
         bar = tqdm(range(self.epochs))
         for i in bar:
             # Computing each iteration for the whole batch (ie : Update the weights each iteration) + Saving history
-            self.historyS1[i], self.historyS2[i], self.historyY[i], self.historyZ1[i], self.historyZ2[i] = self.session.run(
+            self.historyS1[i], self.historyS2[i], self.historyY[i], self.historyZ1[i], self.historyZ2[
+                i] = self.session.run(
                 [self.sigma1_update, self.sigma2_update, self.train_update_Y, self.Z1_update, self.Z2_update],
                 feed_dict={self.input_data: data, self.iter_no: i})
 
@@ -249,4 +261,3 @@ class TSOM2():
 
         # Closing tf session
         self.session.close()
-
