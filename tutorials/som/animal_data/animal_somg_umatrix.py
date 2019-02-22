@@ -33,9 +33,9 @@ if __name__ == '__main__':
 
     # 学習過程の表示
     fig, ax = plt.subplots()
-    def unit_distance(k1, k2):
-        return np.sum(np.square(som.Y[k1] - som.Y[k2]))
-    somg.plot_umatrix(ax, unit_distance)
+    def calc_unit_distance(k1, k2):
+        return np.linalg.norm(som.Y[k1] - som.Y[k2])
+    somg.plot_umatrix(ax, calc_unit_distance)
     plt.show()
 
     # 学習過程の表示
@@ -43,10 +43,10 @@ if __name__ == '__main__':
     def update(frame):
         if frame != 0:
             ax.cla()
-        def calc_distance(k1, k2):
-            return np.sum(np.square(som.history['y'][frame][k1] - som.history['y'][frame][k2]))
-        somg.plot_umatrix(ax, calc_distance)
-        ax.set_title(f"t:{frame:03}")
+        def calc_unit_distance_animation(k1, k2):
+            return np.linalg.norm(som.history['y'][frame][k1] - som.history['y'][frame][k2])
+        somg.plot_umatrix(ax, calc_unit_distance_animation)
+        ax.set_title('epoch:{:03}'.format(frame))
 
     ani = animation.FuncAnimation(fig, update, frames=nb_epoch, interval=100)
     plt.show()
