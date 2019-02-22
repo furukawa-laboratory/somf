@@ -2,6 +2,10 @@
 import numpy as np
 from scipy.spatial import distance as dist
 from tqdm import tqdm
+from sklearn.decomposition import PCA
+
+from matplotlib import pyplot as plt
+
 
 class SOM:
     def __init__(self, X, latent_dim, resolution, sigma_max, sigma_min, tau, init='random'):
@@ -13,16 +17,20 @@ class SOM:
         self.tau = tau
 
         self.D = X.shape[1]
-
-
+        self.L = latent_dim
 
         if latent_dim == 1:
-            self.L = latent_dim
-            self.Zeta = np.linspace(-1.0, 1.0, resolution)[:,np.newaxis]
+            self.Zeta = np.linspace(-1.0, 1.0, resolution)[:, np.newaxis]
         elif latent_dim == 2:
-            self.L = latent_dim
-            zeta = np.meshgrid(np.linspace(-1, 1, resolution), np.linspace(-1, 1, resolution))
-            self.Zeta = np.dstack(zeta).reshape(resolution**2, latent_dim)
+            if isinstance(init, str) and init == 'PCA':
+                pca = PCA(n_components=2)
+                pca.fit(X)
+                comp1, comp2 = pca.singular_values_[0], pca.singular_values_[1]
+                zeta = np.meshgrid(np.linspace(-1, 1, resolution), np.linspace(-comp2/comp1, comp2/comp1, resolution))
+                self.Zeta = np.dstack(zeta).reshape(resolution**2, latent_dim)
+            else:
+                zeta = np.meshgrid(np.linspace(-1, 1, resolution), np.linspace(-1, 1, resolution))
+                self.Zeta = np.dstack(zeta).reshape(resolution**2, latent_dim)
         else:
             raise ValueError("invalid latent dimension: {}".format(latent_dim))
 
@@ -33,12 +41,16 @@ class SOM:
         elif isinstance(init, str) and init == 'random_bmu':
             init_bmus = np.random.randint(0, self.Zeta.shape[0] - 1, self.N)
             self.Z = self.Zeta[init_bmus,:]
+        elif isinstance(init, str) and init == 'PCA':
+            self.Z = pca.fit_transform(X)
         elif isinstance(init, np.ndarray) and init.shape == (self.N, latent_dim):
             self.Z = init.copy()
         else:
             raise ValueError("invalid init: {}".format(init))
 
         self.history = {}
+        # self.history['pca'] = np.zeros((self.N, self.L))
+        self.history['pca'] = self.Z
 
     def fit(self, nb_epoch=100, verbose=True):
 
