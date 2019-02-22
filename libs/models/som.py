@@ -19,22 +19,19 @@ class SOM:
         self.D = X.shape[1]
         self.L = latent_dim
 
-        if latent_dim == 1:
-            if isinstance(init, str) and init == 'PCA':
-                pca = PCA(n_components=1)
-                pca.fit(X)
-            self.Zeta = np.linspace(-1.0, 1.0, resolution)[:, np.newaxis]
+        if isinstance(init, str) and init == 'PCA':
+            pca = PCA(n_components=latent_dim)
+            pca.fit(X)
 
+        if latent_dim == 1:
+            self.Zeta = np.linspace(-1.0, 1.0, resolution)[:, np.newaxis]
         elif latent_dim == 2:
             if isinstance(init, str) and init == 'PCA':
-                pca = PCA(n_components=2)
-                pca.fit(X)
                 comp1, comp2 = pca.singular_values_[0], pca.singular_values_[1]
                 zeta = np.meshgrid(np.linspace(-1, 1, resolution), np.linspace(-comp2/comp1, comp2/comp1, resolution))
-                self.Zeta = np.dstack(zeta).reshape(resolution**2, latent_dim)
             else:
                 zeta = np.meshgrid(np.linspace(-1, 1, resolution), np.linspace(-1, 1, resolution))
-                self.Zeta = np.dstack(zeta).reshape(resolution**2, latent_dim)
+            self.Zeta = np.dstack(zeta).reshape(resolution**2, latent_dim)
         else:
             raise ValueError("invalid latent dimension: {}".format(latent_dim))
 
