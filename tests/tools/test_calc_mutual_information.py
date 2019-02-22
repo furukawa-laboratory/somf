@@ -43,7 +43,7 @@ class TestCalcMutualInformation(unittest.TestCase):
             calc_mutual_information(x=x,y=y)
 
     def test_compare_analytical_value(self):
-        nb_samples = 100000
+        nb_samples = 10000
         seed = 500
         nb_patterns = 10
 
@@ -65,7 +65,8 @@ class TestCalcMutualInformation(unittest.TestCase):
                                                nb_bins=nb_bins,
                                                bias=bias,
                                                normalize=True)
-            rho = cov[0,1] / np.sqrt(cov[0,0]*cov[1,1])
+            # rho = cov[0,1] / np.sqrt(cov[0,0]*cov[1,1])
+            rho = np.corrcoef(x_2d.T)[0,1]
             MI_analytical = -0.5 * np.log(1.0 - (rho**2.0))
             entropy0 = 0.5 * (1.0 + np.log(cov[0,0]) + np.log(2.0*np.pi))
             entropy1 = 0.5 * (1.0 + np.log(cov[1,1]) + np.log(2.0*np.pi))
