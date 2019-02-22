@@ -48,8 +48,6 @@ class SOM:
             raise ValueError("invalid init: {}".format(init))
 
         self.history = {}
-        # self.history['pca'] = np.zeros((self.N, self.L))
-        self.history['pca'] = self.Z
 
     def fit(self, nb_epoch=100, verbose=True):
 
