@@ -195,7 +195,7 @@ class SOMg(object):
             iy = i // self.resolution
             self.umat_matrix[iy, :, ix, :] = cell_image.reshape(4, 4)
 
-        axes.imshow(self.umat_matrix.reshape(self.resolution * 4, self.resolution * 4), vmin=0, vmax=1)
+        axes.imshow(self.umat_matrix.reshape(self.resolution * 4, self.resolution * 4), vmin=0, vmax=1, cmap='jet')
 
     def __calc_umatrix(self, func):
         sum = 0.0
