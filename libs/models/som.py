@@ -4,8 +4,6 @@ from scipy.spatial import distance as dist
 from tqdm import tqdm
 from sklearn.decomposition import PCA
 
-from matplotlib import pyplot as plt
-
 
 class SOM:
     def __init__(self, X, latent_dim, resolution, sigma_max, sigma_min, tau, init='random'):
