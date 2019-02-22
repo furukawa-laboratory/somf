@@ -20,7 +20,11 @@ class SOM:
         self.L = latent_dim
 
         if latent_dim == 1:
+            if isinstance(init, str) and init == 'PCA':
+                pca = PCA(n_components=1)
+                pca.fit(X)
             self.Zeta = np.linspace(-1.0, 1.0, resolution)[:, np.newaxis]
+
         elif latent_dim == 2:
             if isinstance(init, str) and init == 'PCA':
                 pca = PCA(n_components=2)
