@@ -8,6 +8,8 @@ import scipy.spatial.distance as dist
 from matplotlib.widgets import RadioButtons
 from adjustText import adjust_text
 from scipy import signal
+from scipy import ndimage as ndi
+from scipy.ndimage.filters import maximum_filter
 
 np.random.seed(2)
 #やること
@@ -517,6 +519,11 @@ class TSOM2_Conditional_Component_Plane:
         self.Map1.set_ylim(-self.Mapsize, 1)
         self.Fig.show()
 
+    def detect_peaks(image, filter_size=5):
+        local_max = ndi.maximum_filter(image, footprint=np.ones((filter_size, filter_size)), mode='constant')
+        detected_peaks = np.ma.masked_where(image == local_max, image)
+        return detected_peaks.mask
+
     def __draw_map2(self):
         self.Map2.cla()
         self.Map2.set_title('View 2')
@@ -527,18 +534,23 @@ class TSOM2_Conditional_Component_Plane:
 
 
         #ピーク値の単語描画
-        max_val_unit_num = np.argmax(self.Map2_val)
-        #np.savetxt('Map2_val.txt',self.Map2_val[::])
-        #max_val_unit_num=signal.argrelmax(self.Map2_val.reshape(10*10), order=5)  # 最大値
-        #print(max_val_unit_num)
-        cnt = 0
-        for j in range(len(self.label2)):
-            if max_val_unit_num == self.Winner2[j]:
-                self.Map2.text(13, cnt, str(max_val_unit_num) + "-" + self.label2[j])
-                cnt -= 1
-        self.Map2.set_xlim(-1, self.Mapsize)
-        self.Map2.set_ylim(-self.Mapsize, 1)
-        self.Fig.show()
+        filter_size = 3
+        local_max = maximum_filter(self.Map2_val, footprint=np.ones((filter_size, filter_size)), mode='constant')
+        detected_peaks = np.ma.array(self.Map2_val, mask=~(self.Map2_val == local_max))
+        detected_peaks = np.ma.array(detected_peaks, mask=~(detected_peaks >= detected_peaks.max() * 0.5))
+        peak_unit_index = np.where(detected_peaks.mask == False)
+
+        peak_unit_num =[]
+        for i in range(len(peak_unit_index[0])):
+            peak_unit_num.append(peak_unit_index[0][i]*10 + peak_unit_index[1][i])
+
+        for i in range(len(peak_unit_num)):
+            cnt = 0
+            for j in range(len(self.label2)):
+                if peak_unit_num[i] == self.Winner2[j]:
+                    self.Map2.text(10 + i*3, cnt, str(peak_unit_num[i]) + "-" + self.label2[j])
+                    self.Map2.plot(self.Map2_position[peak_unit_num[i], 0], self.Map2_position[peak_unit_num[i], 1], ".", color="green", ms=20)
+                    cnt -= 1
 
 
 
