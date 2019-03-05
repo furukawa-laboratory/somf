@@ -7,6 +7,7 @@ from sklearn.preprocessing import StandardScaler
 import scipy.spatial.distance as dist
 from matplotlib.widgets import RadioButtons
 from adjustText import adjust_text
+from scipy import signal
 
 np.random.seed(2)
 #やること
@@ -387,20 +388,21 @@ class TSOM2_Conditional_Component_Plane:
     # --- 描画 ---------------------- #
     # ------------------------------ #
 
-
     def draw_map(self):
         #コンポーネントの初期表示(左下が0番目のユニットが来るように行列を上下反転している)
         self.__draw_map1()#View1のMapを描画
         self.__draw_map2()#View2のMapを描画
         self.radio.on_clicked(self.hzfunc)#labelbuttonのクリック.radio buttonがクリックされたら()ないの関数を動作する
         self.__draw_click_point()#どこを指定しているかを表示
-
         #クリックイベント
         self.Fig.canvas.mpl_connect('button_press_event', self.__onclick_fig)#Map上のクリックした番号を取得,CCPの計算を行い,CCPを描画
+
 
         #マウスオーバーイベント
         self.Fig.canvas.mpl_connect('motion_notify_event', self.__mouse_over_fig)#Map内をクリックした時の動作
         self.Fig.canvas.mpl_connect('axes_leave_event', self.__mouse_leave_fig)#Map害をクリックした時の動作
+
+        np.savetxt('Map2_val.txt', self.Map2_val[::])
         plt.show()
 
     # ------------------------------ #
@@ -437,6 +439,10 @@ class TSOM2_Conditional_Component_Plane:
                           self.Map2_position[self.Winner2[:], 1] + epsilon * self.noise_map2[:, 1],
                           c="white", linewidths=1, edgecolors="black")
         self.Fig.show()
+
+
+
+
 
 
     # ------------------------------ #
@@ -518,6 +524,18 @@ class TSOM2_Conditional_Component_Plane:
         self.__draw_label_map2()
         self.Map2.imshow(self.Map2_val[::], interpolation='spline36',
                          extent=[0, self.Map2_val.shape[0] - 1, -self.Map2_val.shape[1] + 1, 0], cmap="rainbow")
+
+
+        #ピーク値の単語描画
+        max_val_unit_num = np.argmax(self.Map2_val)
+        #np.savetxt('Map2_val.txt',self.Map2_val[::])
+        #max_val_unit_num=signal.argrelmax(self.Map2_val.reshape(10*10), order=5)  # 最大値
+        #print(max_val_unit_num)
+        cnt = 0
+        for j in range(len(self.label2)):
+            if max_val_unit_num == self.Winner2[j]:
+                self.Map2.text(13, cnt, str(max_val_unit_num) + "-" + self.label2[j])
+                cnt -= 1
         self.Map2.set_xlim(-1, self.Mapsize)
         self.Map2.set_ylim(-self.Mapsize, 1)
         self.Fig.show()
@@ -534,7 +552,6 @@ class TSOM2_Conditional_Component_Plane:
         else:
             temp2 = self.Y[self.Map1_click_unit, :, self.Map3_click_unit]
             self.Map2_val = temp2.reshape((self.map2x_num,self.map2x_num))#np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
-
     # ------------------------------ #
     # --- 最近傍ユニット算出 ---------- #
     # ------------------------------ #
