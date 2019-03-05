@@ -1,3 +1,8 @@
+#更新すること
+#点を配置するのは,やめる?(少なくとも単語はいいのでは?),peak値に関する変数を設定,いらない部分は削除する,レイアウト(ノード番号,出現確率,色のレイアウトetc.)
+
+
+
 # coding=utf-8
 import numpy as np
 import matplotlib
@@ -532,12 +537,13 @@ class TSOM2_Conditional_Component_Plane:
         self.Map2.imshow(self.Map2_val[::], interpolation='spline36',
                          extent=[0, self.Map2_val.shape[0] - 1, -self.Map2_val.shape[1] + 1, 0], cmap="rainbow")
 
-
+        #filter_sizeを狭くすると(peak周辺のやつも取ってくれる)
+        #閾値を下げると,それほどpeakでないものも取ってくれる
         #ピーク値の単語描画
-        filter_size = 3
+        filter_size = 2
         local_max = maximum_filter(self.Map2_val, footprint=np.ones((filter_size, filter_size)), mode='constant')
         detected_peaks = np.ma.array(self.Map2_val, mask=~(self.Map2_val == local_max))
-        detected_peaks = np.ma.array(detected_peaks, mask=~(detected_peaks >= detected_peaks.max() * 0.5))
+        detected_peaks = np.ma.array(detected_peaks, mask=~(detected_peaks >= detected_peaks.max() * 0.7))#先で検出したpeak値の最大値の1/2以下を省く
         peak_unit_index = np.where(detected_peaks.mask == False)
 
         peak_unit_num =[]
