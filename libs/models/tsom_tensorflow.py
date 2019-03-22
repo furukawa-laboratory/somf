@@ -264,7 +264,7 @@ class TSOM2:
         self.historyS = np.zeros((self.epochs, 2))
         self.historyB1 = np.zeros(self.number_vectors[0])
         self.historyB2 = np.zeros(self.number_vectors[1])
-        self.histDist = np.zeros((self.epochs, 5, 100))
+        self.histDist = np.zeros((self.epochs, self.number_vectors[1], self.K2))
 
         for i in bar:
             # Computing each iteration for the whole batch (ie : Update the weights each iteration) + Saving history
