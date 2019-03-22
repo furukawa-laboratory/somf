@@ -5,6 +5,7 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
+from scipy.spatial import distance
 
 class TSOM2:
 
@@ -66,22 +67,22 @@ class TSOM2:
            with tf.name_scope('Zeta_Matrixes'):
 
                 if latentdim[0] == 2:
-                    zeta1 = np.dstack(np.meshgrid(np.linspace(-1, 1, self.n[0]), np.linspace(-1, 1, self.m[0]))).reshape(
+                    zeta1 = np.dstack(np.meshgrid(np.linspace(-1, 1, self.n[0], endpoint=True), np.linspace(-1, 1, self.m[0], endpoint=True))).reshape(
                         -1, latentdim[0])
                     self.K1 = self.n[0]*self.m[0]
                     self.Zeta1 = tf.constant(zeta1, dtype=tf.float64)
                 else:
-                    zeta1 = np.dstack(np.linspace(-1,1, self.n[0])).reshape(-1, latentdim[0])
+                    zeta1 = np.dstack(np.linspace(-1,1, self.n[0], endpoint=True)).reshape(-1, latentdim[0])
                     self.K1 = self.n[0]
                     self.Zeta1 = tf.constant(zeta1, dtype=tf.float64)
 
                 if latentdim[1] == 2:
-                    zeta2 = np.dstack(np.meshgrid(np.linspace(-1, 1, self.n[1]), np.linspace(-1, 1, self.m[1]))).reshape(
+                    zeta2 = np.dstack(np.meshgrid(np.linspace(-1, 1, self.n[1], endpoint=True), np.linspace(-1, 1, self.m[1], endpoint=True))).reshape(
                         -1, latentdim[1])
                     self.K2 = self.n[1]*self.m[1]
                     self.Zeta2 = tf.constant(zeta2, dtype=tf.float64)
                 else:
-                    zeta2 = np.dstack(np.linspace(-1, 1, self.n[1])).reshape(-1, latentdim[1])
+                    zeta2 = np.dstack(np.linspace(-1, 1, self.n[1], endpoint=True)).reshape(-1, latentdim[1])
                     self.K2 = self.n[1]
                     self.Zeta2 = tf.constant(zeta2, dtype=tf.float64)
 
@@ -122,13 +123,13 @@ class TSOM2:
 
            # Compute & Update the new weights
            with tf.name_scope('Updating_Weights_Y'):
-
-                R1 = self.neighboor_update(self.Zeta1, self.Z1, 0)
-                R2 = self.neighboor_update(self.Zeta2, self.Z2, 1)
-                U = tf.einsum('lj,ijd->ild', R2, self.input_data)
-                V = tf.einsum('ki,ijd->kjd', R1, self.input_data)
-                self.train_update = tf.assign(self.Y, tf.einsum('lj,kjd->kld', R2, V))
-                # self.train_update = tf.assign(self.Y, tf.einsum('ki, lj, ijd->kld', R1, R2, self.input_data))
+                self.dist = tf.pow(self.pairwise_dist(self.Zeta2, self.Z2), 2)
+                self.R1, _ = self.neighboor_update(self.Zeta1, self.Z1, 0)
+                self.R2, self.d2 = self.neighboor_update(self.Zeta2, self.Z2, 1)
+                self.U = tf.einsum('lj,ijd->ild', self.R2, self.input_data)
+                self.V = tf.einsum('ki,ijd->kjd', self.R1, self.input_data)
+                
+                self.train_update = tf.assign(self.Y, tf.einsum('ki,lj,ijd->kld', self.R1, self.R2, self.input_data))
 
 
             ########################################## COMPETITIVE STEP ################################################
@@ -137,10 +138,10 @@ class TSOM2:
            with tf.name_scope('Getting_BMU_Nodes'):
 
                 self.bmu_nodes1 = tf.reshape(
-                    self.winning_nodes(U[None, :, :, :], self.train_update[:, None, :, :], [2, 3]),
+                    self.winning_nodes(self.U[:, None, :, :], self.train_update[None, :, :, :], [2, 3]),
                     shape=[self.number_vectors[0]])
                 self.bmu_nodes2 = tf.reshape(
-                    self.winning_nodes(V[:, None, :, :], self.train_update[:, :, None, :], [0, 3]),
+                    self.winning_nodes(self.V[:, :, None, :], self.train_update[:, None, :, :], [0, 3]),
                     shape=[self.number_vectors[1]])
 
            # BMU Vectors extractions, each vector is a 2 dimension one (for mapping)
@@ -188,7 +189,7 @@ class TSOM2:
             # Matrix computing the sum between the G Matrix and the invertMatrix
             # Shape : Number_of_Reference_Vectors x Number_of_Input_Vectors
             with tf.name_scope('Sum_betwwen_Neighboorhood_Matrix_and_Invert_Sum'):
-                return G * Linv
+                return G * Linv, G
 
     def sigma(self):
         """
@@ -199,7 +200,7 @@ class TSOM2:
         """
 
         with tf.name_scope('Sigma_computation'):
-            return tf.maximum(tf.cast(self.sigma_min, tf.float64), self.sigma_max * (1 - (self.iter_no / self.tau)))
+            return tf.maximum(self.sigma_min * tf.constant(1, tf.float64), self.sigma_max * (1 - (self.iter_no / self.tau)))
 
     def winning_nodes(self, M, Y, axis):
         """
@@ -213,9 +214,9 @@ class TSOM2:
         with tf.name_scope('Winning_node'):
             dist = tf.square(M - Y)
 
-            sumR = tf.reduce_sum(dist, axis=axis)
+            self.sumR = tf.reduce_sum(dist, axis=axis)
 
-            arg = tf.argmin(sumR, 0, name='Argmin')
+            arg = tf.argmin(self.sumR, 1, name='Argmin')
 
             return arg
 
@@ -243,6 +244,8 @@ class TSOM2:
             D = tf.sqrt(tf.maximum(na - 2 * tf.matmul(A, B, False, True) + nb, 0.0))
         return D
 
+        #return tf.reshape(tf.py_func(distance.cdist, [A, B], tf.float64), shape=[D.get_shape()[0], D.get_shape()[1]])
+
     def predict(self, data, graph=False):
         """
         Launch prediction on data
@@ -254,21 +257,21 @@ class TSOM2:
         print('\nPredicting out of {0} epochs\n'.format(self.epochs))
         bar = tqdm(range(self.epochs))
 
-        self.bmus1 = np.zeros((self.epochs, data.shape[0]), dtype=np.int64)
-        self.bmus2 = np.zeros((self.epochs, data.shape[1]), dtype=np.int64)
         # History saving for BMU, Weights and sigma value
         self.historyZ1 = np.zeros((self.epochs, self.number_vectors[0], self.latentdim[0]))
         self.historyZ2 = np.zeros((self.epochs, self.number_vectors[1], self.latentdim[1]))
         self.historyY = np.zeros((self.epochs, self.K1, self.K2, self.dimension))
         self.historyS = np.zeros((self.epochs, 2))
+        self.historyB1 = np.zeros(self.number_vectors[0])
+        self.historyB2 = np.zeros(self.number_vectors[1])
+        self.histDist = np.zeros((self.epochs, 5, 100))
 
         for i in bar:
             # Computing each iteration for the whole batch (ie : Update the weights each iteration) + Saving history
-            self.historyS[i], self.historyY[i, :, :], self.historyZ1[i, :], self.historyZ2[i, :], self.bmus1[i], self.bmus2[
-                i] = self.session.run(
-                [self.sigma_update, self.train_update, self.Z1_update, self.Z2_update, self.bmu_nodes1,
-                 self.bmu_nodes2],
+            self.historyS[i], self.historyY[i, :, :], self.historyZ1[i, :], self.historyZ2[i, :], self.historyB1, self.historyB2,self.histDist[i] = self.session.run(
+                [self.sigma_update, self.train_update, self.Z1_update, self.Z2_update, self.bmu_nodes1, self.bmu_nodes2,self.sumR],
                 feed_dict={self.input_data: data, self.iter_no: i})
+
 
         if graph == True:
             writer = tf.summary.FileWriter('output', self.session.graph)
