@@ -10,6 +10,10 @@ from libs.visualization.tsom.tsom2_viewer import TSOM2_Viewer as TSOM2_V
 
 class TestTSOM2(unittest.TestCase):
     def test_numpy_vs_tf(self):
+        # This test will be failed, but this error my be anavoidable
+        # because there is difference between numpy's bit range of float and tensor-flow's one.
+        # You want to know detail. look pull request #32
+        
         # random seed setting
         seed = 100
         np.random.seed(seed)
