@@ -61,21 +61,24 @@ class TestSOM(unittest.TestCase):
 
         # set parameters of training data
         seed = 1
-        n_samples = 100
+        n_samples = 500
         n_features = 200
 
         # generate training data
         random_state = check_random_state(seed=seed)
-        X = random_state.normal(scale=1.0,size=(n_samples,n_features))
+        # X = random_state.normal(scale=1.0,size=(n_samples,n_features))
+        mean = np.zeros(n_features)
+        cov = np.diag(np.exp(-np.linspace(0.0,5.0,n_features)**2.0))
+        X = random_state.multivariate_normal(mean=mean,cov=cov,size=n_samples)
         X -= np.mean(X,axis=0)
 
-        n_components = latent_dim
-
-        # initialize som
-        som = SOM(X, latent_dim=latent_dim, resolution=resolution, sigma_max=sigma_max, sigma_min=sigma_min, tau=tau,
+        # initialize som and pickup initial value by PCA
+        som = SOM(X, latent_dim=latent_dim, resolution=resolution,
+                  sigma_max=sigma_max, sigma_min=sigma_min, tau=tau,
                   init='PCA')
-        init = som.Z
+        SOMResult = som.Z
 
+        # calculate init value using different method, np.linalg.svd
         U, S, V = np.linalg.svd(X, full_matrices=False)
 
         max_abs_cols = np.argmax(np.abs(U), axis=0)
@@ -83,13 +86,17 @@ class TestSOM(unittest.TestCase):
         U *= signs
         V *= signs[:, np.newaxis]
 
-        U = U[:, :n_components]
+        SVDResult = U[:, :latent_dim] * S[:latent_dim]
 
-        U *= S[:n_components]
+        np.testing.assert_allclose(SOMResult, SVDResult/S.max(), rtol=1e-06)
 
-        SVDResult = U / S.max()
+        # calculate init value using different method, np.linalg.eig
+        Lambda, V = np.linalg.eig(X.T@X)
+        EVDResult = X @ V.real[:, :latent_dim] * np.array([-1.0,1.0])[None,:]
 
-        np.testing.assert_allclose(init, SVDResult, rtol=1e-06)
+        np.testing.assert_allclose(SOMResult, EVDResult/np.sqrt(Lambda.real.max()), rtol=1e-06)
+
+
 
 
 
