@@ -58,8 +58,11 @@ class TestSOM(unittest.TestCase):
         tau = 50
         latent_dim = 2
         seed = 1
+        n_samples = 100
+        n_features = 200
 
-        X = [[1,2,3],[2,2,2],[5,1,3]]
+        random_state = check_random_state(seed=seed)
+        X = random_state.normal(scale=1.0,size=(n_samples,n_features))
         X -= np.mean(X,axis=0)
 
         n_components = latent_dim
@@ -70,7 +73,6 @@ class TestSOM(unittest.TestCase):
                   init='PCA')
         som.fit(nb_epoch=nb_epoch)
 
-        n_samples, n_features = X.shape
 
         PCAResult, zeta = som.history['z0_zeta0']
 
