@@ -51,30 +51,30 @@ class TestSOM(unittest.TestCase):
             som = SOM(X,L,resolution,SIGMA_MAX,SIGMA_MIN,TAU,init=init)
 
     def test_init_pca(self):
+        # set parameters of som
         nb_epoch = 50
         resolution = 10
         sigma_max = 2.2
         sigma_min = 0.3
         tau = 50
         latent_dim = 2
+
+        # set parameters of training data
         seed = 1
         n_samples = 100
         n_features = 200
 
+        # generate training data
         random_state = check_random_state(seed=seed)
         X = random_state.normal(scale=1.0,size=(n_samples,n_features))
         X -= np.mean(X,axis=0)
 
         n_components = latent_dim
 
-        np.random.seed(seed)
-
+        # initialize som
         som = SOM(X, latent_dim=latent_dim, resolution=resolution, sigma_max=sigma_max, sigma_min=sigma_min, tau=tau,
                   init='PCA')
-        som.fit(nb_epoch=nb_epoch)
-
-
-        PCAResult, zeta = som.history['z0_zeta0']
+        init = som.Z
 
         U, S, V = np.linalg.svd(X, full_matrices=False)
 
@@ -85,12 +85,11 @@ class TestSOM(unittest.TestCase):
 
         U = U[:, :n_components]
 
-        # U *= np.sqrt(X.shape[0] - 1)
         U *= S[:n_components]
 
-        SVDResult = U
+        SVDResult = U / S.max()
 
-        np.testing.assert_allclose(PCAResult, SVDResult, rtol=1e-06)
+        np.testing.assert_allclose(init, SVDResult, rtol=1e-06)
 
 
 
