@@ -44,7 +44,6 @@ class SOM:
             self.Z = self.Zeta[init_bmus,:]
         elif isinstance(init, str) and init == 'PCA':
             self.Z = pca.transform(X)/comp1
-            self.history['z0_zeta0'] = (self.Z*comp1, pca.singular_values_)
         elif isinstance(init, np.ndarray) and init.shape == (self.N, latent_dim):
             self.Z = init.copy()
         else:
