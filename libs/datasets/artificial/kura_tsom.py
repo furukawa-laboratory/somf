@@ -1,7 +1,6 @@
 import numpy as np
 
 
-#
 def load_kura_tsom(xsamples, ysamples, retz=False):
     z1 = np.linspace(-1, 1, xsamples)
     z2 = np.linspace(-1, 1, ysamples)
