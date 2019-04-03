@@ -40,7 +40,7 @@ class SOM:
 
         self.history = {}
 
-    def fit(self, nb_epoch=100, verbose=True):
+    def fit(self, nb_epoch=100, verbose=True,euclid=True):
 
         self.history['z'] = np.zeros((nb_epoch, self.N, self.L))
         self.history['y'] = np.zeros((nb_epoch, self.K, self.D))
@@ -69,12 +69,20 @@ class SOM:
             self.Y = R @ self.X # 学習量を重みとして観測データの平均を取り参照ベクトルとする
 
             # 競合過程
-            # 勝者ノードの計算
-            Dist = dist.cdist(self.X, self.Y) #NxKの距離行列を計算
-            bmus = Dist.argmin(axis=1)
-            # Nx1の勝者ノード番号をまとめた列ベクトルを計算
-            # argmin(axis=1)を用いて各行で最小値を探しそのインデックスを返す
-            self.Z = self.Zeta[bmus, :] # 勝者ノード番号から勝者ノードを求める
+            if euclid is True:  # ユークリッド距離を使った勝者決定
+                # 勝者ノードの計算
+                Dist = dist.cdist(self.X, self.Y)  # NxKの距離行列を計算
+                bmus = Dist.argmin(axis=1)
+                # Nx1の勝者ノード番号をまとめた列ベクトルを計算
+                # argmin(axis=1)を用いて各行で最小値を探しそのインデックスを返す
+                self.Z = self.Zeta[bmus, :]  # 勝者ノード番号から勝者ノードを求める
+            else:  # KL情報量を使った勝者決定
+                Dist = np.sum(self.X[:, np.newaxis, :] * np.log(self.Y)[np.newaxis, :, :], axis=2)  # N*K行列
+                # 勝者番号の決定
+                bmus = np.argmax(Dist, axis=1)
+                # Nx1の勝者ノード番号をまとめた列ベクトルを計算
+                # argmin(axis=1)を用いて各行で最小値を探しそのインデックスを返す
+                self.Z = self.Zeta[bmus, :]  # 勝者ノード番号から勝者ノードを求める
 
             self.history['z'][epoch] = self.Z
             self.history['y'][epoch] = self.Y
