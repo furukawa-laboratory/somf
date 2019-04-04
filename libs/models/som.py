@@ -31,7 +31,7 @@ class SOM:
         if isinstance(init, str) and init == 'random':
             self.Z = np.random.rand(self.N, latent_dim) * 2.0 - 1.0
         elif isinstance(init, str) and init == 'random_bmu':
-            init_bmus = np.random.randint(0, Zeta.shape[0] - 1, self.N)
+            init_bmus = np.random.randint(0, self.Zeta.shape[0] - 1, self.N)
             self.Z = self.Zeta[init_bmus,:]
         elif isinstance(init, np.ndarray) and init.shape == (self.N, latent_dim):
             self.Z = init.copy()
