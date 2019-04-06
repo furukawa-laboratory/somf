@@ -3,7 +3,7 @@ import numpy as np
 from scipy.spatial import distance as dist
 from tqdm import tqdm
 
-class SOM:
+class SOM_someone:
     def __init__(self, X, latent_dim, resolution, sigma_max, sigma_min, tau, init='random'):
         self.X = X
         self.N = self.X.shape[0]
@@ -77,6 +77,7 @@ class SOM:
                 # argmin(axis=1)を用いて各行で最小値を探しそのインデックスを返す
                 self.Z = self.Zeta[bmus, :]  # 勝者ノード番号から勝者ノードを求める
             else:  # KL情報量を使った勝者決定
+                a=0
                 #please add your program----------------------------
 
 
