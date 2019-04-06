@@ -15,7 +15,9 @@ class TestSOM(unittest.TestCase):
         M = resolution ** L
         seed = 100
         np.random.seed(seed)
-        X = np.random.normal(0, 1, (N, D))
+        X0 = np.random.rand(N, D)
+        X_sum=np.sum(X0,axis=1)
+        X=X0/X_sum[:,np.newaxis]
         Zinit = np.random.rand(N,L)*2.0 -1.0
 
         nb_epoch = 200
