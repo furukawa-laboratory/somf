@@ -76,13 +76,11 @@ class SOM_someone:
                 # Nx1の勝者ノード番号をまとめた列ベクトルを計算
                 # argmin(axis=1)を用いて各行で最小値を探しそのインデックスを返す
                 self.Z = self.Zeta[bmus, :]  # 勝者ノード番号から勝者ノードを求める
-            else:  # KL情報量を使った勝者決定
-                a=0
+            elif euclid is False:  # KL情報量を使った勝者決定
                 #please add your program----------------------------
 
 
                 #please add your program----------------------------
-
             self.history['z'][epoch] = self.Z
             self.history['y'][epoch] = self.Y
             self.history['sigma'][epoch] = sigma
