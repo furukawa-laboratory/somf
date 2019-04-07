@@ -39,10 +39,10 @@ class SOM_someone:
             raise ValueError("invalid init: {}".format(init))
 
         # metricに関する処理
-        if metric is "sqeuclidean":
+        if metric == "sqeuclidean":
             self.metric = "sqeuclidean"
 
-        elif metric is "KLdivergence":
+        elif metric == "KLdivergence":
             self.metric = "KLdivergence"
         else:
             raise ValueError("invalid metric: {}".format(self.metric))
@@ -86,10 +86,11 @@ class SOM_someone:
                 # argmin(axis=1)を用いて各行で最小値を探しそのインデックスを返す
                 self.Z = self.Zeta[bmus, :]  # 勝者ノード番号から勝者ノードを求める
             elif self.metric is "KLdivergence":  # KL情報量を使った勝者決定
-                #please add your program----------------------------
+                Dist = np.sum(self.X[:,None,:] * self.Y[None,:,:],axis=2)
+                bmus = Dist.argmax(axis=1)
+                self.Z = self.Zeta[bmus, :]
 
 
-                #please add your program----------------------------
             self.history['z'][epoch] = self.Z
             self.history['y'][epoch] = self.Y
             self.history['sigma'][epoch] = sigma
