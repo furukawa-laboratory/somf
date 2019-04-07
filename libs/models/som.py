@@ -50,7 +50,7 @@ class SOM:
             raise ValueError("invalid init: {}".format(init))
 
         #metricに関する処理
-        if metric is "sqeuclidean":
+        if metric == "sqeuclidean":
             self.metric="sqeuclidean"
 
         elif metric is "KLdivergence":
