@@ -7,7 +7,7 @@ from libs.models.som_tensorflow import SOM as som
 
 
 class TestSOM(unittest.TestCase):
-    def test_numpy_vs_usefor(self):
+    def test_numpy_vs_tensorflow(self):
         N = 100
         D = 3
         L = 2
