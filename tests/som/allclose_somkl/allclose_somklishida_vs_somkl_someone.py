@@ -24,11 +24,11 @@ class TestSOM(unittest.TestCase):
         SIGMA_MAX = 2.2
         SIGMA_MIN = 0.1
         TAU = 50
-        som_ishida = SOM(X,L,resolution,SIGMA_MAX,SIGMA_MIN,TAU,init=Zinit)
-        som_someone = SOM_someone(X,L,resolution,SIGMA_MAX,SIGMA_MIN,TAU,init=Zinit)
+        som_ishida = SOM(X,L,resolution,SIGMA_MAX,SIGMA_MIN,TAU,init=Zinit,metric="sqeuclidean")
+        som_someone = SOM_someone(X,L,resolution,SIGMA_MAX,SIGMA_MIN,TAU,init=Zinit,metric="sqeuclidean")
 
-        som_ishida.fit(nb_epoch=nb_epoch,euclid=True)
-        som_someone.fit(nb_epoch=nb_epoch,euclid=True)
+        som_ishida.fit(nb_epoch=nb_epoch)
+        som_someone.fit(nb_epoch=nb_epoch)
 
 
         np.testing.assert_allclose(som_ishida.history['y'],som_someone.history['y'])
