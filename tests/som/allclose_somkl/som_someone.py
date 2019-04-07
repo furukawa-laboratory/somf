@@ -86,7 +86,6 @@ class SOM_someone:
                 # argmin(axis=1)を用いて各行で最小値を探しそのインデックスを返す
                 self.Z = self.Zeta[bmus, :]  # 勝者ノード番号から勝者ノードを求める
             elif self.metric is "KLdivergence":  # KL情報量を使った勝者決定
-                pass
                 #please add your program----------------------------
 
 
