@@ -53,7 +53,7 @@ class SOM:
         if metric == "sqeuclidean":
             self.metric="sqeuclidean"
 
-        elif metric is "KLdivergence":
+        elif metric == "KLdivergence":
             self.metric = "KLdivergence"
         else:
             raise ValueError("invalid metric: {}".format(self.metric))
