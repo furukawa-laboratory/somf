@@ -2,10 +2,8 @@
 import numpy as np
 from scipy.spatial import distance as dist
 from tqdm import tqdm
-from sklearn.decomposition import PCA
 
-
-class SOM:
+class SOM_watanabe:
     def __init__(self, X, latent_dim, resolution, sigma_max, sigma_min, tau, init='random',metric="sqeuclidean"):
         self.X = X
         self.N = self.X.shape[0]
@@ -15,22 +13,15 @@ class SOM:
         self.tau = tau
 
         self.D = X.shape[1]
-        self.L = latent_dim
 
-        self.history = {}
 
-        if isinstance(init, str) and init == 'PCA':
-            pca = PCA(n_components=latent_dim)
-            pca.fit(X)
 
         if latent_dim == 1:
-            self.Zeta = np.linspace(-1.0, 1.0, resolution)[:, np.newaxis]
+            self.L = latent_dim
+            self.Zeta = np.linspace(-1.0, 1.0, resolution)[:,np.newaxis]
         elif latent_dim == 2:
-            if isinstance(init, str) and init == 'PCA':
-                comp1, comp2 = pca.singular_values_[0], pca.singular_values_[1]
-                zeta = np.meshgrid(np.linspace(-1, 1, resolution), np.linspace(-comp2/comp1, comp2/comp1, resolution))
-            else:
-                zeta = np.meshgrid(np.linspace(-1, 1, resolution), np.linspace(-1, 1, resolution))
+            self.L = latent_dim
+            zeta = np.meshgrid(np.linspace(-1, 1, resolution), np.linspace(-1, 1, resolution))
             self.Zeta = np.dstack(zeta).reshape(resolution**2, latent_dim)
         else:
             raise ValueError("invalid latent dimension: {}".format(latent_dim))
@@ -42,16 +33,14 @@ class SOM:
         elif isinstance(init, str) and init == 'random_bmu':
             init_bmus = np.random.randint(0, self.Zeta.shape[0] - 1, self.N)
             self.Z = self.Zeta[init_bmus,:]
-        elif isinstance(init, str) and init == 'PCA':
-            self.Z = pca.transform(X)/comp1
         elif isinstance(init, np.ndarray) and init.shape == (self.N, latent_dim):
             self.Z = init.copy()
         else:
             raise ValueError("invalid init: {}".format(init))
 
-        #metricに関する処理
+        # metricに関する処理
         if metric == "sqeuclidean":
-            self.metric="sqeuclidean"
+            self.metric = "sqeuclidean"
 
         elif metric == "KLdivergence":
             self.metric = "KLdivergence"
@@ -60,7 +49,7 @@ class SOM:
 
         self.history = {}
 
-    def fit(self, nb_epoch=100, verbose=True):
+    def fit(self, nb_epoch=100, verbose=True,euclid=True):
 
         self.history['z'] = np.zeros((nb_epoch, self.N, self.L))
         self.history['y'] = np.zeros((nb_epoch, self.K, self.D))
@@ -97,12 +86,10 @@ class SOM:
                 # argmin(axis=1)を用いて各行で最小値を探しそのインデックスを返す
                 self.Z = self.Zeta[bmus, :]  # 勝者ノード番号から勝者ノードを求める
             elif self.metric is "KLdivergence":  # KL情報量を使った勝者決定
-                Dist = np.sum(self.X[:, np.newaxis, :] * np.log(self.Y)[np.newaxis, :, :], axis=2)  # N*K行列
-                # 勝者番号の決定
-                bmus = np.argmax(Dist, axis=1)
-                # Nx1の勝者ノード番号をまとめた列ベクトルを計算
-                # argmin(axis=1)を用いて各行で最小値を探しそのインデックスを返す
-                self.Z = self.Zeta[bmus, :]  # 勝者ノード番号から勝者ノードを求める
+                Dist = np.sum(self.X[:,None,:] * np.log(self.Y[None,:,:]),axis=2)
+                bmus = Dist.argmax(axis=1)
+                self.Z = self.Zeta[bmus, :]
+
 
             self.history['z'][epoch] = self.Z
             self.history['y'][epoch] = self.Y
