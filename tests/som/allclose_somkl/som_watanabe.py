@@ -3,7 +3,7 @@ import numpy as np
 from scipy.spatial import distance as dist
 from tqdm import tqdm
 
-class SOM_someone:
+class SOM_watanabe:
     def __init__(self, X, latent_dim, resolution, sigma_max, sigma_min, tau, init='random',metric="sqeuclidean"):
         self.X = X
         self.N = self.X.shape[0]
