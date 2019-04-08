@@ -71,7 +71,7 @@ class TSOM_plus_SOM:
                        sigma_max=self.som_sigma_max,sigma_min=self.som_sigma_min, tau=self.som_tau, init="random", metric="KLdivergence")
         self.som.fit(som_epoch_num)
 
-#もやもや:1stと2ndのパラメータは辞書で入れてもらう？
+#もやもや:1stと2ndのパラメータは辞書で入れてもらう？(可変長引数でやろう!)
 def _main():
     #3つのガウス分布でそれぞれサンプルを生成して,その情報をグループ情報とする
     group1_mean=np.array([0.0,0.0,0.0])
