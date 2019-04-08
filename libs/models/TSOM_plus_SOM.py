@@ -29,7 +29,7 @@ class TSOM_plus_SOM:
         #上位のSOMのパラメータ設定と、下位TSOMのパラメータ設定を引数として決めてアyる必要がある.
         self.tsom=TSOM2(self.input_data,latent_dim=self.tsom_latent_dim,resolution=self.tsom_resolution,SIGMA_MAX=self.tsom_sigma_max
                         ,SIGMA_MIN=self.tsom_sigma_min,init='random',TAU=self.tsom_tau)
-        #self.som=SOM(,latent_dim=,resolution=,sigma_max=,sigma_min=,tau=,init="random",metric="KLdivergence")
+
         #いるやつ:TSOMクラス,SOMクラス,KDE関数
 
 
@@ -64,10 +64,12 @@ class TSOM_plus_SOM:
 
         output_data=np.concatenate((prob1[:,np.newaxis],prob2[:,np.newaxis],prob3[:,np.newaxis]),axis=1)
         self.output_data=output_data.T
-        
 
-    def fit_2nd_SOM(self):#上位のSOMを
-        pass
+
+    def fit_2nd_SOM(self,som_epoch_num):#上位のSOMを
+        self.som = SOM(self.output_data, latent_dim=self.som_latent_dim, resolution=self.som_resolution,
+                       sigma_max=self.som_sigma_max,sigma_min=self.som_sigma_min, tau=self.som_tau, init="random", metric="KLdivergence")
+        self.som.fit(som_epoch_num)
 
 #もやもや:1stと2ndのパラメータは辞書で入れてもらう？
 def _main():
@@ -109,6 +111,7 @@ def _main():
     #htsom内で呼び出しているtsomのクラス内の変数を参照できるか？→selfつければできるよ！
     htsom.fit_1st_TSOM(tsom_epoch_num=250)
     htsom.fit_KDE(kernel_width=1.0,group_label=group_label)
+    htsom.fit_2nd_SOM(som_epoch_num=250)
 
 if __name__ == '__main__':
     _main()
