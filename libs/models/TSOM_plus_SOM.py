@@ -49,27 +49,31 @@ class TSOM_plus_SOM:
                        sigma_max=self.som_sigma_max,sigma_min=self.som_sigma_min, tau=self.som_tau, init="random", metric="KLdivergence")
         self.som.fit(som_epoch_num)
 
-#もやもや:1stと2ndのパラメータは辞書で入れてもらう？(可変長引数でやろう!)
 def _main():
-    #3つのガウス分布でそれぞれサンプルを生成して,その情報をグループ情報とする
-    group1_mean=np.array([0.0,0.0,0.0])
-    group1_cov=np.identity(n=3)
-    group2_mean = np.array([-1.0, -1.0, -1.0])
-    group2_cov = np.identity(n=3)
-    group3_mean = np.array([1.0, 1.0, 1.0])
-    group3_cov = np.identity(n=3)
+    #グループ数分のガウス分布を生成してそれぞれサンプルを生成する.
 
-    group1_data=np.random.multivariate_normal(mean=group1_mean,cov=group1_cov,size=20)
-    group2_data = np.random.multivariate_normal(mean=group2_mean, cov=group2_cov,size=20)
-    group3_data = np.random.multivariate_normal(mean=group3_mean, cov=group3_cov, size=20)
-    input_data=np.concatenate((group1_data,group2_data,group3_data),axis=0)
+    group_num=10#group数
+    input_dim=3#各メンバーの特徴数
+    samples_per_group=30#各グループにメンバーに何人いるのか
+    #平均ベクトルを一様分布から生成
+    mean=np.random.rand(group_num,input_dim)*10
 
-    group1_label=np.arange(group1_data.shape[0])
-    group2_label = np.arange(group2_data.shape[0])+group1_data.shape[0]
-    group3_label=np.arange(group3_data.shape[0])+group1_data.shape[0]+group2_data.shape[0]
-    group_label=(group1_label,group2_label,group3_label)
+    input_data=np.zeros((group_num,samples_per_group,input_dim))
 
-    #dictのパラメータ名は固定latent_dim,resolution,sigma_max,sigma_min,tauでSOMとTSOMでまとめる
+    for i in range(group_num):
+        samples=np.random.multivariate_normal(mean=mean[i],cov=np.identity(input_dim),size=samples_per_group)
+        input_data[i,:,:]=samples
+    input_data = input_data.reshape((group_num * samples_per_group, input_dim))
+    group_label=np.zeros((group_num,samples_per_group))
+    # for j in range(group_num):
+    #     if j==0:
+    #         temp_group_label=np.arange(samples_per_group)+samples_per_group
+    #         group_label[j,:]=temp_group_label
+    #     else:
+    #         temp_group_label += samples_per_group
+    #         group_label[j, :] = temp_group_label
+
+    # #dictのパラメータ名は固定latent_dim,resolution,sigma_max,sigma_min,tauでSOMとTSOMでまとめる
     htsom=TSOM_plus_SOM(input_data,group_label,((2,1),2),((5,10),10),(1.0,1.0),(0.1,0.1),(50,50))
     #htsom内で呼び出しているtsomのクラス内の変数を参照できるか？→selfつければできるよ！
     htsom.fit_1st_TSOM(tsom_epoch_num=250)
