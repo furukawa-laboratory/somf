@@ -5,26 +5,23 @@ import numpy as np
 from scipy.spatial import distance as dist
 
 class TSOM_plus_SOM:
-    def __init__(self,input_data,tsom_latentdim,tsom_resolution,tsom_sigma_max,tsom_sigma_min,tsom_tau,tsom_epoch_num,
-                 som_latentdim,som_resolution,som_sigma_max,som_sigma_min,som_tau):
-
+    def __init__(self,input_data,**kargs):
+        #とりあえず、keyは固定にして場所自由でいいかも.
         #下位のTSOMのパラメータ設定(とりあえず、全モード共通)
-        self.tsom_latent_dim=tsom_latentdim
-        self.tsom_sigma_max=tsom_sigma_max
-        self.tsom_sigma_min=tsom_sigma_min
-        self.tsom_tau=tsom_tau
-        self.tsom_resolution=tsom_resolution
+        self.tsom_latent_dim=kargs['tsom_latentdim']
+        self.tsom_resolution = kargs['tsom_resolution']
+        self.tsom_sigma_max=kargs['tsom_sigma_max']
+        self.tsom_sigma_min=kargs['tsom_sigma_min']
+        self.tsom_tau=kargs['tsom_tau']
+
         #上位のSOMのパラメータ設定
-        self.som_latent_dim=som_latentdim
-        self.som_sigma_max = som_sigma_max
-        self.som_sigma_min = som_sigma_min
-        self.som_tau = som_tau
-        self.som_resolution = som_resolution
-
-
+        self.som_latent_dim=kargs['som_latentdim']
+        self.som_sigma_max = kargs['som_sigma_max']
+        self.som_sigma_min = kargs['som_sigma_min']
+        self.som_tau = kargs['som_tau']
+        self.som_resolution = kargs['som_resolution']
 
         self.input_data=input_data#下位のTSOMに入れるパラメータ
-        #self.kernel_width=kernel_width#KDEのカーネル幅を決める(ガウスカーネル)
 
         #上位のSOMのパラメータ設定と、下位TSOMのパラメータ設定を引数として決めてアyる必要がある.
         self.tsom=TSOM2(self.input_data,latent_dim=self.tsom_latent_dim,resolution=self.tsom_resolution,SIGMA_MAX=self.tsom_sigma_max
@@ -37,7 +34,6 @@ class TSOM_plus_SOM:
 
     def fit_KDE(self,kernel_width,group_label):#学習した後の潜在空間からKDEで確率分布を作る
         group_num=len(group_label)#グループ数の確認
-
         self.output_data=np.zeros((group_num,self.tsom.K1))#group数*ノード数
         #グループごとにKDEを適用
         for i in range(group_num):
@@ -76,20 +72,9 @@ def _main():
     print(group3_label)
     group_label=(group1_label,group2_label,group3_label)
 
-    tsom_latentdim=2
-    tsom_resolution=10
-    tsom_sigma_max=1.0
-    tsom_sigma_min=0.1
-    tsom_tau=50
-    tsom_epoch_num=250
-    som_latentdim=2
-    som_resolution=10
-    som_sigma_max=1.0
-    som_sigma_min=0.1
-    som_tau=50
-
-    htsom=TSOM_plus_SOM(input_data,tsom_latentdim,tsom_resolution,tsom_sigma_max,tsom_sigma_min,tsom_tau,tsom_epoch_num,
-                        som_latentdim,som_resolution,som_sigma_max,som_sigma_min,som_tau)
+    #dictのパラメータ名は固定
+    htsom=TSOM_plus_SOM(input_data=input_data,tsom_resolution=10,tsom_latentdim=2 ,tsom_sigma_max=1.0, tsom_sigma_min=0.1, tsom_tau=50,
+                        som_latentdim=2,som_resolution=10,som_sigma_max=1.0,som_sigma_min=0.1,som_tau=50)
     #htsom内で呼び出しているtsomのクラス内の変数を参照できるか？→selfつければできるよ！
     htsom.fit_1st_TSOM(tsom_epoch_num=250)
     htsom.fit_KDE(kernel_width=1.0,group_label=group_label)
