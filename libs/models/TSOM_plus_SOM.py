@@ -30,7 +30,6 @@ class TSOM_plus_SOM:
         self.tsom=TSOM2(self.input_data,latent_dim=self.tsom_latent_dim,resolution=self.tsom_resolution,SIGMA_MAX=self.tsom_sigma_max
                         ,SIGMA_MIN=self.tsom_sigma_min,init='random',TAU=self.tsom_tau)
 
-        #いるやつ:TSOMクラス,SOMクラス,KDE関数
 
 
     def fit_1st_TSOM(self,tsom_epoch_num):
@@ -38,33 +37,16 @@ class TSOM_plus_SOM:
 
     def fit_KDE(self,kernel_width,group_label):#学習した後の潜在空間からKDEで確率分布を作る
         group_num=len(group_label)#グループ数の確認
-        group_1_Z=self.tsom.Z1[group_label[0]]
-        group_2_Z = self.tsom.Z1[group_label[1]]
-        group_3_Z = self.tsom.Z1[group_label[2]]
 
-        Dist1 = dist.cdist(self.tsom.Zeta1, group_1_Z, 'sqeuclidean')
-        # KxNの距離行列を計算
-        # ノードと勝者ノードの全ての組み合わせにおける距離を網羅した行列
-        H1 = np.exp(-Dist1 / (2 * kernel_width * kernel_width))  # KxNの学習量行列を計算
-        prob1=np.sum(H1,axis=1)
-        prob1_sum=np.sum(prob1)
-        prob1=prob1/prob1_sum
-
-        Dist2 = dist.cdist(self.tsom.Zeta1, group_2_Z, 'sqeuclidean')
-        H2 = np.exp(-Dist2 / (2 * kernel_width * kernel_width))  # KxNの学習量行列を計算
-        prob2 = np.sum(H2, axis=1)
-        prob2_sum = np.sum(prob2)
-        prob2 = prob2 / prob2_sum
-
-        Dist3 = dist.cdist(self.tsom.Zeta1, group_3_Z, 'sqeuclidean')
-        H3 = np.exp(-Dist3 / (2 * kernel_width * kernel_width))  # KxNの学習量行列を計算
-        prob3 = np.sum(H3, axis=1)
-        prob3_sum = np.sum(prob3)
-        prob3 = prob3 / prob3_sum
-
-        output_data=np.concatenate((prob1[:,np.newaxis],prob2[:,np.newaxis],prob3[:,np.newaxis]),axis=1)
-        self.output_data=output_data.T
-
+        self.output_data=np.zeros((group_num,self.tsom.K1))#group数*ノード数
+        #グループごとにKDEを適用
+        for i in range(group_num):
+            Dist=dist.cdist(self.tsom.Zeta1, self.tsom.Z1[group_label[i],:], 'sqeuclidean')# KxNの距離行列を計算
+            H = np.exp(-Dist / (2 * kernel_width * kernel_width))  # KxNの学習量行列を計算
+            prob = np.sum(H, axis=1)#K*1
+            prob_sum = np.sum(prob)#1*1
+            prob = prob / prob_sum#K*1
+            self.output_data[i,:]=prob
 
     def fit_2nd_SOM(self,som_epoch_num):#上位のSOMを
         self.som = SOM(self.output_data, latent_dim=self.som_latent_dim, resolution=self.som_resolution,
