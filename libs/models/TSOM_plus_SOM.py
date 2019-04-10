@@ -5,21 +5,21 @@ import numpy as np
 from scipy.spatial import distance as dist
 
 class TSOM_plus_SOM:
-    def __init__(self,input_data,group_label,**kargs):
+    def __init__(self,input_data,group_label,*args):
         #とりあえず、keyは固定にして場所自由でいいかも.一部、tsomの時にtupleになっている場合の処理を追加
         #下位のTSOMのパラメータ設定
-        self.tsom_latent_dim=kargs['tsom_latentdim']
-        self.tsom_resolution = kargs['tsom_resolution']
-        self.tsom_sigma_max=kargs['tsom_sigma_max']
-        self.tsom_sigma_min=kargs['tsom_sigma_min']
-        self.tsom_tau=kargs['tsom_tau']
+        self.tsom_latent_dim=args[0]
+        self.tsom_resolution = args[1]
+        self.tsom_sigma_max=args[2]
+        self.tsom_sigma_min=args[3]
+        self.tsom_tau=args[4]
 
         #上位のSOMのパラメータ設定
-        self.som_latent_dim=kargs['som_latentdim']
-        self.som_sigma_max = kargs['som_sigma_max']
-        self.som_sigma_min = kargs['som_sigma_min']
-        self.som_tau = kargs['som_tau']
-        self.som_resolution = kargs['som_resolution']
+        self.som_latent_dim=args[5]
+        self.som_sigma_max = args[6]
+        self.som_sigma_min = args[7]
+        self.som_tau = args[8]
+        self.som_resolution = args[9]
 
         self.input_data=input_data#下位のTSOMに入れるパラメータ
         self.group_label = group_label # グループ数の確認
@@ -70,8 +70,7 @@ def _main():
     group_label=(group1_label,group2_label,group3_label)
 
     #dictのパラメータ名は固定
-    htsom=TSOM_plus_SOM(input_data=input_data,group_label=group_label,tsom_resolution=10,tsom_latentdim=2 ,tsom_sigma_max=1.0,
-                        tsom_sigma_min=0.1,tsom_tau=50,som_latentdim=2,som_resolution=10,som_sigma_max=1.0,som_sigma_min=0.1,som_tau=50)
+    htsom=TSOM_plus_SOM(input_data,group_label,2,10,1.0,0.1,50,2,10,1.0,0.1,50)
     #htsom内で呼び出しているtsomのクラス内の変数を参照できるか？→selfつければできるよ！
     htsom.fit_1st_TSOM(tsom_epoch_num=250)
     htsom.fit_KDE(kernel_width=1.0)
