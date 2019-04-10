@@ -8,18 +8,19 @@ class TSOM_plus_SOM:
     def __init__(self,input_data,group_label,*args):
         #とりあえず、keyは固定にして場所自由でいいかも.一部、tsomの時にtupleになっている場合の処理を追加
         #下位のTSOMのパラメータ設定
-        self.tsom_latent_dim=args[0]
-        self.tsom_resolution = args[1]
-        self.tsom_sigma_max=args[2]
-        self.tsom_sigma_min=args[3]
-        self.tsom_tau=args[4]
+        self.tsom_latent_dim=args[0][0]
+        self.tsom_resolution = args[1][0]
+        self.tsom_sigma_max=args[2][0]
+        self.tsom_sigma_min=args[3][0]
+        self.tsom_tau=args[4][0]
 
         #上位のSOMのパラメータ設定
-        self.som_latent_dim=args[5]
-        self.som_sigma_max = args[6]
-        self.som_sigma_min = args[7]
-        self.som_tau = args[8]
-        self.som_resolution = args[9]
+        self.som_latent_dim=args[0][1]
+        self.som_resolution = args[1][1]
+        self.som_sigma_max = args[2][1]
+        self.som_sigma_min = args[3][1]
+        self.som_tau = args[4][1]
+        
 
         self.input_data=input_data#下位のTSOMに入れるパラメータ
         self.group_label = group_label # グループ数の確認
@@ -69,8 +70,8 @@ def _main():
     group3_label=np.arange(group3_data.shape[0])+group1_data.shape[0]+group2_data.shape[0]
     group_label=(group1_label,group2_label,group3_label)
 
-    #dictのパラメータ名は固定
-    htsom=TSOM_plus_SOM(input_data,group_label,2,10,1.0,0.1,50,2,10,1.0,0.1,50)
+    #dictのパラメータ名は固定latent_dim,resolution,sigma_max,sigma_min,tauでSOMとTSOMでまとめる
+    htsom=TSOM_plus_SOM(input_data,group_label,(2,2),(10,10),(1.0,1.0),(0.1,0.1),(50,50))
     #htsom内で呼び出しているtsomのクラス内の変数を参照できるか？→selfつければできるよ！
     htsom.fit_1st_TSOM(tsom_epoch_num=250)
     htsom.fit_KDE(kernel_width=1.0)
