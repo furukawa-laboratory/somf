@@ -45,9 +45,9 @@ class TSOM_plus_SOM_someone:
             prob = prob / prob_sum#K*1
             self.prob_data[i,:]=prob
 
-    def fit_2nd_SOM(self,som_epoch_num):#上位のSOMを
+    def fit_2nd_SOM(self,som_epoch_num,init):#上位のSOMを
         self.som = SOM(self.prob_data, latent_dim=self.som_latent_dim, resolution=self.som_resolution,
-                       sigma_max=self.som_sigma_max,sigma_min=self.som_sigma_min, tau=self.som_tau, init="random", metric="KLdivergence")
+                       sigma_max=self.som_sigma_max,sigma_min=self.som_sigma_min, tau=self.som_tau, init=init, metric="KLdivergence")
         self.som.fit(som_epoch_num)
 
 def _main():
