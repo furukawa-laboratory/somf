@@ -5,7 +5,7 @@ import numpy as np
 from scipy.spatial import distance as dist
 
 class TSOM_plus_SOM:
-    def __init__(self,input_data,group_label,*args):
+    def __init__(self,input_data,init,group_label,*args):
         #とりあえず、keyは固定にして場所自由でいいかも.一部、tsomの時にtupleになっている場合の処理を追加
         #下位のTSOMのパラメータ設定
         self.tsom_latent_dim=args[0][0]
@@ -25,9 +25,17 @@ class TSOM_plus_SOM:
         self.group_label = group_label # グループ数の確認
         self.group_num=len(self.group_label)
 
+        if init is 'random':
+            pass
+        elif isinstance(init,(list,tuple)):
+            pass
+
+        else:
+            raise ValueError("invalid resolution: {}".format(init))
+
         #上位のSOMのパラメータ設定と、下位TSOMのパラメータ設定を引数として決めてやる必要がある.
         self.tsom=TSOM2(self.input_data,latent_dim=self.tsom_latent_dim,resolution=self.tsom_resolution,SIGMA_MAX=self.tsom_sigma_max
-                        ,SIGMA_MIN=self.tsom_sigma_min,init='random',TAU=self.tsom_tau)
+                        ,SIGMA_MIN=self.tsom_sigma_min,init=init,TAU=self.tsom_tau)
         self.prob_data = np.zeros((self.group_num, self.tsom.K1))  # group数*ノード数
 
 
