@@ -56,29 +56,23 @@ def _main():
     input_dim=3#各メンバーの特徴数
     samples_per_group=30#各グループにメンバーに何人いるのか
     #平均ベクトルを一様分布から生成
-    mean=np.random.rand(group_num,input_dim)*10
+    mean=np.random.rand(group_num,input_dim)
 
-    input_data=np.zeros((group_num,samples_per_group,input_dim))
+    input_data=np.zeros((group_num,samples_per_group,input_dim))#input dataは1stTSOMに入れるデータ
 
     for i in range(group_num):
         samples=np.random.multivariate_normal(mean=mean[i],cov=np.identity(input_dim),size=samples_per_group)
         input_data[i,:,:]=samples
     input_data = input_data.reshape((group_num * samples_per_group, input_dim))
     group_label=np.zeros((group_num,samples_per_group),dtype=int)
-    # for j in range(group_num):
-    #     if j==0:
-    #         temp_group_label=np.arange(samples_per_group)+samples_per_group
-    #         group_label[j,:]=temp_group_label
-    #     else:
-    #         temp_group_label += samples_per_group
-    #         group_label[j, :] = temp_group_label
 
     # #dictのパラメータ名は固定latent_dim,resolution,sigma_max,sigma_min,tauでSOMとTSOMでまとめる
     htsom=TSOM_plus_SOM(input_data,group_label,((2,1),2),((5,10),10),(1.0,1.0),(0.1,0.1),(50,50))
-    #htsom内で呼び出しているtsomのクラス内の変数を参照できるか？→selfつければできるよ！
-    htsom.fit_1st_TSOM(tsom_epoch_num=250)
-    htsom.fit_KDE(kernel_width=1.0)
-    htsom.fit_2nd_SOM(som_epoch_num=250)
+
+    #plus型TSOM(TSOM*SOM)のやつ
+    htsom.fit_1st_TSOM(tsom_epoch_num=250)#1stTSOMの学習
+    htsom.fit_KDE(kernel_width=1.0)#カーネル密度推定を使って2ndSOMに渡す確率分布を作成
+    htsom.fit_2nd_SOM(som_epoch_num=250)#2ndSOMの学習
 
 if __name__ == '__main__':
     _main()
