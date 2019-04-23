@@ -27,29 +27,29 @@ class TSOM_plus_SOM_someone:
         self.group_num=len(self.group_label)
 
         #上位のSOMのパラメータ設定と、下位TSOMのパラメータ設定を引数として決めてやる必要がある.
-        self.tsom=TSOM2(self.input_data,latent_dim=self.tsom_latent_dim,resolution=self.tsom_resolution,SIGMA_MAX=self.tsom_sigma_max
-                        ,SIGMA_MIN=self.tsom_sigma_min,init=Init,TAU=self.tsom_tau)
+
         self.prob_data = np.zeros((self.group_num, self.tsom.K1))  # group数*ノード数
 
 
     def fit_1st_TSOM(self,tsom_epoch_num):
-        self.tsom.fit(tsom_epoch_num)
+        # ----------please insert your algorithm-----------------------------
+
+
+
+        # ----------please insert your algorithm------------------------------
 
     def fit_KDE(self,kernel_width):#学習した後の潜在空間からKDEで確率分布を作る
-        #グループごとにKDEを適用
-        for i in range(self.group_num):
-            Dist=dist.cdist(self.tsom.Zeta1, self.tsom.Z1[self.group_label[i],:], 'sqeuclidean')# KxNの距離行列を計算
-            H = np.exp(-Dist / (2 * kernel_width * kernel_width))  # KxNの学習量行列を計算
-            prob = np.sum(H, axis=1)#K*1
-            prob_sum = np.sum(prob)#1*1
-            prob = prob / prob_sum#K*1
-            self.prob_data[i,:]=prob
+        #----------please insert your algorithm-----------------------------
+
+
+
+        #----------please insert your algorithm------------------------------
 
     def fit_2nd_SOM(self,som_epoch_num,init):#上位のSOMを
-        self.som = SOM(self.prob_data, latent_dim=self.som_latent_dim, resolution=self.som_resolution,
-                       sigma_max=self.som_sigma_max,sigma_min=self.som_sigma_min, tau=self.som_tau, init=init, metric="KLdivergence")
-        self.som.fit(som_epoch_num)
+        # ----------please insert your algorithm-----------------------------
 
+
+        # ----------please insert your algorithm------------------------------
 def _main():
     #グループ数分のガウス分布を生成してそれぞれサンプルを生成する.
 
