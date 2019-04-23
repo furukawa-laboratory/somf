@@ -64,7 +64,7 @@ def _main():
         samples=np.random.multivariate_normal(mean=mean[i],cov=np.identity(input_dim),size=samples_per_group)
         input_data[i,:,:]=samples
     input_data = input_data.reshape((group_num * samples_per_group, input_dim))
-    group_label=np.zeros((group_num,samples_per_group))
+    group_label=np.zeros((group_num,samples_per_group),dtype=int)
     # for j in range(group_num):
     #     if j==0:
     #         temp_group_label=np.arange(samples_per_group)+samples_per_group
