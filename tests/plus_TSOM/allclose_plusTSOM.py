@@ -7,15 +7,16 @@ from tests.plus_TSOM.plus_TSOM_someone import TSOM_plus_SOM_someone
 
 class TestSOM(unittest.TestCase):
     def test_plusTSOM_ishida_vs_test_plusTSOM_someone(self):
+        #学習データの作成-------------------------------------------
         group_num = 10  # group数
         input_dim = 3  # 各メンバーの特徴数
         samples_per_group = 30  # 各グループにメンバーに何人いるのか
         seed = 100
         np.random.seed(seed)
-        #初期値を合わせる
+        #1stTSOMの初期値
         Z1 = np.random.rand(group_num * samples_per_group, 2) * 2.0 - 1.0
         Z2 = np.random.rand(input_dim, 2) * 2.0 - 1.0
-        init = (Z1, Z2)
+        init_TSOM = (Z1, Z2)
 
 
         #学習データの作成(平均のみが違うガウス分布からサンプリングした人工データを用いる.ガウス分布数がグループ数で,サンプル数がメンバーの数)
@@ -33,13 +34,11 @@ class TestSOM(unittest.TestCase):
         #グループラベルを作成
         group_label = np.zeros((group_num, samples_per_group), dtype=int)
 
+        #plus型TSOMの学習-----------------------------------------------------------
 
-
-
-        # #plus型TSOMの学習
         #dictのパラメータ名は固定latent_dim,resolution,sigma_max,sigma_min,tauでSOMとTSOMでまとめる
-        htsom_ishida = TSOM_plus_SOM(input_data,init,group_label, ((2, 2), 2), ((5, 10), 10), (1.0, 1.0), (0.1, 0.1), (50, 50))
-        htsom_someone=TSOM_plus_SOM_someone(input_data,init ,group_label, ((2, 2), 2), ((5, 10), 10), (1.0, 1.0), (0.1, 0.1), (50, 50))
+        htsom_ishida = TSOM_plus_SOM(input_data,init_TSOM,group_label, ((2, 2), 2), ((5, 10), 10), (1.0, 1.0), (0.1, 0.1), (50, 50))
+        htsom_someone=TSOM_plus_SOM_someone(input_data,init_TSOM ,group_label, ((2, 2), 2), ((5, 10), 10), (1.0, 1.0), (0.1, 0.1), (50, 50))
 
 
         # plus型TSOM(TSOM*SOM)のやつ
@@ -57,8 +56,11 @@ class TestSOM(unittest.TestCase):
         print("allclose_Kernel_Dnsity_Estimation")
         np.testing.assert_allclose(htsom_ishida.prob_data, htsom_someone.prob_data)
 
-        htsom_ishida.fit_2nd_SOM(som_epoch_num=250)  # 2ndSOMの学習
-        htsom_someone.fit_2nd_SOM(som_epoch_num=250)  # 2ndSOMの学習
+        init_SOM = np.random.rand(group_num, 2) * 2.0 - 1.0#2ndSOMの初期化
+
+        #2ndSOMの学習
+        htsom_ishida.fit_2nd_SOM(som_epoch_num=250,init=init_SOM)  # 2ndSOMの学習
+        htsom_someone.fit_2nd_SOM(som_epoch_num=250,init=init_SOM)  # 2ndSOMの学習
 
         print("allclose_2ndSOM")
         np.testing.assert_allclose(htsom_ishida.som.history['y'], htsom_someone.som.history['y'])
