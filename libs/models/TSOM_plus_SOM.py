@@ -19,23 +19,16 @@ class TSOM_plus_SOM:
         self.som_sigma_max = args[2][1]
         self.som_sigma_min = args[3][1]
         self.som_tau = args[4][1]
+        Init=init
 
 
         self.input_data=input_data#下位のTSOMに入れるパラメータ
         self.group_label = group_label # グループ数の確認
         self.group_num=len(self.group_label)
 
-        if init is 'random':
-            pass
-        elif isinstance(init,(list,tuple)):
-            pass
-
-        else:
-            raise ValueError("invalid resolution: {}".format(init))
-
         #上位のSOMのパラメータ設定と、下位TSOMのパラメータ設定を引数として決めてやる必要がある.
         self.tsom=TSOM2(self.input_data,latent_dim=self.tsom_latent_dim,resolution=self.tsom_resolution,SIGMA_MAX=self.tsom_sigma_max
-                        ,SIGMA_MIN=self.tsom_sigma_min,init=init,TAU=self.tsom_tau)
+                        ,SIGMA_MIN=self.tsom_sigma_min,init=Init,TAU=self.tsom_tau)
         self.prob_data = np.zeros((self.group_num, self.tsom.K1))  # group数*ノード数
 
 
@@ -73,9 +66,13 @@ def _main():
         input_data[i,:,:]=samples
     input_data = input_data.reshape((group_num * samples_per_group, input_dim))
     group_label=np.zeros((group_num,samples_per_group),dtype=int)
+    #init='random'
+    Z1 = np.random.rand(group_num*samples_per_group,2) * 2.0 - 1.0
+    Z2 = np.random.rand(input_dim, 1) * 2.0 - 1.0
+    init=(Z1,Z2)
 
     # #dictのパラメータ名は固定latent_dim,resolution,sigma_max,sigma_min,tauでSOMとTSOMでまとめる
-    htsom=TSOM_plus_SOM(input_data,group_label,((2,1),2),((5,10),10),(1.0,1.0),(0.1,0.1),(50,50))
+    htsom=TSOM_plus_SOM(input_data,init,group_label,((2,1),2),((5,10),10),(1.0,1.0),(0.1,0.1),(50,50))
 
     #plus型TSOM(TSOM*SOM)のやつ
     htsom.fit_1st_TSOM(tsom_epoch_num=250)#1stTSOMの学習
