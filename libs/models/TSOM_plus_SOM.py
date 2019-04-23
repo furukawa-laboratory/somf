@@ -25,10 +25,10 @@ class TSOM_plus_SOM:
         self.group_label = group_label # グループ数の確認
         self.group_num=len(self.group_label)
 
-        #上位のSOMのパラメータ設定と、下位TSOMのパラメータ設定を引数として決めてアyる必要がある.
+        #上位のSOMのパラメータ設定と、下位TSOMのパラメータ設定を引数として決めてやる必要がある.
         self.tsom=TSOM2(self.input_data,latent_dim=self.tsom_latent_dim,resolution=self.tsom_resolution,SIGMA_MAX=self.tsom_sigma_max
                         ,SIGMA_MIN=self.tsom_sigma_min,init='random',TAU=self.tsom_tau)
-        self.output_data = np.zeros((self.group_num, self.tsom.K1))  # group数*ノード数
+        self.prob_data = np.zeros((self.group_num, self.tsom.K1))  # group数*ノード数
 
 
     def fit_1st_TSOM(self,tsom_epoch_num):
@@ -42,10 +42,10 @@ class TSOM_plus_SOM:
             prob = np.sum(H, axis=1)#K*1
             prob_sum = np.sum(prob)#1*1
             prob = prob / prob_sum#K*1
-            self.output_data[i,:]=prob
+            self.prob_data[i,:]=prob
 
     def fit_2nd_SOM(self,som_epoch_num):#上位のSOMを
-        self.som = SOM(self.output_data, latent_dim=self.som_latent_dim, resolution=self.som_resolution,
+        self.som = SOM(self.prob_data, latent_dim=self.som_latent_dim, resolution=self.som_resolution,
                        sigma_max=self.som_sigma_max,sigma_min=self.som_sigma_min, tau=self.som_tau, init="random", metric="KLdivergence")
         self.som.fit(som_epoch_num)
 
