@@ -167,6 +167,7 @@ class SOMg(object):
             aver /= nn
 
         scale = (aver - self.mu) / (self.sigma * 4.0) + 0.5
+
         return np.clip(scale, 0, 1)
 
     def __draw_umatrix(self, axes):
@@ -222,6 +223,7 @@ class SOMg(object):
                 i2 = self.__neighbor_unit(i1, k)
                 if i2 < 0:
                     self.umat[i1, k] = self.umat[i1, K_MAX]
+        self.umat=np.loadtxt("Umatrix_color_scale.txt")
 
     def __neighbor_unit(self, i, k):
         self.resolution = int(pow(self.som.K, 1 / self.som.L))
