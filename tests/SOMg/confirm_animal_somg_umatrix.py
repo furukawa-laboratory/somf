@@ -12,7 +12,7 @@ from libs.visualization.som.somg import SOMg
 
 if __name__ == '__main__':
     nb_epoch = 50
-    resolution = 10
+    resolution = 20
     sigma_max = 2.2
     sigma_min = 0.3
     tau = 50
@@ -29,6 +29,11 @@ if __name__ == '__main__':
     som = SOM(X, latent_dim=latent_dim, resolution=resolution, sigma_max=sigma_max, sigma_min=sigma_min, tau=tau)
     som.fit(nb_epoch=nb_epoch)
 
+    #学習結果をresult.txtで用意した学習結果にすり替える
+    Y=np.loadtxt("result.txt")#400*21
+    som.Y=Y
+    for i in range(nb_epoch):
+        som.history["y"][i,:,:]=Y
     somg = SOMg(som)
 
     # 学習過程の表示
