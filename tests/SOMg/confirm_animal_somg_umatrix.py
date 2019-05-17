@@ -7,7 +7,7 @@ sys.path.append('../../')
 
 from libs.models.som import SOM
 from libs.datasets.artificial import animal
-from libs.visualization.som.somg import SOMg
+from tests.SOMg.confirm_SOMg import SOMg #color_scaleをUmatrix_color_scale.txtに変更したconfirm_SOMgに変更
 
 
 if __name__ == '__main__':
