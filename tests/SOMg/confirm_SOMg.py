@@ -171,9 +171,11 @@ class SOMg(object):
         return np.clip(scale, 0, 1)
 
     def __draw_umatrix(self, axes):
+        #color_value=np.loadtxt("Umatrix_color_scale.txt")
         for i in range(self.som.K):
             for k in range(K_MAX + 1):
                 self.umat_color[i, k] = self.__calc_umatrix_color(i, k)
+                #self.umat_color[i, k] = color_value[i, k]
             cell_image = np.zeros(16)
             cell_image[0] = self.umat_color[i, 7]
             cell_image[1] = self.umat_color[i, 0]
@@ -223,7 +225,8 @@ class SOMg(object):
                 i2 = self.__neighbor_unit(i1, k)
                 if i2 < 0:
                     self.umat[i1, k] = self.umat[i1, K_MAX]
-        self.umat=np.loadtxt("Umatrix_color_scale.txt")
+
+        print(self.umat)
 
     def __neighbor_unit(self, i, k):
         self.resolution = int(pow(self.som.K, 1 / self.som.L))
