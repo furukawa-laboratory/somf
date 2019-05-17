@@ -2,8 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
 
-# import sys
-# sys.path.append('../../')
 
 from libs.models.som import SOM
 from libs.datasets.artificial import animal
