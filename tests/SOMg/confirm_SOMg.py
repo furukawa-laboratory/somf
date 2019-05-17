@@ -168,14 +168,23 @@ class SOMg(object):
 
         scale = (aver - self.mu) / (self.sigma * 4.0) + 0.5
 
+        # color_value = np.loadtxt("Umatrix_color_scale.txt")
+        # print(str(np.allclose(color_value[n, k], scale, rtol=1e-02)) + '    ' + str(n) + ', ' + str(k))
         return np.clip(scale, 0, 1)
 
     def __draw_umatrix(self, axes):
-        #color_value=np.loadtxt("Umatrix_color_scale.txt")
+        color_value = np.loadtxt("Umatrix_color_scale.txt")
+        color_value_py = np.zeros(color_value.shape)
+
         for i in range(self.som.K):
             for k in range(K_MAX + 1):
                 self.umat_color[i, k] = self.__calc_umatrix_color(i, k)
-                #self.umat_color[i, k] = color_value[i, k]
+
+                self.umat_color[i, k] = color_value[i, k]
+                color_value_py[i, k] = self.__calc_umatrix_color(i, k)
+                # print(color_value[i, k])
+                # print(color_value_py[i, k])
+
             cell_image = np.zeros(16)
             cell_image[0] = self.umat_color[i, 7]
             cell_image[1] = self.umat_color[i, 0]
@@ -198,6 +207,7 @@ class SOMg(object):
             iy = i // self.resolution
             self.umat_matrix[iy, :, ix, :] = cell_image.reshape(4, 4)
 
+        print(np.allclose(color_value, color_value_py,rtol=1e-02))
         axes.imshow(self.umat_matrix.reshape(self.resolution * 4, self.resolution * 4), vmin=0, vmax=1, cmap='jet')
 
     def __calc_umatrix(self, func):
@@ -225,8 +235,6 @@ class SOMg(object):
                 i2 = self.__neighbor_unit(i1, k)
                 if i2 < 0:
                     self.umat[i1, k] = self.umat[i1, K_MAX]
-
-        self.umat=np.loadtxt("Umatrix_color_scale.txt")
 
     def __neighbor_unit(self, i, k):
         self.resolution = int(pow(self.som.K, 1 / self.som.L))
