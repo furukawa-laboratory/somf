@@ -10,15 +10,18 @@ from libs.visualization.som.Grad_norm import Grad_Norm
 xsamples=20
 ysamples=20
 X,z=load_kura_tsom(xsamples=xsamples,ysamples=ysamples,retz=True)
+
+#チームを分割(偶数チームのみ)
+group_num=4
 #観測データを4分割
 group1=X[0:int(xsamples/2),0:int(ysamples/2),:]
-group1=group1.reshape((int(xsamples*ysamples/4),3))
+group1=group1.reshape((int(xsamples*ysamples/group_num),3))
 group2=X[0:int(xsamples/2),int(ysamples/2):int(ysamples),:]
-group2=group2.reshape((int(xsamples*ysamples/4),3))
+group2=group2.reshape((int(xsamples*ysamples/group_num),3))
 group3=X[int(xsamples/2):int(xsamples),0:int(ysamples/2),:]
-group3=group3.reshape((int(xsamples*ysamples/4),3))
+group3=group3.reshape((int(xsamples*ysamples/group_num),3))
 group4=X[int(xsamples/2):int(xsamples),int(ysamples/2):int(ysamples),:]
-group4=group4.reshape((int(xsamples*ysamples/4),3))
+group4=group4.reshape((int(xsamples*ysamples/group_num),3))
 
 
 #人工データの描画
