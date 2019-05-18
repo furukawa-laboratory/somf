@@ -11,25 +11,24 @@ xsamples=20
 ysamples=20
 X,z=load_kura_tsom(xsamples=xsamples,ysamples=ysamples,retz=True)
 #観測データを4分割
-group1=X[0:10,0:10,:]
+group1=X[0:int(xsamples/2),0:int(ysamples/2),:]
 group1=group1.reshape((int(xsamples*ysamples/4),3))
-group2=X[0:10,10:20,:]
+group2=X[0:int(xsamples/2),int(ysamples/2):int(ysamples),:]
 group2=group2.reshape((int(xsamples*ysamples/4),3))
-group3=X[10:20,0:10,:]
+group3=X[int(xsamples/2):int(xsamples),0:int(ysamples/2),:]
 group3=group3.reshape((int(xsamples*ysamples/4),3))
-group4=X[10:20,10:20,:]
+group4=X[int(xsamples/2):int(xsamples),int(ysamples/2):int(ysamples),:]
 group4=group4.reshape((int(xsamples*ysamples/4),3))
 
 
 #人工データの描画
 fig=plt.figure()
 ax=fig.add_subplot(1,1,1,projection="3d")
-#ax.scatter(X_view[:,0],X_view[:,1],X_view[:,2])
 ax.scatter(group1[:,0],group1[:,1],group1[:,2],color="red")
 ax.scatter(group2[:,0],group2[:,1],group2[:,2],color="blue")
 ax.scatter(group3[:,0],group3[:,1],group3[:,2],color="green")
 ax.scatter(group4[:,0],group4[:,1],group4[:,2],color="orange")
-#plt.show()
+plt.show()
 
 #グループラベルの作成
 group1_label=np.arange(0,100)
