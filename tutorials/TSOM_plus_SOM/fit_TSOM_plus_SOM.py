@@ -4,6 +4,7 @@ from libs.datasets.artificial.kura_tsom import load_kura_tsom
 import matplotlib.pyplot as plt
 from libs.models.TSOM_plus_SOM import TSOM_plus_SOM
 from mpl_toolkits.mplot3d import Axes3D
+from libs.visualization.som.Grad_norm import Grad_Norm
 
 #人工データの検証
 xsamples=20
@@ -47,3 +48,7 @@ tsom_plus_som=TSOM_plus_SOM(input_data,"random",group_label,(2,2),(10,10),(1.0,1
 tsom_plus_som.fit_1st_TSOM(tsom_epoch_num=250)
 tsom_plus_som.fit_KDE(kernel_width=1.0)
 tsom_plus_som.fit_2nd_SOM(som_epoch_num=250,init="random")#2ndSOMの学習
+
+#grad_normで可視化
+som_umatrix = Grad_Norm(X=tsom_plus_som.som.X,Z=tsom_plus_som.som.Z,sigma=0.1,labels=None,title_text="team_map",resolution=20)
+som_umatrix.draw_umatrix()
