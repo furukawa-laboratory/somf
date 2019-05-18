@@ -45,6 +45,7 @@ input_data=np.concatenate((group1,group2,group3,group4),axis=0)
 args=((1,1),(10,10),(1.0,1.0),(0.1,0.1),(50,50))
 
 #+型階層TSOMのclass読み込み
+# group_label以降の変数ははlatent_dim,resolution,sigma_max,sigma_min,tauでSOMとTSOMでまとめている
 tsom_plus_som=TSOM_plus_SOM(input_data,"random",group_label,(2,2),(10,10),(1.0,1.0),(0.1,0.1),(50,50))
 
 tsom_plus_som.fit_1st_TSOM(tsom_epoch_num=250)
