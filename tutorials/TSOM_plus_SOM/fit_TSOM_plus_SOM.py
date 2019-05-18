@@ -40,7 +40,7 @@ group_label=(group1_label,group2_label,group3_label,group4_label)
 
 
 input_data=np.concatenate((group1,group2,group3,group4),axis=0)
-args=((2,2),(10,10),(1.0,1.0),(0.1,0.1),(50,50))
+args=((1,1),(10,10),(1.0,1.0),(0.1,0.1),(50,50))
 
 #+型階層TSOMのclass読み込み
 tsom_plus_som=TSOM_plus_SOM(input_data,"random",group_label,(2,2),(10,10),(1.0,1.0),(0.1,0.1),(50,50))
@@ -49,6 +49,7 @@ tsom_plus_som.fit_1st_TSOM(tsom_epoch_num=250)
 tsom_plus_som.fit_KDE(kernel_width=1.0)
 tsom_plus_som.fit_2nd_SOM(som_epoch_num=250,init="random")#2ndSOMの学習
 
-#grad_normで可視化
+
+#grad_normでteamを可視化
 som_umatrix = Grad_Norm(X=tsom_plus_som.som.X,Z=tsom_plus_som.som.Z,sigma=0.1,labels=None,title_text="team_map",resolution=20)
 som_umatrix.draw_umatrix()
