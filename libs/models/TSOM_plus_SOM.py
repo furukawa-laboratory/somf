@@ -30,8 +30,6 @@ class TSOM_plus_SOM:
                         ,SIGMA_MIN=self.tsom_sigma_min,init=Init,TAU=self.tsom_tau)
         self.prob_data = np.zeros((self.group_num, self.tsom.K1))  # group数*ノード数
 
-a
-b
     def fit_1st_TSOM(self,tsom_epoch_num):
         self.tsom.fit(tsom_epoch_num)
 
