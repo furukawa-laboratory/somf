@@ -1,8 +1,6 @@
 import numpy as np
-# import matplotlib.pyplot as plt
 import scipy.spatial.distance as dist
 from sklearn.preprocessing import StandardScaler
-# import matplotlib.animation
 from plotly.offline import plot
 import plotly.graph_objs as go
 
@@ -119,41 +117,6 @@ class SOM_Umatrix:
 
 
 
-        # 勝者位置が重なった時用の処理
-        # self.Label_Texts = []
-        # self.epsilon = 0.04 * (self.Z_allepoch.max() - self.Z_allepoch.min())
-        # for i in range(self.N):
-        #     count = 0
-        #     for j in range(i):
-        #         if np.allclose(Z[j, :], Z[i, :]):
-        #             count += 1
-        #     Label_Text = self.Map.text(Z[i, 0], Z[i, 1] + self.epsilon * count, self.labels[i], color='k')
-        #     self.Label_Texts.append(Label_Text)
-
-        # ani = matplotlib.animation.FuncAnimation(self.Fig, self.update, interval=self.interval, blit=False,
-        #                                    repeat=self.repeat, frames=self.T)
-        # plt.show()
-
-    # def update(self, epoch):
-    #     Z = self.Z_allepoch[epoch,:,:]
-    #     sigma = self.sigma_allepoch[epoch]
-    #
-    #     dY_std = self.__calc_umatrix(Z, sigma)
-    #     U_matrix_val = dY_std.reshape((self.resolution, self.resolution))
-    #     self.Im.set_array(U_matrix_val)
-    #     self.Scat.set_offsets(Z)
-    #     for i in range(self.N):
-    #         count = 0
-    #         for j in range(i):
-    #             if np.allclose(Z[j, :], Z[i, :]):
-    #                 count += 1
-    #         self.Label_Texts[i].remove()
-    #         self.Label_Texts[i] = self.Map.text(Z[i, 0],
-    #                                             Z[i, 1] + self.epsilon * count,
-    #                                             self.labels[i],
-    #                                             color='k')
-    #     if not self.isStillImage:
-    #         self.Map.set_title(self.title_text+' epoch={}'.format(epoch))
 
     # U-matrix表示用の値（勾配）を算出
     def __calc_umatrix(self, Z, sigma):
