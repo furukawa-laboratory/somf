@@ -1,63 +1,33 @@
 # What is this?
-This is Repository to share library which all members use.  
-古川研メンバーが共通して用いるようなライブラリを共有するためのリポジトリ．  
+自己組織化マップ(Self-Organizing Map: SOM)とその派生アルゴリズムのPythonによる実装を公開しているリポジトリです。  
+
+本リポジトリは九州工業大学の古川研究室が運営を行なっています。本研究室はSOMをベースとした、データからの知識発見に役立つ機械学習アルゴリズムを開発しています。本リポジトリではベーシックなSOMに限らず、本研究室で開発したアルゴリズムの実装も公開しています。
+
+本リポジトリは元々、研究室内でアルゴリズムを共有するためにprivateで整備されていたものですが、この度publicとしました。現在ライブラリとしての公開を目指して整備を行なっています。もちろん外部の方からのcontributionは大歓迎です。
+
+# SOMとは？
+SOMはニューラルネットワークの一種で、高次元データに対する可視化やモデリングに幅広く用いられているアルゴリズムです。古くから存在するアルゴリズムではありますが、近年盛り上がりを見せる機械学習・深層学習のアルゴリズムにも通じる側面があります。詳細は本研究室で公開している[ドキュメント](http://www.brain.kyutech.ac.jp/~furukawa/data/SOMtext.pdf)をご覧ください。
 
 
-# Directories
+# 現在公開しているコード
 
-```
-.
-├── libs                    # libraries ライブラリ
-│   ├── datasets            # module to return datasets データセットを返すモジュール
-│   ├── models              # class of models such as SOM, TSOM... SOMやTSOMなどの学習アルゴリズムのクラス
-│   ├── tools               # utility tools あらゆるライブラリで共通して用いるような汎用的なもの
-│   └── visualization       # module to visualize such as U-matrix, Component Plane... 描画用のライブラリ
-├── playground              # prototype code with playing 試しに作ってみた系のコード
-├── tests                   # code to test libraries 開発した学習アルゴリズムが正しく動作するかどうかチェックするための実行ファイル置き場．
-│                           # place test code when you review pull request プルリクエストのレビューの際の検証コードはここに置く
-└── tutorials               # tutorial of libraries アルゴリズムのチュートリアルを実行するファイル置き場
-```
+## アルゴリズム
+- SOM（バッチ型）
+   - tensorflow ver
+   - numpy ver
+- [CCA-SOM](https://www.jstage.jst.go.jp/article/jsoft/30/2/30_525/_article/-char/ja)（マルチビューデータに対応したSOM）
+- [テンソルSOM](https://www.sciencedirect.com/science/article/pii/S0893608016000149)（テンソルデータに対応したSOM）
+   - tensorflow ver
+   - numpy ver
+- Kernel smoothing(Nadaraya-Watson estimater)
 
-# How to use?
+## 可視化ツール
+- Grad_norm for SOM
+- Conditional Component Plane for TSOM
 
-## How to introduce into your repository リポジトリへの導入方法
-Please introduce flib into your repository by using **submodule** which is git function. search "submodule git" on google!  
-gitの**submodule**機能を用いて自分のリポジトリにflibを導入してください．
+## データセット
+- [Beverage Preference Data set](http://www.brain.kyutech.ac.jp/~furukawa/beverage-e/)
+- 各種人工データセット
 
-
-※submoduleは簡単に言うとリポジトリの中にリポジトリを入れる機能です．これを使うと以下のようなことができます
-- 自分の研究プロジェクトのリポジトリ内にflibを入れることができる（自分のリポジトリからflibにあるライブラリを利用できる）
-- リモートのflibでプッシュがあるとそれをフェッチしてマージできる（もちろんそれをしないことも可能）
-
-ネット上ではコマンドラインからの導入の解説がほどんどですが，ある程度source treeで管理することもできます．
-
-詳しくは以下をチェックするか検索してみてください．  
-[Git submodule の基礎 - Qiita](https://qiita.com/sotarok/items/0d525e568a6088f6f6bb)  
-[Git submoduleの押さえておきたい理解ポイントのまとめ - Qiita](https://qiita.com/kinpira/items/3309eb2e5a9a422199e9)
-
-### submoduleで導入した後の設定（Pycharm）
-Pycharm上で利用する場合は，flibのディレクトリをSource rootに設定すると，flibのチュートリアルコードと同様の書き方でライブラリを利用することができます．ただし，大元のリポジトリの中にflib内のディレクトリと同じ名前のディレクトリがあるするとコンフリクトを起こしたりするので注意してください．
-
-## How to request bug fix and new feature? バグ修正や新機能追加の依頼の出し方
-Please create **Issues**, use template.  
-Issueを作成してください．テンプレートがあるので基本的にはそれを利用してください．
-
-## How to edit exiting code and add new code コードの編集や追加の方法
-GitHub-flowと呼ばれる方法を採用します．以下の流れです．
-1. Confirm related Issue. If there is no issue, create the issue.  対応するIssueの内容を確認する．ない場合はまずIssueを作成する
-2. Create a branch. ブランチを切る．
-   - name issue number at prefix, compact representation about the work. ブランチ名はIssue番号を先頭につけて，そのあと作業内容を簡潔に書く．
-3. Push at an appropriate frequency. 適宜pushをする．
-4. Completing the work, create pull request. 作業がひと段落したらpull requestを出す．
-   - Don't forget to write issue number. Issueの番号を必ず書いてください．
-   - must request review to someone. レビューを必ず他の人に依頼すること．
-   - Only doctors students can merge. Dの学生だけがマージが可能．
-
-GitHub-flowに関してはこちらを参照してください．  
-[GitHub Flow ～GitHubを活用するブランチモデル～](https://tracpath.com/bootcamp/learning_git_github_flow.html)
-
-
-# Note 諸注意
-Libraries in this repository are made by every lab members. It is not a finished product without bugs. So do not use it as a black box as an end user would. Even for codes that are merged with master, please keep in mind there might be some bugs. Also, please create issues or features request topic. We are expecting your positive contribution !
-
-このリポジトリにあるライブラリはあくまでラボメンバー皆で作って行くものです．バグのない完成したものではありません．なのでエンドユーザー感覚で完全にブラックボックスとして使わないでください．masterにマージされているライブラリでも，デバッグをやるぐらいの心づもりで利用してください．また，欲しい機能は自分で作ったりIssueで提案したり，積極的なcontributeを期待しています！
+# User guide
+現在整備中です。手っ取り早く動かしたい方は[tutorials](https://github.com/furukawa-laboratory/somf/tree/master/tutorials)に実行コードがありますのでそちらをお試しください。
