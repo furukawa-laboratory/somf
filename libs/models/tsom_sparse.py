@@ -23,8 +23,6 @@ class TSOM2():
 
         # initialization
         self.x = x.copy()
-        self.x_nonzero = x.copy()
-        self.x_nonzero.data = np.ones(x.size)
         (self.n_samples1, self.n_samples2) = self.x.shape
 
         if type(sigma_max) is float:
