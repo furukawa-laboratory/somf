@@ -1,33 +1,34 @@
+Japanese README is [here](https://github.com/furukawa-laboratory/somf/blob/master/README_ja.md)
+
 # What is this?
-自己組織化マップ(Self-Organizing Map: SOM)とその派生アルゴリズムのPythonによる実装を公開しているリポジトリです。  
+This repository is Python implementation program of SOM(Self-Organaizing Map) and its derived algorithms that we open to the public.
 
-本リポジトリは九州工業大学の古川研究室が運営を行なっています。本研究室はSOMをベースとした、データからの知識発見に役立つ機械学習アルゴリズムを開発しています。本リポジトリではベーシックなSOMに限らず、本研究室で開発したアルゴリズムの実装も公開しています。
+This repository is operated by Furukawa Laboratory of Kyushu Institute of Technology. Our laboratory has developed a machine learning algorithm based on SOM that is useful for knowledge discovery from data. In this repository, not only the basic SOM, but also the implementation of the algorithm that developed in this laboratory.
 
-本リポジトリは元々、研究室内でアルゴリズムを共有するためにprivateで整備されていたものですが、この度publicとしました。現在ライブラリとしての公開を目指して整備を行なっています。もちろん外部の方からのcontributionは大歓迎です。
+This repository was originally maintained as private in order to share the algorithms in our laboratory, but it has been decided to make it public and are currently working on the release of a Python library. Of course, contributions from outsiders are very welcome.
 
-# SOMとは？
-SOMはニューラルネットワークの一種で、高次元データに対する可視化やモデリングに幅広く用いられているアルゴリズムです。古くから存在するアルゴリズムではありますが、近年盛り上がりを見せる機械学習・深層学習のアルゴリズムにも通じる側面があります。詳細は本研究室で公開している[ドキュメント](http://www.brain.kyutech.ac.jp/~furukawa/data/SOMtext.pdf)をご覧ください。
+# What is SOM?
+SOM is a type of neural network, and is a widely used algorithm for visualization and modeling of high dimensional data. It's the basic algorithm has been around for a few decades, some aspects of machine learning and deep learning that showed up recently suggest new interesting improvements. Please refer to the [document](http://www.brain.kyutech.ac.jp/~furukawa/data/SOMtext.pdf) published by our laboratory for details(Japanese only).
 
+# Currently published code
 
-# 現在公開しているコード
-
-## アルゴリズム
-- SOM（バッチ型）
+## Algorithms
+- SOM（batch type）
    - tensorflow ver
    - numpy ver
-- [CCA-SOM](https://www.jstage.jst.go.jp/article/jsoft/30/2/30_525/_article/-char/ja)（マルチビューデータに対応したSOM）
-- [テンソルSOM](https://www.sciencedirect.com/science/article/pii/S0893608016000149)（テンソルデータに対応したSOM）
+- [CCA-SOM](https://www.jstage.jst.go.jp/article/jsoft/30/2/30_525/_article/-char/ja)（SOM corresponded with multi-view data）
+- [tensor-SOM](https://www.sciencedirect.com/science/article/pii/S0893608016000149)(SOM corresponded with tensor data, [Demo](http://www.brain.kyutech.ac.jp/~furukawa/tsom-e/))
    - tensorflow ver
    - numpy ver
 - Kernel smoothing(Nadaraya-Watson estimater)
 
-## 可視化ツール
+## Visualization tools
 - Grad_norm for SOM
 - Conditional Component Plane for TSOM
 
-## データセット
+## Dataset
 - [Beverage Preference Data set](http://www.brain.kyutech.ac.jp/~furukawa/beverage-e/)
-- 各種人工データセット
+- Various artificial data sets
 
 # User guide
-現在整備中です。手っ取り早く動かしたい方は[tutorials](https://github.com/furukawa-laboratory/somf/tree/master/tutorials)に実行コードがありますのでそちらをお試しください。
+Under preparation. If you want to run for now, please refer to [tutorials](https://github.com/furukawa-laboratory/somf/tree/master/tutorials).
