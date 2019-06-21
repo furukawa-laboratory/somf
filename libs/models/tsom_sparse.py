@@ -131,8 +131,8 @@ class TSOM2():
             self.m_step_indirect(epoch)
 
     def e_step_indirect(self):
-        self.k_star1 = np.argmin(np.sum(np.square(self.u[:, None, :, :] - self.y[None, :, :, :]), axis=(2, 3)), axis=1)
-        self.k_star2 = np.argmin(np.sum(np.square(self.v[:, :, None, :] - self.y[:, None, :, :]), axis=(0, 3)), axis=1)
+        self.k_star1 = np.argmin(np.sum(np.square(self.u[:, None, :] - self.y[None, :, :]), axis=2), axis=1)
+        self.k_star2 = np.argmin(np.sum(np.square(self.v[:, :, None] - self.y[:, None, :]), axis=0), axis=1)
         self.z1 = self.zeta1[self.k_star1, :]
         self.z2 = self.zeta2[self.k_star2, :]
 
