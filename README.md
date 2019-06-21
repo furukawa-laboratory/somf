@@ -3,12 +3,12 @@ Japanese README is [here](https://github.com/furukawa-laboratory/somf/blob/maste
 # What is this?
 This repository is Python implementation program of SOM(Self-Organaizing Map) and its derived algorithms that we open to the public.
 
-This repository is operated by Furukawa Laboratory of Kyushu Institute of Technology. Our laboratory has developed a machine learning algorithm based on SOM that is useful for knowledge discovery from data. In this repository, not only the basic SOM, but also the implementation of the algorithm that developed in this laboratory.
+This repository is operated by Furukawa Laboratory of Kyushu Institute of Technology. Our laboratory has developed machine learning algorithms based on SOM that are useful for knowledge discovery from data. In this repository you can find all the implementations of the algorithms that were developed in this laboratory.
 
-This repository was originally maintained as private in order to share the algorithms in our laboratory, but it has been decided to make it public and are currently working on the release of a Python library. Of course, contributions from outsiders are very welcome.
+This repository was originally maintained as private in order to share the algorithms in our laboratory, but it has been decided to make it public and we are currently working on the release of a Python library. Of course, contributions from outsiders are very welcome.
 
 # What is SOM?
-SOM is a type of neural network, and is a widely used algorithm for visualization and modeling of high dimensional data. It's the basic algorithm has been around for a few decades, some aspects of machine learning and deep learning that showed up recently suggest new interesting improvements. Please refer to the [document](http://www.brain.kyutech.ac.jp/~furukawa/data/SOMtext.pdf) published by our laboratory for details(Japanese only).
+SOM is a type of neural network, and is a widely used algorithm for visualization and modeling of high dimensional data. If the algorithm has been around for a few decades, it is still relevant and closely related to popular trending machine learning and deep learning methods. Please refer to the [document](http://www.brain.kyutech.ac.jp/~furukawa/data/SOMtext.pdf) published by our laboratory for details(Japanese only).
 
 # Currently published code
 
