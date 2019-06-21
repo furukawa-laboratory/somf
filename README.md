@@ -8,7 +8,7 @@ This repository is operated by Furukawa Laboratory of Kyushu Institute of Techno
 This repository was originally maintained as private in order to share the algorithms in our laboratory, but it has been decided to make it public and we are currently working on the release of a Python library. Of course, contributions from outsiders are very welcome.
 
 # What is SOM?
-SOM is a type of neural network, and is a widely used algorithm for visualization and modeling of high dimensional data. If the basic algorithm has been around for a few decades, some aspects of machine learning and deep learning that showed up recently suggest new interesting improvements. Please refer to the [document](http://www.brain.kyutech.ac.jp/~furukawa/data/SOMtext.pdf) published by our laboratory for details(Japanese only).
+SOM is a type of neural network, and is a widely used algorithm for visualization and modeling of high dimensional data. If the basic algorithm has been around for a few decades, some aspects of machine learning and deep learning which have showed up recently suggest new interesting improvements. Please refer to the [document](http://www.brain.kyutech.ac.jp/~furukawa/data/SOMtext.pdf) published by our laboratory for details(Japanese only).
 
 # Currently published code
 
