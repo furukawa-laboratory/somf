@@ -105,14 +105,12 @@ class TSOM2():
         self.history['z1'] = np.zeros((nb_epoch, self.n_samples1, self.latent_dim1))
         self.history['z2'] = np.zeros((nb_epoch, self.n_samples2, self.latent_dim2))
 
-        self.m_step(0, is_direct)
-
     def fit(self, nb_epoch=200, is_direct=True):
         self.initialization(nb_epoch, is_direct)
 
         for epoch in tqdm(np.arange(nb_epoch)):
-            self.e_step(is_direct)
             self.m_step(epoch, is_direct)
+            self.e_step(is_direct)
 
             self.history['y'][epoch, :, :] = self.y
             self.history['z1'][epoch, :] = self.z1
