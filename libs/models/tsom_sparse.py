@@ -3,10 +3,11 @@ from scipy.spatial.distance import cdist
 from scipy import sparse
 from tqdm import tqdm
 from ..tools.create_zeta import create_zeta
+from ..tools.calc_sigma import calc_sigma, SigmaMode
 
 
 class TSOM2():
-    def __init__(self, x, latent_dim, resolution, sigma_max, sigma_min, tau, init='random'):
+    def __init__(self, x, latent_dim, resolution, sigma_max, sigma_min, tau, init='random', sigma_mode='EXPONENTIAL'):
         # validation
         if not sparse.isspmatrix(x):
             raise TypeError("type(x) must be sparse")
@@ -20,6 +21,9 @@ class TSOM2():
         for param in [resolution, latent_dim]:
             if (type(param) is not int) and (not isinstance(param, (list, tuple))):
                 raise TypeError(f"invalid type: {param}")
+
+        if sigma_mode not in SigmaMode.__members__:
+            raise ValueError("invalid sigma_mode")
 
         # initialization
         self.x = x.copy()
@@ -59,6 +63,8 @@ class TSOM2():
         elif isinstance(latent_dim, (list, tuple)):
             self.latent_dim1 = latent_dim[0]
             self.latent_dim2 = latent_dim[1]
+
+        self.sigma_mode = SigmaMode[sigma_mode]
 
         self.zeta1 = create_zeta(-1.0, 1.0, latent_dim=self.latent_dim1, resolution=self.resolution1, include_min_max=True)
         self.zeta2 = create_zeta(-1.0, 1.0, latent_dim=self.latent_dim2, resolution=self.resolution2, include_min_max=True)
@@ -131,12 +137,12 @@ class TSOM2():
         self.z2 = self.zeta2[self.k_star2, :]
 
     def m_step_indirect(self, epoch):
-        sigma1 = self.sigma_min1 + (self.sigma_max1 - self.sigma_min1) * np.exp(-epoch / self.tau1)
+        sigma1 = calc_sigma(self.sigma_mode, self.sigma_max1, self.sigma_min1, self.tau1, epoch)
         h1 = np.exp(-cdist(self.zeta1, self.z1, 'sqeuclidean') / (2 * pow(sigma1, 2)))
         g1 = np.sum(h1, axis=1, keepdims=True)
         r1 = h1 / g1
 
-        sigma2 = self.sigma_min2 + (self.sigma_max2 - self.sigma_min2) * np.exp(-epoch / self.tau2)
+        sigma2 = calc_sigma(self.sigma_mode, self.sigma_max2, self.sigma_min2, self.tau2, epoch)
         h2 = np.exp(-cdist(self.zeta2, self.z2, 'sqeuclidean') / (2 * pow(sigma2, 2)))
         g2 = np.sum(h2, axis=1, keepdims=True)
         r2 = h2 / g2
@@ -158,12 +164,12 @@ class TSOM2():
         self.z2 = self.zeta2[self.k_star2, :]
 
     def m_step_direct(self, epoch):
-        sigma1 = self.sigma_min1 + (self.sigma_max1 - self.sigma_min1) * np.exp(-epoch / self.tau1)
+        sigma1 = calc_sigma(self.sigma_mode, self.sigma_max1, self.sigma_max1, self.tau1, epoch)
         self.h1 = np.exp(-cdist(self.zeta1, self.z1, 'sqeuclidean') / (2 * pow(sigma1, 2)))
         g1 = np.sum(self.h1, axis=1, keepdims=True)
         r1 = self.h1 / g1
 
-        sigma2 = self.sigma_min2 + (self.sigma_max2 - self.sigma_min2) * np.exp(-epoch / self.tau2)
+        sigma2 = calc_sigma(self.sigma_mode, self.sigma_max2, self.sigma_min2, self.tau2, epoch)
         self.h2 = np.exp(-cdist(self.zeta2, self.z2, 'sqeuclidean') / (2 * pow(sigma2, 2)))
         g2 = np.sum(self.h2, axis=1, keepdims=True)
         r2 = self.h2 / g2
