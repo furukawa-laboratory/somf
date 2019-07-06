@@ -6,32 +6,32 @@ from libs.models.TSOM_plus_SOM import TSOM_plus_SOM
 from mpl_toolkits.mplot3d import Axes3D
 from libs.visualization.som.Grad_norm import Grad_Norm
 
-#人工データの検証
-xsamples=20
-ysamples=20
-X,z=load_kura_tsom(xsamples=xsamples,ysamples=ysamples,retz=True)
+# #人工データの検証
+# xsamples=80#x_samplesでメンバーの人数が100人になるように調整
+# ysamples=20
+# X,z=load_kura_tsom(xsamples=xsamples,ysamples=ysamples,retz=True)
+#
+# #チームを分割(偶数チームのみ)
+# group_num=16
+# input_data=np.zeros((group_num,int(xsamples*ysamples/group_num),3))#グループ数*メンバー数*次元
+# #観測データを分割
+# for i in range(int(group_num/2)):
+#     group1 = X[int(xsamples*i /int(group_num/2)):int(xsamples*(i+1) / int(group_num/2)), 0:int(ysamples / 2), :]
+#     group1=group1.reshape((int(xsamples*ysamples/group_num),3))
+#     group2 = X[int(xsamples*i / int(group_num/2)):int(xsamples*(i+1) / int(group_num/2)), int(ysamples / 2):int(ysamples), :]
+#     group2=group2.reshape((int(xsamples*ysamples/group_num),3))
+#
+#     input_data[int(2*i),:,:]=group1
+#     input_data[int(2*i+1), :, :] = group2
+#
+#
+# fig=plt.figure()
+# ax=fig.add_subplot(1,1,1,projection="3d")
+# for i in range(group_num):
+#     ax.scatter(input_data[i,:,0], input_data[i,:,1], input_data[i,:,2])
+# plt.show()
 
-#チームを分割(偶数チームのみ)
-group_num=4
-#観測データを4分割
-group1=X[0:int(xsamples/2),0:int(ysamples/2),:]
-group1=group1.reshape((int(xsamples*ysamples/group_num),3))
-group2=X[0:int(xsamples/2),int(ysamples/2):int(ysamples),:]
-group2=group2.reshape((int(xsamples*ysamples/group_num),3))
-group3=X[int(xsamples/2):int(xsamples),0:int(ysamples/2),:]
-group3=group3.reshape((int(xsamples*ysamples/group_num),3))
-group4=X[int(xsamples/2):int(xsamples),int(ysamples/2):int(ysamples),:]
-group4=group4.reshape((int(xsamples*ysamples/group_num),3))
 
-
-#人工データの描画
-fig=plt.figure()
-ax=fig.add_subplot(1,1,1,projection="3d")
-ax.scatter(group1[:,0],group1[:,1],group1[:,2],color="red")
-ax.scatter(group2[:,0],group2[:,1],group2[:,2],color="blue")
-ax.scatter(group3[:,0],group3[:,1],group3[:,2],color="green")
-ax.scatter(group4[:,0],group4[:,1],group4[:,2],color="orange")
-plt.show()
 
 #グループラベルの作成
 group1_label=np.arange(0,100)
@@ -40,19 +40,19 @@ group3_label=np.arange(200,300)
 group4_label=np.arange(300,400)
 group_label=(group1_label,group2_label,group3_label,group4_label)
 
-
-input_data=np.concatenate((group1,group2,group3,group4),axis=0)
-args=((1,1),(10,10),(1.0,1.0),(0.1,0.1),(50,50))
-
-#+型階層TSOMのclass読み込み
-# group_label以降の変数ははlatent_dim,resolution,sigma_max,sigma_min,tauでSOMとTSOMでまとめている
-tsom_plus_som=TSOM_plus_SOM(input_data,"random",group_label,(2,2),(10,10),(1.0,1.0),(0.1,0.1),(50,50))
-
-tsom_plus_som.fit_1st_TSOM(tsom_epoch_num=250)
-tsom_plus_som.fit_KDE(kernel_width=1.0)
-tsom_plus_som.fit_2nd_SOM(som_epoch_num=250,init="random")#2ndSOMの学習
-
-
-#grad_normでteamを可視化
-som_umatrix = Grad_Norm(X=tsom_plus_som.som.X,Z=tsom_plus_som.som.Z,sigma=0.1,labels=None,title_text="team_map",resolution=20)
-som_umatrix.draw_umatrix()
+#
+# input_data=np.concatenate((group1,group2,group3,group4),axis=0)
+# args=((1,1),(10,10),(1.0,1.0),(0.1,0.1),(50,50))
+#
+# #+型階層TSOMのclass読み込み
+# # group_label以降の変数ははlatent_dim,resolution,sigma_max,sigma_min,tauでSOMとTSOMでまとめている
+# tsom_plus_som=TSOM_plus_SOM(input_data,"random",group_label,(2,2),(10,10),(1.0,1.0),(0.1,0.1),(50,50))
+#
+# tsom_plus_som.fit_1st_TSOM(tsom_epoch_num=250)
+# tsom_plus_som.fit_KDE(kernel_width=1.0)
+# tsom_plus_som.fit_2nd_SOM(som_epoch_num=250,init="random")#2ndSOMの学習
+#
+#
+# #grad_normでteamを可視化
+# som_umatrix = Grad_Norm(X=tsom_plus_som.som.X,Z=tsom_plus_som.som.Z,sigma=0.1,labels=None,title_text="team_map",resolution=20)
+# som_umatrix.draw_umatrix()
