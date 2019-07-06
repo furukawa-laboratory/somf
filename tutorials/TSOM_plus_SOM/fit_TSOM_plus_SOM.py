@@ -12,7 +12,7 @@ from libs.visualization.som.Grad_norm import Grad_Norm
 # X,z=load_kura_tsom(xsamples=xsamples,ysamples=ysamples,retz=True)
 #
 # #チームを分割(偶数チームのみ)
-# group_num=16
+group_num=8
 # input_data=np.zeros((group_num,int(xsamples*ysamples/group_num),3))#グループ数*メンバー数*次元
 # #観測データを分割
 # for i in range(int(group_num/2)):
@@ -31,17 +31,12 @@ from libs.visualization.som.Grad_norm import Grad_Norm
 #     ax.scatter(input_data[i,:,0], input_data[i,:,1], input_data[i,:,2])
 # plt.show()
 
-
-
 #グループラベルの作成
-group1_label=np.arange(0,100)
-group2_label=np.arange(100,200)
-group3_label=np.arange(200,300)
-group4_label=np.arange(300,400)
-group_label=(group1_label,group2_label,group3_label,group4_label)
+group_label=[]
+for i in range(group_num):
+    group_label_i=np.arange(int(100*(i)),int(100*(i+1)))
+    group_label.append(group_label_i)
 
-#
-# input_data=np.concatenate((group1,group2,group3,group4),axis=0)
 # args=((1,1),(10,10),(1.0,1.0),(0.1,0.1),(50,50))
 #
 # #+型階層TSOMのclass読み込み
