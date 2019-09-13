@@ -63,11 +63,34 @@ k3_star=np.argmin(Dist3_sum,axis=1)#N3*1
 sigma1=max(sigma1_min,sigma1_max*(-1/tau1))
 Dist_zeta1=dist.cdist(Z1,Zeta1,'sqeuclidean')#N1*K1
 H1=np.exp(-1/(2*sigma1*sigma1)*Dist_zeta1)
+G1=np.sum(H1,axis=0)
+G1inv = np.reciprocal(G1) # Gのそれぞれの要素の逆数を取る
+R1=H1*G1inv
 
 sigma2=max(sigma2_min,sigma2_max*(-1/tau2))
 Dist_zeta2=dist.cdist(Z2,Zeta2,'sqeuclidean')#N2*K2
 H2=np.exp(-1/(2*sigma2*sigma2)*Dist_zeta2)
+G2=np.sum(H2,axis=0)
+G2inv = np.reciprocal(G2) # Gのそれぞれの要素の逆数を取る
+R2=H2*G2inv
+
 
 sigma3=max(sigma3_min,sigma3_max*(-1/tau3))
 Dist_zeta3=dist.cdist(Z3,Zeta3,'sqeuclidean')#N3*K3
 H3=np.exp(-1/(2*sigma3*sigma3)*Dist_zeta3)
+G3=np.sum(H3,axis=0)
+G3inv = np.reciprocal(G3) # Gのそれぞれの要素の逆数を取る
+R3=H3*G3inv
+
+#写像の計算
+
+#1次モデルの計算
+#データ: i,j,k
+#ノード: l,m,n
+U1= np.einsum('jm,kn,ijk->imn',R2,R3,X)#N1*K1*K2
+U2=np.einsum('il,kn,ijk->ljn',R1,R3,X)#K1*N2*K3
+U3=np.einsum('il,jm,ijk->lmk',R1,R2,X)#K1*K2*N3
+
+#これはさすがにeigsum使わない方がいいかも...
+#Y=np.einsum('il,jm,kn,ijk->lmn',R1,R2,R3,X)#K1*K2*N3
+#print(Y.shape)
