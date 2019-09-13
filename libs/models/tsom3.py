@@ -1,6 +1,7 @@
 import numpy as np
 from libs.tools.create_zeta import create_zeta
 from libs.datasets.real.beverage import load_data
+from scipy.spatial import distance as dist
 
 #データのimport
 data_set  =load_data(ret_situation_label=False,ret_beverage_label=False)
@@ -12,6 +13,18 @@ N3=X.shape[2]
 K1=5
 K2=10
 K3=15
+
+#近傍半径の計算
+sigma1_max=1.0
+sigma1_min=0.1
+sigma2_max=1.0
+sigma2_min=0.1
+sigma3_max=1.0
+sigma3_min=0.1
+tau1=50
+tau2=50
+tau3=50
+
 
 #潜在空間の作成
 Zeta1=create_zeta(zeta_min=-1, zeta_max=1, latent_dim=2, resolution=K1, include_min_max=True)
@@ -30,12 +43,6 @@ U1=np.zeros((N1,K2,K3))
 U2=np.zeros((K1,N2,K3))
 U3=np.zeros((K1,K2,N3))
 
-#学習量の作成
-H1=np.zeros((N1,K1))
-H2=np.zeros((N2,K2))
-H3=np.zeros((N3,K3))
-
-
 #アルゴリズム
 #モード1の勝者決定
 Dist=U1[:,np.newaxis,:,:]-Y[np.newaxis,:,:,:]#N1*K1*K2*K3
@@ -52,5 +59,15 @@ Dist3=U3[:,:,:,np.newaxis]-Y[:,:,np.newaxis,:]#K1*K2*N3*K3
 Dist3_sum=np.sum(Dist3,axis=(0,1))#N3*K3
 k3_star=np.argmin(Dist3_sum,axis=1)#N3*1
 
+#モード1の学習量の計算
+sigma1=max(sigma1_min,sigma1_max*(-1/tau1))
+Dist_zeta1=dist.cdist(Z1,Zeta1,'sqeuclidean')#N1*K1
+H1=np.exp(-1/(2*sigma1*sigma1)*Dist_zeta1)
 
+sigma2=max(sigma2_min,sigma2_max*(-1/tau2))
+Dist_zeta2=dist.cdist(Z2,Zeta2,'sqeuclidean')#N2*K2
+H2=np.exp(-1/(2*sigma2*sigma2)*Dist_zeta2)
 
+sigma3=max(sigma3_min,sigma3_max*(-1/tau3))
+Dist_zeta3=dist.cdist(Z3,Zeta3,'sqeuclidean')#N3*K3
+H3=np.exp(-1/(2*sigma3*sigma3)*Dist_zeta3)
