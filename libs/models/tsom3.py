@@ -83,7 +83,6 @@ G3inv = np.reciprocal(G3) # Gのそれぞれの要素の逆数を取る
 R3=H3*G3inv
 
 #写像の計算
-
 #1次モデルの計算
 #データ: i,j,k
 #ノード: l,m,n
@@ -91,6 +90,5 @@ U1= np.einsum('jm,kn,ijk->imn',R2,R3,X)#N1*K1*K2
 U2=np.einsum('il,kn,ijk->ljn',R1,R3,X)#K1*N2*K3
 U3=np.einsum('il,jm,ijk->lmk',R1,R2,X)#K1*K2*N3
 
-#これはさすがにeigsum使わない方がいいかも...
-#Y=np.einsum('il,jm,kn,ijk->lmn',R1,R2,R3,X)#K1*K2*N3
-#print(Y.shape)
+#一時モデルを使って2次モデルを更新
+Y=np.einsum('il,imn->lmn',R1,U1)#K1*K2*K3
