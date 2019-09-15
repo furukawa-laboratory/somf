@@ -139,7 +139,7 @@ class TSOM3():
 
             sigma3 = max(self.SIGMA3_MIN, self.SIGMA3_MAX * (1 - (epoch / self.TAU3)))
             distance3 = distance.cdist(self.Zeta3, self.Z3, 'sqeuclidean')  # 距離行列をつくるDはK3*N3行列
-            print(distance3.shape)
+            #print(distance3.shape)
             H3 = np.exp(-distance3 / (2 * pow(sigma3, 2)))  # かっこに気を付ける
             G3 = np.sum(H3, axis=1)  # Gは行ごとの和をとったベクトル K3*1
             R3 = (H3.T / G3).T  # 行列の計算なので.Tで転置を行う K3*N3
@@ -156,20 +156,20 @@ class TSOM3():
 
             #勝者決定
             # モード1
-            Dist1 = self.U1[:, np.newaxis, :, :] - self.Y[np.newaxis, :, :, :]  # N1*K1*K2*K3
+            Dist1 = np.square(self.U1[:, np.newaxis, :, :] - self.Y[np.newaxis, :, :, :])  # N1*K1*K2*K3
             Dist1_sum = np.sum(Dist1, axis=(2, 3))  # N1*K1
             self.k1_star = np.argmin(Dist1_sum, axis=1)  # N1*1
             self.Z1 = self.Zeta1[self.k1_star, :]
 
             # モード2
-            Dist2 = self.U2[:, :, np.newaxis, :] - self.Y[:, np.newaxis, :, :]  # K1*N2*K2*K3
+            Dist2 = np.square(self.U2[:, :, np.newaxis, :] - self.Y[:, np.newaxis, :, :])  # K1*N2*K2*K3
             Dist2_sum = np.sum(Dist2, axis=(0, 3))  # N2*K2
             self.k2_star = np.argmin(Dist2_sum, axis=1)
             self.Z2=self.Zeta2[self.k2_star,:]
 
 
             # モード3
-            Dist3 = self.U3[:, :, :, np.newaxis] - self.Y[:, :, np.newaxis, :]  # K1*K2*N3*K3
+            Dist3 = np.square(self.U3[:, :, :, np.newaxis] - self.Y[:, :, np.newaxis, :] ) # K1*K2*N3*K3
             Dist3_sum = np.sum(Dist3, axis=(0, 1))  # N3*K3
             self.k3_star = np.argmin(Dist3_sum, axis=1)  # N3*1
             self.Z3 = self.Zeta3[self.k3_star, :]
