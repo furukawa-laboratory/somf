@@ -119,62 +119,30 @@ class TSOM3_another():
         self.history['sigma3'] = np.zeros(nb_epoch)
 
         for epoch in tqdm(np.arange(nb_epoch)):
-            # 学習量の決定
-            # sigma1 = self.SIGMA1_MIN + (self.SIGMA1_MAX - self.SIGMA1_MIN) * np.exp(-epoch / self.TAU1)
-            sigma1 = max(self.SIGMA1_MIN, self.SIGMA1_MAX * (1 - (epoch / self.TAU1)))
-            distance1 = distance.cdist(self.Zeta1, self.Z1, 'sqeuclidean')  # 距離行列をつくるDはK1*N1行列
-            H1 = np.exp(-distance1 / (2 * pow(sigma1, 2)))  # かっこに気を付ける
-            G1 = np.sum(H1, axis=1)  # Gは行ごとの和をとったベクトル K1*1
-            R1 = (H1.T / G1).T  # 行列の計算なので.Tで転置を行う K1*N1
-
-            # sigma2 = self.SIGMA2_MIN + (self.SIGMA2_MAX - self.SIGMA2_MIN) * np.exp(-epoch / self.TAU2)
-            sigma2 = max(self.SIGMA2_MIN, self.SIGMA2_MAX * (1 - (epoch / self.TAU2)))
-            distance2 = distance.cdist(self.Zeta2, self.Z2, 'sqeuclidean')  # 距離行列をつくるDはK2*N2行列
-            H2 = np.exp(-distance2 / (2 * pow(sigma2, 2)))  # かっこに気を付ける
-            G2 = np.sum(H2, axis=1)  # Gは行ごとの和をとったベクトル K2*1
-            R2 = (H2.T / G2).T  # 行列の計算なので.Tで転置を行う K2*N2
-
-            sigma3 = max(self.SIGMA3_MIN, self.SIGMA3_MAX * (1 - (epoch / self.TAU3)))
-            distance3 = distance.cdist(self.Zeta3, self.Z3, 'sqeuclidean')  # 距離行列をつくるDはK3*N3行列
-            #print(distance3.shape)
-            H3 = np.exp(-distance3 / (2 * pow(sigma3, 2)))  # かっこに気を付ける
-            G3 = np.sum(H3, axis=1)  # Gは行ごとの和をとったベクトル K3*1
-            R3 = (H3.T / G3).T  # 行列の計算なので.Tで転置を行う K3*N3
+            #-------------please write tsom3 algorithm--------------------------
 
 
-            # １次モデル，２次モデルの決定
-            #データ: i,j,k
-            #ノード: l,m,n
-            self.U1 = np.einsum('mj,nk,ijk->imn', R2, R3, self.X)  # N1*K1*K2
-            self.U2 = np.einsum('li,nk,ijk->ljn', R1, R3, self.X)  # K1*N2*K3
-            self.U3 = np.einsum('li,mj,ijk->lmk', R1, R2, self.X)  # K1*K2*N3
-            # １次モデルを使って2次モデルを更新
-            self.Y = np.einsum('li,imn->lmn', R1, self.U1)  # K1*K2*K3
 
-            #勝者決定
-            # モード1
-            Dist1 = np.square(self.U1[:, np.newaxis, :, :] - self.Y[np.newaxis, :, :, :])  # N1*K1*K2*K3
-            Dist1_sum = np.sum(Dist1, axis=(2, 3))  # N1*K1
-            self.k1_star = np.argmin(Dist1_sum, axis=1)  # N1*1
-            self.Z1 = self.Zeta1[self.k1_star, :]
-
-            # モード2
-            Dist2 = np.square(self.U2[:, :, np.newaxis, :] - self.Y[:, np.newaxis, :, :])  # K1*N2*K2*K3
-            Dist2_sum = np.sum(Dist2, axis=(0, 3))  # N2*K2
-            self.k2_star = np.argmin(Dist2_sum, axis=1)
-            self.Z2=self.Zeta2[self.k2_star,:]
+            
 
 
-            # モード3
-            Dist3 = np.square(self.U3[:, :, :, np.newaxis] - self.Y[:, :, np.newaxis, :] ) # K1*K2*N3*K3
-            Dist3_sum = np.sum(Dist3, axis=(0, 1))  # N3*K3
-            self.k3_star = np.argmin(Dist3_sum, axis=1)  # N3*1
-            self.Z3 = self.Zeta3[self.k3_star, :]
 
-            self.history['y'][epoch, :, :] = self.Y
-            self.history['z1'][epoch, :] = self.Z1
-            self.history['z2'][epoch, :] = self.Z2
-            self.history['z3'][epoch, :] = self.Z3
-            self.history['sigma1'][epoch] = sigma1
-            self.history['sigma2'][epoch] = sigma2
-            self.history['sigma3'][epoch] = sigma3
+
+
+
+
+
+
+
+
+
+
+            # -------------please write tsom3 algorithm--------------------------
+
+            #self.history['y'][epoch, :, :] = self.Y
+            #self.history['z1'][epoch, :] = self.Z1
+            #self.history['z2'][epoch, :] = self.Z2
+            #self.history['z3'][epoch, :] = self.Z3
+            #self.history['sigma1'][epoch] = sigma1
+            #self.history['sigma2'][epoch] = sigma2
+            #self.history['sigma3'][epoch] = sigma3
