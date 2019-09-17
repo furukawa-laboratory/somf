@@ -75,7 +75,6 @@ class TSOM3():
             self.latent_dim3=latent_dim[2]
         else:
             raise ValueError("invalid latent_dim: {}".format(latent_dim))
-            # latent_dimがlist,float,3次元以上はエラーかな?
         self.Zeta1 = create_zeta(-1.0, 1.0, latent_dim=self.latent_dim1, resolution=resolution1, include_min_max=True)
         self.Zeta2 = create_zeta(-1.0, 1.0, latent_dim=self.latent_dim2, resolution=resolution2, include_min_max=True)
         self.Zeta3 = create_zeta(-1.0, 1.0, latent_dim=self.latent_dim3, resolution=resolution3, include_min_max=True)
@@ -93,7 +92,7 @@ class TSOM3():
             self.Z1 = np.random.rand(self.N1, self.latent_dim1) * 2.0 - 1.0
             self.Z2 = np.random.rand(self.N2, self.latent_dim2) * 2.0 - 1.0
             self.Z3 = np.random.rand(self.N3, self.latent_dim3) * 2.0 - 1.0
-        elif isinstance(init, (tuple, list)) and len(init) == 2:
+        elif isinstance(init, (tuple, list)) and len(init) == 3:
             if isinstance(init[0], np.ndarray) and init[0].shape == (self.N1, self.latent_dim1):
                 self.Z1 = init[0].copy()
             else:
