@@ -13,10 +13,10 @@ if __name__ == '__main__':
     beverage_label = data_set[1]
     situation_label = data_set[2]
 
-    tsom3 = TSOM3(X, latent_dim=(2, 2, 2), resolution=(5, 5, 5), SIGMA_MAX=(0.1, 2.0, 2.0), SIGMA_MIN=(0.01, 0.2, 0.2),
+    tsom3 = TSOM3(X, latent_dim=2, resolution=5, SIGMA_MAX=2.0, SIGMA_MIN=0.2,
                   TAU=(50, 50, 50), init='random')
     tsom3.fit(nb_epoch=250)
-
+    
     # 結果の描画
     fig = plt.figure()
     ax = fig.add_subplot(1, 2, 1)
