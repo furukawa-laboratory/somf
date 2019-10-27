@@ -1,49 +1,36 @@
-#+型階層TSOMのクラスを追加するプログラム
 from libs.models.tsom import TSOM2
 from libs.models.som import SOM
 import numpy as np
 from scipy.spatial import distance as dist
 
+
 class TSOM_plus_SOM:
-    def __init__(self,input_data,init,group_label,*args):
-        #下位のTSOMのパラメータ設定
-        self.tsom_latent_dim=args[0][0]
-        self.tsom_resolution = args[1][0]
-        self.tsom_sigma_max=args[2][0]
-        self.tsom_sigma_min=args[3][0]
-        self.tsom_tau=args[4][0]
-        #上位のSOMのパラメータ設定
-        self.som_latent_dim=args[0][1]
-        self.som_resolution = args[1][1]
-        self.som_sigma_max = args[2][1]
-        self.som_sigma_min = args[3][1]
-        self.som_tau = args[4][1]
-        Init=init
+    def __init__(self, input_data, group_label, params_tsom, params_kde, params_som):
+        self.params_tsom = params_tsom
+        self.params_kde = params_kde
+        self.params_som = params_som
 
+        self.params_tsom['X'] = input_data
+        self.group_label = group_label  # グループ数の確認
+        self.group_num = len(self.group_label)
 
-        self.input_data=input_data#下位のTSOMに入れるパラメータ
-        self.group_label = group_label # グループ数の確認
-        self.group_num=len(self.group_label)
-
-        #上位のSOMのパラメータ設定と、下位TSOMのパラメータ設定を引数として決めてやる必要がある.
-        self.tsom=TSOM2(self.input_data,latent_dim=self.tsom_latent_dim,resolution=self.tsom_resolution,SIGMA_MAX=self.tsom_sigma_max
-                        ,SIGMA_MIN=self.tsom_sigma_min,init=Init,TAU=self.tsom_tau)
-        self.prob_data = np.zeros((self.group_num, self.tsom.K1))  # group数*ノード数
-
-    def fit_1st_TSOM(self,tsom_epoch_num):
+    def fit_1st_TSOM(self, tsom_epoch_num):
+        self.tsom = TSOM2(**self.params_tsom)
         self.tsom.fit(tsom_epoch_num)
 
-    def fit_KDE(self,kernel_width):#学習した後の潜在空間からKDEで確率分布を作る
-        #グループごとにKDEを適用
+    def fit_KDE(self, kernel_width):  # 学習した後の潜在空間からKDEで確率分布を作る
+        prob_data = np.zeros((self.group_num, self.tsom.K1))  # group数*ノード数
+        # グループごとにKDEを適用
         for i in range(self.group_num):
-            Dist=dist.cdist(self.tsom.Zeta1, self.tsom.Z1[self.group_label[i],:], 'sqeuclidean')# KxNの距離行列を計算
+            Dist = dist.cdist(self.tsom.Zeta1, self.tsom.Z1[self.group_label[i], :], 'sqeuclidean')  # KxNの距離行列を計算
             H = np.exp(-Dist / (2 * kernel_width * kernel_width))  # KxNの学習量行列を計算
-            prob = np.sum(H, axis=1)#K*1
-            prob_sum = np.sum(prob)#1*1
-            prob = prob / prob_sum#K*1
-            self.prob_data[i,:]=prob
+            prob = np.sum(H, axis=1)  # K*1
+            prob_sum = np.sum(prob)  # 1*1
+            prob = prob / prob_sum  # K*1
+            self.prob_data[i, :] = prob
+        self.params_som['X'] = prob_data
+        self.params_som['metric'] = "KLdivergnce"
 
-    def fit_2nd_SOM(self,som_epoch_num,init):#上位のSOMを
-        self.som = SOM(self.prob_data, latent_dim=self.som_latent_dim, resolution=self.som_resolution,
-                       sigma_max=self.som_sigma_max,sigma_min=self.som_sigma_min, tau=self.som_tau, init=init, metric="KLdivergence")
+    def fit_2nd_SOM(self, som_epoch_num, init):  # 上位のSOMを
+        self.som = SOM(**self.params_som)
         self.som.fit(som_epoch_num)
