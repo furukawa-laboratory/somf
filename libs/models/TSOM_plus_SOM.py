@@ -7,7 +7,6 @@ from scipy.spatial import distance as dist
 class TSOM_plus_SOM:
     def __init__(self, input_data, group_label, params_tsom, params_som):
         self.params_tsom = params_tsom
-        self.params_kde = params_kde
         self.params_som = params_som
 
         self.params_tsom['X'] = input_data
