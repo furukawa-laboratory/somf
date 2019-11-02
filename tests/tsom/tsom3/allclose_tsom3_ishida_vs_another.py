@@ -3,7 +3,6 @@ import unittest
 import numpy as np
 
 from libs.models.tsom3 import TSOM3
-# from tests.tsom.tsom3.tsom3_another import TSOM3_another
 
 # tsom3_another harada version
 from tests.tsom.tsom3.tsom3_another_h import TSOM3_another
