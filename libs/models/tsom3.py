@@ -149,7 +149,8 @@ class TSOM3():
             self.U2 = np.einsum('li,nk,ijk->ljn', R1, R3, self.X)  # K1*N2*K3
             self.U3 = np.einsum('li,mj,ijk->lmk', R1, R2, self.X)  # K1*K2*N3
             # １次モデルを使って2次モデルを更新
-            self.Y = np.einsum('li,imn->lmn', R1, self.U1)  # K1*K2*K3
+            #self.Y = np.einsum('li,imn->lmn', R1, self.U1)  # K1*K2*K3
+            self.Y = np.einsum('li,mj,nk,ijk->lmn', R1, R2,R3,self.X)  # K1*K2*K3
 
             #勝者決定
             # モード1
