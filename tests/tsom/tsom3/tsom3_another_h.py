@@ -155,10 +155,10 @@ class TSOM3_another():
 
             # -------------please write tsom3 algorithm--------------------------
 
-            #self.history['y'][epoch, :, :] = self.Y
-            #self.history['z1'][epoch, :] = self.Z1
-            #self.history['z2'][epoch, :] = self.Z2
-            #self.history['z3'][epoch, :] = self.Z3
-            #self.history['sigma1'][epoch] = sigma1
-            #self.history['sigma2'][epoch] = sigma2
-            #self.history['sigma3'][epoch] = sigma3
+            self.history['y'][epoch, :, :] = self.Y
+            self.history['z1'][epoch, :] = self.Z1
+            self.history['z2'][epoch, :] = self.Z2
+            self.history['z3'][epoch, :] = self.Z3
+            self.history['sigma1'][epoch] = sigma1
+            self.history['sigma2'][epoch] = sigma2
+            self.history['sigma3'][epoch] = sigma3
