@@ -13,7 +13,7 @@ class TSOM3():
             self.N2 = self.X.shape[1]
             self.N3=self.X.shape[2]
             self.observed_dim=self.X.shape[3]
-        elif X.dim==4:
+        elif X.ndim==4:
             self.X=X
             self.N1 = self.X.shape[0]
             self.N2 = self.X.shape[1]
@@ -117,7 +117,7 @@ class TSOM3():
 
         self.history = {}
     def fit(self, nb_epoch=200):
-        self.history['y'] = np.zeros((nb_epoch, self.K1, self.K2, self.K3))
+        self.history['y'] = np.zeros((nb_epoch, self.K1, self.K2, self.K3,self.observed_dim))
         self.history['z1'] = np.zeros((nb_epoch, self.N1, self.latent_dim1))
         self.history['z2'] = np.zeros((nb_epoch, self.N2, self.latent_dim2))
         self.history['z3'] = np.zeros((nb_epoch, self.N3, self.latent_dim3))
@@ -156,8 +156,8 @@ class TSOM3():
             self.U2 = np.einsum('li,nk,ijkd->ljnd', R1, R3, self.X)  # K1*N2*K3*D
             self.U3 = np.einsum('li,mj,ijkd->lmkd', R1, R2, self.X)  # K1*K2*N3
             # １次モデルを使って2次モデルを更新
-            #self.Y = np.einsum('li,imn->lmn', R1, self.U1)  # K1*K2*K3
-            self.Y = np.einsum('li,mj,nk,ijkd->lmnd', R1, R2,R3,self.X)  # K1*K2*K3
+            self.Y = np.einsum('li,imnd->lmnd', R1, self.U1)  # K1*K2*K3*D
+            #self.Y = np.einsum('li,mj,nk,ijkd->lmnd', R1, R2,R3,self.X)  # K1*K2*K3*D
 
             #勝者決定
             # モード1
@@ -179,7 +179,7 @@ class TSOM3():
             self.k3_star = np.argmin(Dist3_sum, axis=1)  # N3*1
             self.Z3 = self.Zeta3[self.k3_star, :]
 
-            self.history['y'][epoch, :, :] = self.Y
+            self.history['y'][epoch, :, :,:,:] = self.Y
             self.history['z1'][epoch, :] = self.Z1
             self.history['z2'][epoch, :] = self.Z2
             self.history['z3'][epoch, :] = self.Z3
