@@ -8,12 +8,19 @@ class TSOM3():
 
         # 入力データXについて
         if X.ndim == 3:
-            self.X = X
+            self.X=X.reshape((X.shape[0],X.shape[1],X.shape[2],1))
             self.N1 = self.X.shape[0]
             self.N2 = self.X.shape[1]
             self.N3=self.X.shape[2]
+            self.observed_dim=self.X.shape[3]
+        elif X.dim==4:
+            self.X=X
+            self.N1 = self.X.shape[0]
+            self.N2 = self.X.shape[1]
+            self.N3 = self.X.shape[2]
+            self.observed_dim = self.X.shape[3]
         else:
-            raise ValueError("invalid X: {}\nX must be 3d ndarray".format(X))
+            raise ValueError("invalid X: {}\nX must be 3d or 4d ndarray".format(X))
 
         # 最大近傍半径(SIGMAX)の設定
         if type(SIGMA_MAX) is float:
@@ -145,30 +152,30 @@ class TSOM3():
             # １次モデル，２次モデルの決定
             #データ: i,j,k
             #ノード: l,m,n
-            self.U1 = np.einsum('mj,nk,ijk->imn', R2, R3, self.X)  # N1*K1*K2
-            self.U2 = np.einsum('li,nk,ijk->ljn', R1, R3, self.X)  # K1*N2*K3
-            self.U3 = np.einsum('li,mj,ijk->lmk', R1, R2, self.X)  # K1*K2*N3
+            self.U1 = np.einsum('mj,nk,ijkd->imnd', R2, R3, self.X)  # N1*K1*K2*D
+            self.U2 = np.einsum('li,nk,ijkd->ljnd', R1, R3, self.X)  # K1*N2*K3*D
+            self.U3 = np.einsum('li,mj,ijkd->lmkd', R1, R2, self.X)  # K1*K2*N3
             # １次モデルを使って2次モデルを更新
             #self.Y = np.einsum('li,imn->lmn', R1, self.U1)  # K1*K2*K3
-            self.Y = np.einsum('li,mj,nk,ijk->lmn', R1, R2,R3,self.X)  # K1*K2*K3
+            self.Y = np.einsum('li,mj,nk,ijkd->lmnd', R1, R2,R3,self.X)  # K1*K2*K3
 
             #勝者決定
             # モード1
-            Dist1 = np.square(self.U1[:, np.newaxis, :, :] - self.Y[np.newaxis, :, :, :])  # N1*K1*K2*K3
-            Dist1_sum = np.sum(Dist1, axis=(2, 3))  # N1*K1
+            Dist1 = np.square(self.U1[:, np.newaxis, :, :,:] - self.Y[np.newaxis, :, :, :,:])  # N1*K1*K2*K3*D
+            Dist1_sum = np.sum(Dist1, axis=(2,3,4))  # N1*K1
             self.k1_star = np.argmin(Dist1_sum, axis=1)  # N1*1
             self.Z1 = self.Zeta1[self.k1_star, :]
 
             # モード2
-            Dist2 = np.square(self.U2[:, :, np.newaxis, :] - self.Y[:, np.newaxis, :, :])  # K1*N2*K2*K3
-            Dist2_sum = np.sum(Dist2, axis=(0, 3))  # N2*K2
+            Dist2 = np.square(self.U2[:, :, np.newaxis, :,:] - self.Y[:, np.newaxis, :, :,:])  # K1*N2*K2*K3*D
+            Dist2_sum = np.sum(Dist2, axis=(0,3,4))  # N2*K2
             self.k2_star = np.argmin(Dist2_sum, axis=1)
             self.Z2=self.Zeta2[self.k2_star,:]
 
 
             # モード3
-            Dist3 = np.square(self.U3[:, :, :, np.newaxis] - self.Y[:, :, np.newaxis, :] ) # K1*K2*N3*K3
-            Dist3_sum = np.sum(Dist3, axis=(0, 1))  # N3*K3
+            Dist3 = np.square(self.U3[:, :, :, np.newaxis,:] - self.Y[:, :, np.newaxis, :,:] ) # K1*K2*N3*K3*D
+            Dist3_sum = np.sum(Dist3, axis=(0, 1,4))  # N3*K3
             self.k3_star = np.argmin(Dist3_sum, axis=1)  # N3*1
             self.Z3 = self.Zeta3[self.k3_star, :]
 
