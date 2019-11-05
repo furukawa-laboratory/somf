@@ -23,13 +23,14 @@ class TSOM_plus_SOM:
         for i in range(self.group_num):
             Dist = dist.cdist(self.tsom.Zeta1, self.tsom.Z1[self.group_label[i], :], 'sqeuclidean')  # KxNの距離行列を計算
             H = np.exp(-Dist / (2 * kernel_width * kernel_width))  # KxNの学習量行列を計算
-            prob = np.sum(H, axis=1)  # K*1
-            prob_sum = np.sum(prob)  # 1*1
-            prob = prob / prob_sum  # K*1
-            self.prob_data[i, :] = prob
+            prob = np.sum(H, axis=1)
+            prob_sum = np.sum(prob)
+            prob = prob / prob_sum
+            prob_data[i, :] = prob
         self.params_som['X'] = prob_data
-        self.params_som['metric'] = "KLdivergnce"
+        self.params_som['metric'] = "KLdivergence"
 
     def fit_2nd_SOM(self, som_epoch_num, init):  # 上位のSOMを
+        self.params_som['init'] = init
         self.som = SOM(**self.params_som)
         self.som.fit(som_epoch_num)
