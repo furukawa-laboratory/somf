@@ -31,6 +31,7 @@ for i in range(int(group_num / 2)):
 # for i in range(group_num):
 #     ax.scatter(input_data[i, :, 0], input_data[i, :, 1], input_data[i, :, 2])
 # plt.show()
+input_data = input_data.reshape(-1,3)
 
 # グループラベルの作成
 group_label = []
@@ -56,9 +57,9 @@ tsom_plus_som = TSOM_plus_SOM(input_data=input_data,
                               params_tsom=params_tsom,
                               params_som=params_som)
 
-tsom_plus_som.fit_1st_TSOM(tsom_epoch_num=250)
+tsom_plus_som.fit_1st_TSOM(tsom_epoch_num=50)
 tsom_plus_som.fit_KDE(kernel_width=1.0)
-tsom_plus_som.fit_2nd_SOM(som_epoch_num=250)  # 2ndSOMの学習
+tsom_plus_som.fit_2nd_SOM(som_epoch_num=250,init='random')  # 2ndSOMの学習
 
 # grad_normでteamを可視化
 som_umatrix = Grad_Norm(X=tsom_plus_som.som.X, Z=tsom_plus_som.som.Z, sigma=0.1, labels=None, title_text="team_map",
