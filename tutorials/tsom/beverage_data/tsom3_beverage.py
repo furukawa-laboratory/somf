@@ -4,9 +4,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-
-
-
 if __name__ == '__main__':
     # データのimport
     data_set = load_data(ret_situation_label=True, ret_beverage_label=True)

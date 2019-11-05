@@ -5,7 +5,7 @@ import numpy as np
 from libs.models.tsom3 import TSOM3
 
 # tsom3_another harada version
-from tests.tsom.tsom3.tsom3_another_h import TSOM3_another
+from tests.tsom.tsom3.tsom3_another import TSOM3_another
 
 
 class TestTSOM3(unittest.TestCase):
@@ -45,10 +45,10 @@ class TestTSOM3(unittest.TestCase):
 
         tsom3_ishida.fit(nb_epoch=nb_epoch)
 
-        # tsom3_another=TSOM3_another(X, latent_dim=latent_dim, resolution=resolution,
-        #                    SIGMA_MAX=sigma_max, SIGMA_MIN=sigma_min, TAU=tau,
-        #                    init=init)
-        # tsom3_another.fit(nb_epoch=nb_epoch)
+        tsom3_another=TSOM3_another(X, latent_dim=latent_dim, resolution=resolution,
+                           SIGMA_MAX=sigma_max, SIGMA_MIN=sigma_min, TAU=tau,
+                           init=init)
+        tsom3_another.fit(nb_epoch=nb_epoch)
         # learn
 
         # test

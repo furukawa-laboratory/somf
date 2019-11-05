@@ -8,10 +8,17 @@ class TSOM3_another():
 
         # 入力データXについて
         if X.ndim == 3:
+            self.X = X.reshape((X.shape[0], X.shape[1], X.shape[2], 1))
+            self.N1 = self.X.shape[0]
+            self.N2 = self.X.shape[1]
+            self.N3 = self.X.shape[2]
+            self.observed_dim = self.X.shape[3]
+        elif X.ndim == 4:
             self.X = X
             self.N1 = self.X.shape[0]
             self.N2 = self.X.shape[1]
             self.N3 = self.X.shape[2]
+            self.observed_dim = self.X.shape[3]
         else:
             raise ValueError("invalid X: {}\nX must be 3d ndarray".format(X))
 
@@ -111,7 +118,7 @@ class TSOM3_another():
         self.history = {}
 
     def fit(self, nb_epoch=200):
-        self.history['y'] = np.zeros((nb_epoch, self.K1, self.K2, self.K3))
+        self.history['y'] = np.zeros((nb_epoch, self.K1, self.K2, self.K3, self.observed_dim))
         self.history['z1'] = np.zeros((nb_epoch, self.N1, self.latent_dim1))
         self.history['z2'] = np.zeros((nb_epoch, self.N2, self.latent_dim2))
         self.history['z3'] = np.zeros((nb_epoch, self.N3, self.latent_dim3))
@@ -140,14 +147,14 @@ class TSOM3_another():
             G3 = np.sum(H3, axis=1)
             R3 = (H3.T / G3).T
 
-            self.U1 = np.einsum('mj,nk,ijk->imn', R2, R3, self.X)
-            self.U2 = np.einsum('li,nk,ijk->ljn', R1, R3, self.X)
-            self.U3 = np.einsum('li,mj,ijk->lmk', R1, R2, self.X)
-            self.Y = np.einsum('li,mj,nk,ijk->lmn', R1, R2, R3, self.X)
+            self.U1 = np.einsum('mj,nk,ijkd->imnd', R2, R3, self.X)
+            self.U2 = np.einsum('li,nk,ijkd->ljnd', R1, R3, self.X)
+            self.U3 = np.einsum('li,mj,ijkd->lmkd', R1, R2, self.X)
+            self.Y = np.einsum('li,imnd->lmnd', R1, self.U1)
 
-            self.k_star1 = np.argmin(np.sum(np.square(self.U1[:, None, :, :] - self.Y[None, :, :, :]), axis=(2, 3)), axis=1)
-            self.k_star2 = np.argmin(np.sum(np.square(self.U2[:, :, None, :] - self.Y[:, None, :, :]), axis=(0, 3)), axis=1)
-            self.k_star3 = np.argmin(np.sum(np.square(self.U3[:, :, :, None] - self.Y[:, :, None, :]), axis=(0, 1)), axis=1)
+            self.k_star1 = np.argmin(np.sum(np.square(self.U1[:, None, :, :, :] - self.Y[None, :, :, :, :]), axis=(2, 3, 4)), axis=1)
+            self.k_star2 = np.argmin(np.sum(np.square(self.U2[:, :, None, :, :] - self.Y[:, None, :, :, :]), axis=(0, 3, 4)), axis=1)
+            self.k_star3 = np.argmin(np.sum(np.square(self.U3[:, :, :, None, :] - self.Y[:, :, None, :, :]), axis=(0, 1, 4)), axis=1)
 
             self.Z1 = self.Zeta1[self.k_star1, :]
             self.Z2 = self.Zeta2[self.k_star2, :]
@@ -155,7 +162,7 @@ class TSOM3_another():
 
             # -------------please write tsom3 algorithm--------------------------
 
-            self.history['y'][epoch, :, :] = self.Y
+            self.history['y'][epoch, :, :, :, :] = self.Y
             self.history['z1'][epoch, :] = self.Z1
             self.history['z2'][epoch, :] = self.Z2
             self.history['z3'][epoch, :] = self.Z3
