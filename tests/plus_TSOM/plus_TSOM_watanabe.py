@@ -4,24 +4,9 @@ from libs.models.som import SOM
 import numpy as np
 from scipy.spatial import distance as dist
 
-class TSOM_plus_SOM_someone:
-    def __init__(self,input_data,init,group_label,*args):
-        #とりあえず、keyは固定にして場所自由でいいかも.一部、tsomの時にtupleになっている場合の処理を追加
+class TSOMPlusSOMWatanabe:
+    def __init__(self,input_data,group_label,params_tsom, params_som):
         #下位のTSOMのパラメータ設定
-        self.tsom_latent_dim=args[0][0]
-        self.tsom_resolution = args[1][0]
-        self.tsom_sigma_max=args[2][0]
-        self.tsom_sigma_min=args[3][0]
-        self.tsom_tau=args[4][0]
-        #上位のSOMのパラメータ設定
-        self.som_latent_dim=args[0][1]
-        self.som_resolution = args[1][1]
-        self.som_sigma_max = args[2][1]
-        self.som_sigma_min = args[3][1]
-        self.som_tau = args[4][1]
-        Init=init
-
-
         self.input_data=input_data#下位のTSOMに入れるパラメータ
         self.group_label = group_label # グループ数の確認
         self.group_num=len(self.group_label)
