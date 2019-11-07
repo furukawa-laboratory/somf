@@ -28,7 +28,7 @@ def load_kura_tsom(xsamples, ysamples, missing_num=None,retz=False):
             missing_rate = missing_num
             all_samples = xsamples * ysamples
             missing_num = int(all_samples * missing_rate)
-        elif missing_num >= 1 & missing_num <= xsamples * ysamples:  # missing_numが1以上、全てのサンプル数以下の場合、欠損させるサンプル数ということでそのままさせる
+        elif missing_num >= 1 & missing_num <= xsamples * ysamples:  # missing_numが1以上、全サンプル数以下の場合、missing_numだけ欠損
             pass
         else:  # 負数の場合や、サンプル数以上の場合はerror文を返す
             raise ValueError("invalid missing_num: {}\nmissing_num must not be negative number".format(missing_num))
@@ -42,7 +42,7 @@ def load_kura_tsom(xsamples, ysamples, missing_num=None,retz=False):
 
         Gamma = np.ones((xsamples, ysamples))#Gammaはどのデータが欠損かを表す
 
-        for n in np.arange(missing_num):  # 欠損させたいデータ数分、Gammaの要素を0にする
+        for n in np.arange(missing_num):  # 欠損させたいデータ数分、Gammaの要素とtrue_zを欠損させる
             tempp = p[n]
             i = tempp[0]
             j = tempp[1]
@@ -57,6 +57,7 @@ def load_kura_tsom(xsamples, ysamples, missing_num=None,retz=False):
         #     for j in np.arange(ysamples):
         #         if Gamma[i, j] == 0:
         #             x[i, j, :] = 0
+
         #欠損値をNan埋めする
         Nan=np.nan
         for i in np.arange(xsamples):
