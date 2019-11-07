@@ -37,37 +37,46 @@ def load_kura_tsom(xsamples, ysamples, missing_num=None,retz=False):
         # list1とlist2の全組み合わせの配列を作成して、それをシャッフルして0番目からmissing_num個だけ欠損させる
         missing_list1 = np.arange(xsamples)
         missing_list2 = np.arange(ysamples)
-        p = list(itertools.product(missing_list1, missing_list2))  # List数はI*J
+        p = list(itertools.product(missing_list1, missing_list2))  # List数はN1*N2
         random.shuffle(p)  # listをshuffle
 
         Gamma = np.ones((xsamples, ysamples))#Gammaはどのデータが欠損かを表す
 
-        for n in np.arange(missing_num):  # 欠損させたいデータ数分、Gammaの要素とtrue_zを欠損させる
+        for n in np.arange(missing_num):  # 欠損させたいデータ数分、Gammaの要素を欠損させる
             tempp = p[n]
             i = tempp[0]
             j = tempp[1]
             if Gamma[i, j] == 1:
                 Gamma[i, j] = 0
-            elif Gamma[i, j] == 0:
+            elif Gamma[i, j] == 0:#同じ場所を欠損させようとしたらエラーを吐く
                 raise ValueError("invalid Gamma: {}\n".format(Gamma))
 
+        #true_zを欠損させる
+        for n in np.arange(missing_num):
+            tempp = p[n]
+            i = tempp[0]
+            j = tempp[1]
+            truez[i,j,:]=np.nan
+
         #Gammaに基づいてデータ行列を欠損させる
+        # 欠損値をNan埋めする
+        for i in np.arange(xsamples):
+            for j in np.arange(ysamples):
+                if Gamma[i, j] == 0:
+                    x[i, j, :] = np.nan
         # 欠損値を0埋めする
         # for i in np.arange(xsamples):
         #     for j in np.arange(ysamples):
         #         if Gamma[i, j] == 0:
         #             x[i, j, :] = 0
 
-        #欠損値をNan埋めする
-        Nan=np.nan
-        for i in np.arange(xsamples):
-            for j in np.arange(ysamples):
-                if Gamma[i,j]==0:
-                    x[i,j,:]=Nan
+
         if retz:
             return x,truez,Gamma
         else:
             return x,Gamma
+
+
 
 
 if __name__ == '__main__':
@@ -77,7 +86,10 @@ if __name__ == '__main__':
     xsamples = 10
     ysamples = 10
 
-    x, truez = load_kura_tsom(10, 10, retz=True)
+    x, truez,Gamma = load_kura_tsom(5, 5, retz=True,missing_num=0.2)
+
+
+
 
     fig = plt.figure(figsize=[10, 5])
     ax_x = fig.add_subplot(1, 2, 1, projection='3d')
