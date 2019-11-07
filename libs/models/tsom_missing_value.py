@@ -50,7 +50,7 @@ class TSOM2():
                 gamma = np.where(np.isnan(self.X) == 1, 0, 1)#nanがあるところ
                 # X の欠損値を 0 で置換
                 self.gamma = gamma
-                #self.X[np.isnan(self.X)] = 0
+                self.X[np.isnan(self.X)] = 0
             elif self.frag==0:#欠損値がない場合はgammaは作らない
                 pass
 
@@ -166,11 +166,11 @@ class TSOM2():
             if self.frag == 1: # 欠損値有り
                 # ２次モデルの決定
                 G = np.einsum("ik,jl,ijd->kld", H1.T, H2.T, self.gamma)
-                self.Y = np.einsum('ik,jl,ijd,ijd->kld', H1.T, H2.T, self.gamma, self.X) / G[:, :, None]
+                self.Y = np.einsum('ik,jl,ijd,ijd->kld', H1.T, H2.T, self.gamma, self.X) / G
                 if self.model == "indirect": # 1次モデル型
                     # １次モデル，２次モデルの決定
-                    self.U = np.einsum('lj,ijd,ijd->ild', H2.T, self.gamma, self.X)/np.sum(self.gamma*H2.T, axis = 1)
-                    self.V = np.einsum('ki,ijd,ijd->kjd', H1.T, self.gamma, self.X)/np.sum(self.gamma*H1.T, axis = 1)
+                    self.U = np.einsum('jl,ijd,ijd->ild', H2.T, self.gamma, self.X)/np.einsum('ijd,jl->ild', self.gamma, H2.T)
+                    self.V = np.einsum('ik,ijd,ijd->kjd', H1.T, self.gamma, self.X)/np.einsum('ijd,ik->kjd', self.gamma, H1.T)
                     # 勝者決定
                     self.k_star1 = np.argmin(
                         np.sum(np.square(self.U[:, None, :, :] - self.Y[None, :, :, :]), axis=(2, 3)), axis=1)
@@ -179,7 +179,7 @@ class TSOM2():
 
                 elif self.model == "direct": # 直接型
                     # 勝者決定
-                    Dist = self.gamma[:, :, None, None, None] * np.square(
+                    Dist = self.gamma[:, :, None, None, :] * np.square(
                         self.X[:, :, None, None, :] - self.Y[None, None, :, :, :])
                     self.k_star1 = np.argmin(np.einsum("jl,ijklm->ik", H2.T, Dist), axis=1)
                     self.k_star2 = np.argmin(np.einsum("ik,ijklm->jl", H1.T, Dist), axis=1)
