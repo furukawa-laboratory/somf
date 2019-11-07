@@ -5,7 +5,7 @@ from tqdm import tqdm
 from ..tools.create_zeta import create_zeta
 
 class TSOM2():
-    def __init__(self, X, latent_dim, resolution, SIGMA_MAX, SIGMA_MIN, TAU, type, gamma=None, init='random'):
+    def __init__(self, X, latent_dim, resolution, SIGMA_MAX, SIGMA_MIN, TAU, model, gamma=None, init='random'):
 
         # 入力データXについて
         if X.ndim == 2:
@@ -149,7 +149,7 @@ class TSOM2():
 
             if self.hantei_X == 1: # 欠損値有り
                 G = np.einsum("ik,jl,ijd->kld", H1.T, H2.T, self.gamma)
-                if self.type == "first": # 1次モデル型
+                if self.model == None: # 1次モデル型
                     # １次モデル，２次モデルの決定
                     self.U = np.einsum('lj,ijd,ijd->ild', H2.T, self.gamma, self.X)/np.sum(self.gamma*H2.T, axis = 1)
                     self.V = np.einsum('ki,ijd,ijd->kjd', H1.T, self.gamma, self.X)/np.sum(self.gamma*H1.T, axis = 1)
@@ -160,7 +160,7 @@ class TSOM2():
                     self.k_star2 = np.argmin(
                         np.sum(np.square(self.V[:, :, None, :] - self.Y[:, None, :, :]), axis=(0, 3)), axis=1)
 
-                elif self.type == "direct": # 直接型
+                elif self.model == "direct": # 直接型
                     # ２次モデルの決定
                     self.Y = np.einsum('ik,jl,ijd,ijd->kld', H1.T, H2.T, self.gamma, self.X) / G[:, :, None]
 
@@ -170,8 +170,12 @@ class TSOM2():
                     self.k_star1 = np.argmin(np.einsum("jl,ijklm->ik", H2.T, Dist), axis=1)
                     self.k_star2 = np.argmin(np.einsum("ik,ijklm->jl", H1.T, Dist), axis=1)
 
+                else:
+                    raise ValueError("invalid type: {}\ntype must be None or direct".format(model))
+
+
             else: # 欠損値無し
-                if self.type == "first": # 1次モデル型
+                if self.model == None: # 1次モデル型
                     # １次モデル，２次モデルの決定
                     self.U = np.einsum('lj,ijd->ild', R2, self.X)
                     self.V = np.einsum('ki,ijd->kjd', R1, self.X)
@@ -182,7 +186,7 @@ class TSOM2():
                     self.k_star2 = np.argmin(
                         np.sum(np.square(self.V[:, :, None, :] - self.Y[:, None, :, :]), axis=(0, 3)), axis=1)
 
-                elif self.type == "direct": # 直接型
+                elif self.model == "direct": # 直接型
                     G = np.einsum("ik,jl ->kl", H1.T, H2.T)
                     # ２次モデルの決定
                     self.Y = np.einsum('ik,jl,ijd->kld', H1.T, H2.T, self.X) / G
@@ -193,6 +197,8 @@ class TSOM2():
                     self.k_star1 = np.argmin(np.einsum("jl,ijklm->ik", H2.T, Dist), axis=1)
                     self.k_star2 = np.argmin(np.einsum("ik,ijklm->jl", H1.T, Dist), axis=1)
 
+                else:
+                    raise ValueError("invalid model: {}\nmodel must be None or direct".format(model))
             self.Z1 = self.Zeta1[self.k_star1, :]  # k_starのZの座標N*L(L=2
             self.Z2 = self.Zeta2[self.k_star2, :]  # k_starのZの座標N*L(L=2
 
