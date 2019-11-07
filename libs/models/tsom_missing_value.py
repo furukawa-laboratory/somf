@@ -56,9 +56,9 @@ class TSOM2():
 
         # 1次モデル型と直接型を選択する引数
         if model=="direct":
-            self.model = model
+            self.model = "direct"
         elif model==None:
-            self.model=model
+            self.model="first"
         else:
             raise ValueError("invalid model: {}\nmodel is only direct or None. ".format(model))
 
@@ -163,9 +163,9 @@ class TSOM2():
             G2 = np.sum(H2, axis=1)  # Gは行ごとの和をとったベクトル
             R2 = (H2.T / G2).T  # 行列の計算なので.Tで転置を行う
 
-            if self.hantei_X == 1: # 欠損値有り
+            if self.frag == 1: # 欠損値有り
                 G = np.einsum("ik,jl,ijd->kld", H1.T, H2.T, self.gamma)
-                if self.type == "first": # 1次モデル型
+                if self.model == "first": # 1次モデル型
                     # １次モデル，２次モデルの決定
                     self.U = np.einsum('lj,ijd,ijd->ild', H2.T, self.gamma, self.X)/np.sum(self.gamma*H2.T, axis = 1)
                     self.V = np.einsum('ki,ijd,ijd->kjd', H1.T, self.gamma, self.X)/np.sum(self.gamma*H1.T, axis = 1)
@@ -176,7 +176,7 @@ class TSOM2():
                     self.k_star2 = np.argmin(
                         np.sum(np.square(self.V[:, :, None, :] - self.Y[:, None, :, :]), axis=(0, 3)), axis=1)
 
-                elif self.type == "direct": # 直接型
+                elif self.model == 1: # 直接型
                     # ２次モデルの決定
                     self.Y = np.einsum('ik,jl,ijd,ijd->kld', H1.T, H2.T, self.gamma, self.X) / G[:, :, None]
 
@@ -187,7 +187,7 @@ class TSOM2():
                     self.k_star2 = np.argmin(np.einsum("ik,ijklm->jl", H1.T, Dist), axis=1)
 
             else: # 欠損値無し
-                if self.type == "first": # 1次モデル型
+                if self.model == "first": # 1次モデル型
                     # １次モデル，２次モデルの決定
                     self.U = np.einsum('lj,ijd->ild', R2, self.X)
                     self.V = np.einsum('ki,ijd->kjd', R1, self.X)
@@ -198,7 +198,7 @@ class TSOM2():
                     self.k_star2 = np.argmin(
                         np.sum(np.square(self.V[:, :, None, :] - self.Y[:, None, :, :]), axis=(0, 3)), axis=1)
 
-                elif self.type == "direct": # 直接型
+                elif self.model == "direct": # 直接型
                     G = np.einsum("ik,jl ->kl", H1.T, H2.T)
                     # ２次モデルの決定
                     self.Y = np.einsum('ik,jl,ijd->kld', H1.T, H2.T, self.X) / G
