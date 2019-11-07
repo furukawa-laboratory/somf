@@ -2,8 +2,7 @@ import numpy as np
 import random
 import itertools
 
-def load_kura_tsom(xsamples, ysamples, missing_num,retz=False):
-
+def load_kura_tsom(xsamples, ysamples, missing_num=None,retz=False):
     z1 = np.linspace(-1, 1, xsamples)
     z2 = np.linspace(-1, 1, ysamples)
 
@@ -52,20 +51,22 @@ def load_kura_tsom(xsamples, ysamples, missing_num,retz=False):
             elif Gamma[i, j] == 0:
                 raise ValueError("invalid Gamma: {}\n".format(Gamma))
 
-        # # Gammaに基づいてデータ行列を欠損させる
-        # # 欠損値を0埋めする
+        #Gammaに基づいてデータ行列を欠損させる
+        # 欠損値を0埋めする
         # for i in np.arange(xsamples):
         #     for j in np.arange(ysamples):
         #         if Gamma[i, j] == 0:
         #             x[i, j, :] = 0
-
         #欠損値をNan埋めする
         Nan=np.nan
         for i in np.arange(xsamples):
             for j in np.arange(ysamples):
                 if Gamma[i,j]==0:
                     x[i,j,:]=Nan
-        return x, Gamma
+        if retz:
+            return x,truez,Gamma
+        else:
+            return x,Gamma
 
 
 if __name__ == '__main__':
