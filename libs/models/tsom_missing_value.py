@@ -22,29 +22,45 @@ class TSOM2():
         else:
             raise ValueError("invalid X: {}\nX must be 2d or 3d ndarray".format(X))
 
-        #Gammaの処理
-        #Gammaが指定される時はそのまま使う
-        if gamma.ndim==2:
-            self.gamma=gamma.reshape((gamma.shape[0],gamma.shape[1],1))
-        elif gamma.ndim==3:
-            self.gamma=gamma
-        else:
-            raise ValueError("invalid gamma: {}\ngamma must be 2d or 3d ndarray".format(gamma))
-
-        #データXに欠損がある場合はそれに基づいてgammaを作成する
-        frag = np.any(np.isnan(self.X))# 欠損値があるかを判定.欠損があれば1,欠損がなければ0
-        self.frag=frag
-        # 欠損値がある場合
-        if self.frag == 1:
-            gamma = np.where(np.isnan(self.X) == 1, 0, 1)#nanがあるところ
-            # X の欠損値を 0 で置換
-            self.gamma = gamma
-            #self.X[np.isnan(self.X)] = 0
-        elif self.frag==0:#欠損値がない場合はgammaは作らない
+        #欠損値アルゴリズム処理
+        if gamma.ndim == 2:
+            gamma = gamma.reshape((gamma.shape[0], gamma.shape[1], 1))
+        elif gamma.ndim == 3:
             pass
 
+        if gamma is not None:#gammaが指定されている時
+            if X.shape !=gamma.shape:
+                raise ValueError("invalid gamma: {}\ndata size and gamma size is not match. ".format(gamma))
+            elif X.shape==gamma.shape:#データのサイズとgammaのサイズが一致する時
+                if np.any(np.isnan(self.X)) ==1:#gamma指定してデータに欠損がある場合
+                    temp_gamma = np.where(np.isnan(self.X) == 1, 0, 1)  #データに基づいてgammaを作る
+                    temp_frag=np.allclose(temp_gamma,gamma)
+                    if temp_frag is True:#データの欠損しているところとgammaの0の値が一致する時
+                        self.gamma=gamma
+                        self.frag=1
+                    else:
+                        raise ValueError("invalid gamma: {}\ndata size and gamma size is not match. ".format(gamma))
+                elif np.any(np.isnan(self.X)) ==0:#gamma指定してデータに欠損がない場合.つまり意図的にデータを欠損とみなしたいとき
+                    self.gamma=gamma
+        elif gamma is None:#データXに欠損がある場合はそれに基づいてgammaを作成する
+            frag = np.any(np.isnan(self.X))# 欠損値があるかを判定.欠損があれば1,欠損がなければ0
+            self.frag=frag
+            # 欠損値がある場合
+            if self.frag == 1:
+                gamma = np.where(np.isnan(self.X) == 1, 0, 1)#nanがあるところ
+                # X の欠損値を 0 で置換
+                self.gamma = gamma
+                #self.X[np.isnan(self.X)] = 0
+            elif self.frag==0:#欠損値がない場合はgammaは作らない
+                pass
+
         # 1次モデル型と直接型を選択する引数
-        self.type = type
+        if model=="direct":
+            self.model = "direct"
+        elif model==None:
+            self.model="first"
+        else:
+            raise ValueError("invalid model: {}\nmodel is only direct or None. ".format(model))
 
         # 最大近傍半径(SIGMAX)の設定
         if type(SIGMA_MAX) is float:
@@ -147,9 +163,10 @@ class TSOM2():
             G2 = np.sum(H2, axis=1)  # Gは行ごとの和をとったベクトル
             R2 = (H2.T / G2).T  # 行列の計算なので.Tで転置を行う
 
-            if self.hantei_X == 1: # 欠損値有り
+            if self.frag == 1: # 欠損値有り
                 G = np.einsum("ik,jl,ijd->kld", H1.T, H2.T, self.gamma)
                 if self.model == None: # 1次モデル型
+
                     # １次モデル，２次モデルの決定
                     self.U = np.einsum('lj,ijd,ijd->ild', H2.T, self.gamma, self.X)/np.sum(self.gamma*H2.T, axis = 1)
                     self.V = np.einsum('ki,ijd,ijd->kjd', H1.T, self.gamma, self.X)/np.sum(self.gamma*H1.T, axis = 1)
@@ -161,6 +178,7 @@ class TSOM2():
                         np.sum(np.square(self.V[:, :, None, :] - self.Y[:, None, :, :]), axis=(0, 3)), axis=1)
 
                 elif self.model == "direct": # 直接型
+
                     # ２次モデルの決定
                     self.Y = np.einsum('ik,jl,ijd,ijd->kld', H1.T, H2.T, self.gamma, self.X) / G[:, :, None]
 
@@ -175,7 +193,9 @@ class TSOM2():
 
 
             else: # 欠損値無し
+
                 if self.model == None: # 1次モデル型
+
                     # １次モデル，２次モデルの決定
                     self.U = np.einsum('lj,ijd->ild', R2, self.X)
                     self.V = np.einsum('ki,ijd->kjd', R1, self.X)
