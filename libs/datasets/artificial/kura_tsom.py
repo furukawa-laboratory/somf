@@ -34,6 +34,7 @@ def load_kura_tsom(xsamples, ysamples, missing_num=None,retz=False):
             raise ValueError("invalid missing_num: {}\nmissing_num must not be negative number".format(missing_num))
 
         #どのデータを欠損させるかを決定する
+        
         # list1とlist2の全組み合わせの配列を作成して、それをシャッフルして0番目からmissing_num個だけ欠損させる
         missing_list1 = np.arange(xsamples)
         missing_list2 = np.arange(ysamples)
@@ -64,12 +65,6 @@ def load_kura_tsom(xsamples, ysamples, missing_num=None,retz=False):
             for j in np.arange(ysamples):
                 if Gamma[i, j] == 0:
                     x[i, j, :] = np.nan
-        # 欠損値を0埋めする
-        # for i in np.arange(xsamples):
-        #     for j in np.arange(ysamples):
-        #         if Gamma[i, j] == 0:
-        #             x[i, j, :] = 0
-
 
         if retz:
             return x,truez,Gamma
@@ -86,36 +81,17 @@ if __name__ == '__main__':
     xsamples = 10
     ysamples = 10
 
-    x, truez,Gamma = load_kura_tsom(500, 4, retz=True,missing_num=0.1)
+    #欠損なしver
+    x, truez = load_kura_tsom(xsamples, ysamples, retz=True)
 
-    #プログラムが正しいのかを確認
-    A=x*Gamma[:,:,np.newaxis]
-    print(A[:,:,0])
-    B=truez*Gamma[:,:,np.newaxis]
-    print(B[:,:,0])
+    # 欠損ありver
+    #x, truez, Gamma = load_kura_tsom(xsamples, ysamples, retz=True,missing_num=0.7)
 
-    for i in range(x.shape[0]):
-        for j in np.arange(x.shape[1]):
-            if A[i,j,0]==np.nan:
-                A[i,j,0]=1
-            else:
-                A[i, j, 0] = 0
-    for i in range(x.shape[0]):
-        for j in np.arange(x.shape[1]):
-            if B[i,j,0]==np.nan:
-                B[i,j,0]=0
-            else:
-                B[i, j, 0] = 0
-    print(np.allclose(A[:, :, 0], B[:, :, 0]))
-
-
-
-
-    # fig = plt.figure(figsize=[10, 5])
-    # ax_x = fig.add_subplot(1, 2, 1, projection='3d')
-    # ax_truez = fig.add_subplot(1, 2, 2)
-    # ax_x.scatter(x[:, :, 0].flatten(), x[:, :, 1].flatten(), x[:, :, 2].flatten(), c=x[:, :, 0].flatten())
-    # ax_truez.scatter(truez[:, :, 0].flatten(), truez[:, :, 1].flatten(), c=x[:, :, 0].flatten())
-    # ax_x.set_title('Generated three-dimensional data')
-    # ax_truez.set_title('True two-dimensional latent variable')
-    # plt.show()
+    fig = plt.figure(figsize=[10, 5])
+    ax_x = fig.add_subplot(1, 2, 1, projection='3d')
+    ax_truez = fig.add_subplot(1, 2, 2)
+    ax_x.scatter(x[:, :, 0].flatten(), x[:, :, 1].flatten(), x[:, :, 2].flatten(), c=x[:, :, 0].flatten())
+    ax_truez.scatter(truez[:, :, 0].flatten(), truez[:, :, 1].flatten(), c=x[:, :, 0].flatten())
+    ax_x.set_title('Generated three-dimensional data')
+    ax_truez.set_title('True two-dimensional latent variable')
+    plt.show()
