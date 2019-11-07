@@ -151,9 +151,9 @@ class TSOM2():
                 G = np.einsum("ik,jl,ijd->kld", H1.T, H2.T, self.gamma)
                 if self.type == "first": # 1次モデル型
                     # １次モデル，２次モデルの決定
-                    self.U = np.einsum('lj,ijd,ijd->ild', H2, self.gamma, self.X)/np.sum(self.gamma*H2, axis = 1)
-                    self.V = np.einsum('ki,ijd,ijd->kjd', H1, self.gammi, self.X)/np.sum(self.gamma*H1, axis = 1)
-                    self.Y = np.einsum('ki,lj,ijd->kld', R1, R2, self.X)
+                    self.U = np.einsum('lj,ijd,ijd->ild', H2.T, self.gamma, self.X)/np.sum(self.gamma*H2.T, axis = 1)
+                    self.V = np.einsum('ki,ijd,ijd->kjd', H1.T, self.gamma, self.X)/np.sum(self.gamma*H1.T, axis = 1)
+                    self.Y = np.einsum('ik,jl,ijd,ijd->kld', H1.T, H2.T, self.gamma, self.X) / G[:, :, None]
                     # 勝者決定
                     self.k_star1 = np.argmin(
                         np.sum(np.square(self.U[:, None, :, :] - self.Y[None, :, :, :]), axis=(2, 3)), axis=1)
