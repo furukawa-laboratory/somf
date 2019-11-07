@@ -86,7 +86,7 @@ if __name__ == '__main__':
     xsamples = 10
     ysamples = 10
 
-    x, truez,Gamma = load_kura_tsom(5, 4, retz=True,missing_num=0.1)
+    x, truez,Gamma = load_kura_tsom(500, 4, retz=True,missing_num=0.1)
 
     #プログラムが正しいのかを確認
     A=x*Gamma[:,:,np.newaxis]
@@ -97,25 +97,25 @@ if __name__ == '__main__':
     for i in range(x.shape[0]):
         for j in np.arange(x.shape[1]):
             if A[i,j,0]==np.nan:
-                A[i,j,0]=0
+                A[i,j,0]=1
             else:
-                pass
+                A[i, j, 0] = 0
     for i in range(x.shape[0]):
         for j in np.arange(x.shape[1]):
             if B[i,j,0]==np.nan:
                 B[i,j,0]=0
             else:
-                pass
+                B[i, j, 0] = 0
     print(np.allclose(A[:, :, 0], B[:, :, 0]))
 
 
 
 
-    fig = plt.figure(figsize=[10, 5])
-    ax_x = fig.add_subplot(1, 2, 1, projection='3d')
-    ax_truez = fig.add_subplot(1, 2, 2)
-    ax_x.scatter(x[:, :, 0].flatten(), x[:, :, 1].flatten(), x[:, :, 2].flatten(), c=x[:, :, 0].flatten())
-    ax_truez.scatter(truez[:, :, 0].flatten(), truez[:, :, 1].flatten(), c=x[:, :, 0].flatten())
-    ax_x.set_title('Generated three-dimensional data')
-    ax_truez.set_title('True two-dimensional latent variable')
-    plt.show()
+    # fig = plt.figure(figsize=[10, 5])
+    # ax_x = fig.add_subplot(1, 2, 1, projection='3d')
+    # ax_truez = fig.add_subplot(1, 2, 2)
+    # ax_x.scatter(x[:, :, 0].flatten(), x[:, :, 1].flatten(), x[:, :, 2].flatten(), c=x[:, :, 0].flatten())
+    # ax_truez.scatter(truez[:, :, 0].flatten(), truez[:, :, 1].flatten(), c=x[:, :, 0].flatten())
+    # ax_x.set_title('Generated three-dimensional data')
+    # ax_truez.set_title('True two-dimensional latent variable')
+    # plt.show()
