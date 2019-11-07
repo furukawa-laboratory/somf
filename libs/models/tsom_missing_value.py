@@ -22,18 +22,26 @@ class TSOM2():
         else:
             raise ValueError("invalid X: {}\nX must be 2d or 3d ndarray".format(X))
 
-        # 欠損値判定
-        self.hantei_X = np.any(np.isnan(self.X))
-        # 欠損値がある場合
-        if self.hantei_X == 1:
-            self.Gamma = np.where(np.isnan(self.X) == 1, 0, 1)
-            # X の欠損値を 0 で置換
-            self.gamma = self.Gamma[:,:,0]
-            self.X[np.isnan(self.X)] = 0
+        #Gammaの処理
+        #Gammaが指定される時はそのまま使う
+        if gamma.ndim==2:
+            self.gamma=gamma.reshape((gamma.shape[0],gamma.shape[1],1))
+        elif gamma.ndim==3:
+            self.gamma=gamma
+        else:
+            raise ValueError("invalid gamma: {}\ngamma must be 2d or 3d ndarray".format(gamma))
 
-        # gammma が与えられている場合
-        if gamma != None:
-            self.gammma = gamma
+        #データXに欠損がある場合はそれに基づいてgammaを作成する
+        frag = np.any(np.isnan(self.X))# 欠損値があるかを判定.欠損があれば1,欠損がなければ0
+        self.frag=frag
+        # 欠損値がある場合
+        if self.frag == 1:
+            gamma = np.where(np.isnan(self.X) == 1, 0, 1)#nanがあるところ
+            # X の欠損値を 0 で置換
+            self.gamma = gamma
+            #self.X[np.isnan(self.X)] = 0
+        elif self.frag==0:#欠損値がない場合はgammaは作らない
+            pass
 
         # 1次モデル型と直接型を選択する引数
         self.type = type
