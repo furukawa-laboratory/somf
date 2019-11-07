@@ -24,9 +24,9 @@ class TSOM2():
 
         if gamma is not None:#gammaが指定されている時
             # 欠損値アルゴリズム処理
-            if gamma.ndim == 2:
-                gamma = gamma.reshape((gamma.shape[0], gamma.shape[1], 1))
-            elif gamma.ndim == 3:
+            if self.X.ndim == 2:
+                gamma = gamma.reshape((gamma.shape[0], gamma.shape[1], self.observed_dim))
+            elif self.X.ndim == 3:
                 pass
 
             if X.shape !=gamma.shape:
@@ -165,7 +165,9 @@ class TSOM2():
 
             if self.frag == 1: # 欠損値有り
                 # ２次モデルの決定
-                G = np.einsum("ik,jl,ijd->kld", H1.T, H2.T, self.gamma)
+
+                G = np.einsum("ik,jl,ijd->kld", H1.T, H2.T, self.gamma)#K1*K2*D
+
                 self.Y = np.einsum('ik,jl,ijd,ijd->kld', H1.T, H2.T, self.gamma, self.X) / G
                 if self.model == "indirect": # 1次モデル型
                     # １次モデル，２次モデルの決定
