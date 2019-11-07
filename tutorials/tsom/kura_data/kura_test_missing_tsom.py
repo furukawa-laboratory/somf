@@ -3,12 +3,10 @@ from libs.datasets.artificial.kura_tsom import load_kura_tsom
 from libs.models.tsom_missing_value import TSOM2
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation as animation
-import numpy as np
 
-#データの読み込み
-I=30
-J=10
-X=load_kura_tsom(I,J)
+
+
+X,Gamma=load_kura_tsom(xsamples=100,ysamples=200,missing_num=0.8)
 
 
 tau1=50
@@ -18,12 +16,6 @@ sigma1_zero=1.2
 sigma2_min=0.1
 sigma2_zero=1.2
 
-# # 欠損値データ追加
-x_nan = np.random.randint(0, I, 10)
-y_nan = np.random.randint(0, J, 10)
-
-for i in range(10):
-    X[x_nan[i], y_nan[i], :] = np.nan
 
 tsom2=TSOM2(X,latent_dim=(1,1),resolution=(10,15),SIGMA_MAX=(sigma1_zero,sigma2_zero),
                   SIGMA_MIN=sigma1_min, TAU=(tau1,tau2))
@@ -41,7 +33,7 @@ def plot(i):
 ani = animation.FuncAnimation(fig, plot, frames=250,interval=100)
 plt.show()
 
-#
+
 # fig = plt.figure()
 # ax = Axes3D(fig)
 # ax.scatter(X[:,:, 0], X[:,:, 1], X[:,:, 2])
