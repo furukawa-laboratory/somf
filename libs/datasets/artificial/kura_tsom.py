@@ -86,7 +86,27 @@ if __name__ == '__main__':
     xsamples = 10
     ysamples = 10
 
-    x, truez,Gamma = load_kura_tsom(5, 5, retz=True,missing_num=0.2)
+    x, truez,Gamma = load_kura_tsom(5, 4, retz=True,missing_num=0.1)
+
+    #プログラムが正しいのかを確認
+    A=x*Gamma[:,:,np.newaxis]
+    print(A[:,:,0])
+    B=truez*Gamma[:,:,np.newaxis]
+    print(B[:,:,0])
+
+    for i in range(x.shape[0]):
+        for j in np.arange(x.shape[1]):
+            if A[i,j,0]==np.nan:
+                A[i,j,0]=0
+            else:
+                pass
+    for i in range(x.shape[0]):
+        for j in np.arange(x.shape[1]):
+            if B[i,j,0]==np.nan:
+                B[i,j,0]=0
+            else:
+                pass
+    print(np.allclose(A[:, :, 0], B[:, :, 0]))
 
 
 
