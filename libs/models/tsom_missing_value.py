@@ -5,7 +5,7 @@ from tqdm import tqdm
 from ..tools.create_zeta import create_zeta
 
 class TSOM2():
-    def __init__(self, X, latent_dim, resolution, SIGMA_MAX, SIGMA_MIN, TAU, type, gamma=None, init='random'):
+    def __init__(self, X, latent_dim, resolution, SIGMA_MAX, SIGMA_MIN, TAU, model, gamma=None, init='random'):
 
         # 入力データXについて
         if X.ndim == 2:
@@ -22,29 +22,45 @@ class TSOM2():
         else:
             raise ValueError("invalid X: {}\nX must be 2d or 3d ndarray".format(X))
 
-        #Gammaの処理
-        #Gammaが指定される時はそのまま使う
-        if gamma.ndim==2:
-            self.gamma=gamma.reshape((gamma.shape[0],gamma.shape[1],1))
-        elif gamma.ndim==3:
-            self.gamma=gamma
-        else:
-            raise ValueError("invalid gamma: {}\ngamma must be 2d or 3d ndarray".format(gamma))
-
-        #データXに欠損がある場合はそれに基づいてgammaを作成する
-        frag = np.any(np.isnan(self.X))# 欠損値があるかを判定.欠損があれば1,欠損がなければ0
-        self.frag=frag
-        # 欠損値がある場合
-        if self.frag == 1:
-            gamma = np.where(np.isnan(self.X) == 1, 0, 1)#nanがあるところ
-            # X の欠損値を 0 で置換
-            self.gamma = gamma
-            #self.X[np.isnan(self.X)] = 0
-        elif self.frag==0:#欠損値がない場合はgammaは作らない
+        #欠損値アルゴリズム処理
+        if gamma.ndim == 2:
+            gamma = gamma.reshape((gamma.shape[0], gamma.shape[1], 1))
+        elif gamma.ndim == 3:
             pass
 
+        if gamma is not None:#gammaが指定されている時
+            if X.shape !=gamma.shape:
+                raise ValueError("invalid gamma: {}\ndata size and gamma size is not match. ".format(gamma))
+            elif X.shape==gamma.shape:#データのサイズとgammaのサイズが一致する時
+                if np.any(np.isnan(self.X)) ==1:#gamma指定してデータに欠損がある場合
+                    temp_gamma = np.where(np.isnan(self.X) == 1, 0, 1)  #データに基づいてgammaを作る
+                    temp_frag=np.allclose(temp_gamma,gamma)
+                    if temp_frag is True:#データの欠損しているところとgammaの0の値が一致する時
+                        self.gamma=gamma
+                        self.frag=1
+                    else:
+                        raise ValueError("invalid gamma: {}\ndata size and gamma size is not match. ".format(gamma))
+                elif np.any(np.isnan(self.X)) ==0:#gamma指定してデータに欠損がない場合.つまり意図的にデータを欠損とみなしたいとき
+                    self.gamma=gamma
+        elif gamma is None:#データXに欠損がある場合はそれに基づいてgammaを作成する
+            frag = np.any(np.isnan(self.X))# 欠損値があるかを判定.欠損があれば1,欠損がなければ0
+            self.frag=frag
+            # 欠損値がある場合
+            if self.frag == 1:
+                gamma = np.where(np.isnan(self.X) == 1, 0, 1)#nanがあるところ
+                # X の欠損値を 0 で置換
+                self.gamma = gamma
+                #self.X[np.isnan(self.X)] = 0
+            elif self.frag==0:#欠損値がない場合はgammaは作らない
+                pass
+
         # 1次モデル型と直接型を選択する引数
-        self.type = type
+        if model=="direct":
+            self.model = model
+        elif model==None:
+            self.model=model
+        else:
+            raise ValueError("invalid model: {}\nmodel is only direct or None. ".format(model))
 
         # 最大近傍半径(SIGMAX)の設定
         if type(SIGMA_MAX) is float:
