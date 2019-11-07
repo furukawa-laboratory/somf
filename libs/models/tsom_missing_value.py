@@ -22,13 +22,13 @@ class TSOM2():
         else:
             raise ValueError("invalid X: {}\nX must be 2d or 3d ndarray".format(X))
 
-        #欠損値アルゴリズム処理
-        if gamma.ndim == 2:
-            gamma = gamma.reshape((gamma.shape[0], gamma.shape[1], 1))
-        elif gamma.ndim == 3:
-            pass
-
         if gamma is not None:#gammaが指定されている時
+            # 欠損値アルゴリズム処理
+            if gamma.ndim == 2:
+                gamma = gamma.reshape((gamma.shape[0], gamma.shape[1], 1))
+            elif gamma.ndim == 3:
+                pass
+
             if X.shape !=gamma.shape:
                 raise ValueError("invalid gamma: {}\ndata size and gamma size is not match. ".format(gamma))
             elif X.shape==gamma.shape:#データのサイズとgammaのサイズが一致する時
