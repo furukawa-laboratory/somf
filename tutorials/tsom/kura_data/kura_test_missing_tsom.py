@@ -3,25 +3,14 @@ from libs.datasets.artificial.kura_tsom import load_kura_tsom
 from libs.models.tsom_missing_value import TSOM2
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation as animation
-
-import pandas as pd
 import numpy as np
 
 #データの読み込み
 I=30
 J=10
 X=load_kura_tsom(I,J)
-print(X.shape)
 
-nodes1_kx=10
-nodes1_ky=1#kuraの場合,潜在空間は1次元
-nodes1_num=nodes1_kx*nodes1_ky
-nodes2_kx=5
-nodes2_ky=1#kuraの場合,潜在空間は1次元
-nodes2_num=nodes2_kx*nodes2_ky
-mode1_samples=X.shape[0]
-mode2_samples=X.shape[1]
-observed_dim=X.shape[2]
+
 tau1=50
 tau2=50
 sigma1_min=0.1
