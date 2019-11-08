@@ -42,6 +42,7 @@ class TSOM2():
                         raise ValueError("invalid gamma: {}\ndata size and gamma size is not match. ".format(gamma))
                 elif np.any(np.isnan(self.X)) ==0:#gamma指定してデータに欠損がない場合.つまり意図的にデータを欠損とみなしたいとき
                     self.gamma=gamma
+                    self.frag=1
         elif gamma is None:#データXに欠損がある場合はそれに基づいてgammaを作成する
             frag = np.any(np.isnan(self.X))# 欠損値があるかを判定.欠損があれば1,欠損がなければ0
             self.frag=frag
