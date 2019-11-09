@@ -18,7 +18,14 @@ class TSOMPlusSOMWatanabe:
         self.tsom.fit(tsom_epoch_num)
 
     def _fit_KDE(self,kernel_width):#学習した後の潜在空間からKDEで確率分布を作る
+        group_density = np.empty((0,len(self.index_members_of_group)))
+        for members in self.index_members_of_group:
+            Dist = dist.cdist(self.tsom.Zeta1,self.tsom.Z1[members],'sqeuclidean') #KxN
+            kernel_value = np.exp(-0.5*Dist/(kernel_width*kernel_width)).sum(axis=1) #K
+            density = kernel_value / kernel_value.sum()
+            np.append(group_density,density)
 
+        self.params_som['X'] = group_density
         self.params_som['metric'] = 'KLdivergence'
 
     def _fit_2nd_SOM(self,som_epoch_num,init):#上位のSOMを
