@@ -54,8 +54,8 @@ params_som = {'latent_dim':2,
 
 # +型階層TSOMのclass読み込み
 # group_label以降の変数ははlatent_dim,resolution,sigma_max,sigma_min,tauでSOMとTSOMでまとめている
-tsom_plus_som = TSOM_plus_SOM(input_data=input_data,
-                              group_label=group_label,
+tsom_plus_som = TSOM_plus_SOM(member_features=input_data,
+                              index_members_of_group=group_label,
                               params_tsom=params_tsom,
                               params_som=params_som)
 
