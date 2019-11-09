@@ -13,7 +13,10 @@ class TSOM_plus_SOM:
         self.index_members_of_group = index_members_of_group  # グループ数の確認
         self.group_num = len(self.index_members_of_group)
 
-    # def fit(self, tsom_epoch_num, kernel_width, som_epoch_num, init):
+    def fit(self, tsom_epoch_num, kernel_width, som_epoch_num):
+        self._fit_1st_TSOM(tsom_epoch_num)
+        self._fit_KDE(kernel_width)
+        self._fit_2nd_SOM(som_epoch_num)
 
     def _fit_1st_TSOM(self, tsom_epoch_num):
         self.tsom = TSOM2(**self.params_tsom)
