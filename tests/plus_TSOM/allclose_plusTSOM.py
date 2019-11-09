@@ -20,12 +20,10 @@ class TestSOM(unittest.TestCase):
         init_SOM = np.random.rand(n_group, 2) * 2.0 - 1.0
 
 
-        #学習データの作成(平均のみが違うガウス分布からサンプリングした人工データを用いる.ガウス分布数がグループ数で,サンプル数がメンバーの数)
-        # 平均ベクトルを一様分布から生成
+        # 学習データの用意
         mean = np.random.rand(n_group, n_features)
-        member_features = np.zeros((n_group, n_samples_per_group, n_features))#input dataは1stTSOMに入れるデータ
+        member_features = np.zeros((n_group, n_samples_per_group, n_features))
 
-        #データの生成
         for i in range(n_group):
             samples = np.random.multivariate_normal(mean=mean[i], cov=np.identity(n_features), size=n_samples_per_group)
             member_features[i, :, :] = samples
