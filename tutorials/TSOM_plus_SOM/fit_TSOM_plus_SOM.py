@@ -48,7 +48,8 @@ params_som = {'latent_dim':2,
               'resolution':10,
               'sigma_max':2.0,
               'sigma_min':0.5,
-              'tau':50}
+              'tau':50,
+              'init':'random'}
 
 # +型階層TSOMのclass読み込み
 # group_label以降の変数ははlatent_dim,resolution,sigma_max,sigma_min,tauでSOMとTSOMでまとめている
@@ -59,7 +60,7 @@ tsom_plus_som = TSOM_plus_SOM(input_data=input_data,
 
 tsom_plus_som.fit_1st_TSOM(tsom_epoch_num=50)
 tsom_plus_som.fit_KDE(kernel_width=1.0)
-tsom_plus_som.fit_2nd_SOM(som_epoch_num=250,init='random')  # 2ndSOMの学習
+tsom_plus_som.fit_2nd_SOM(som_epoch_num=250)  # 2ndSOMの学習
 
 # grad_normでteamを可視化
 som_umatrix = Grad_Norm(X=tsom_plus_som.som.X, Z=tsom_plus_som.som.Z, sigma=0.1, labels=None, title_text="team_map",
