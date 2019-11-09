@@ -2,7 +2,7 @@
 import numpy as np
 from libs.datasets.artificial.kura_tsom import load_kura_tsom
 import matplotlib.pyplot as plt
-from libs.models.TSOM_plus_SOM import TSOM_plus_SOM
+from libs.models.TSOMPlusSOM import TSOMPlusSOM
 from mpl_toolkits.mplot3d import Axes3D
 from libs.visualization.som.Grad_norm import Grad_Norm
 
@@ -54,10 +54,10 @@ params_som = {'latent_dim':2,
 
 # +型階層TSOMのclass読み込み
 # group_label以降の変数ははlatent_dim,resolution,sigma_max,sigma_min,tauでSOMとTSOMでまとめている
-tsom_plus_som = TSOM_plus_SOM(member_features=input_data,
-                              index_members_of_group=group_label,
-                              params_tsom=params_tsom,
-                              params_som=params_som)
+tsom_plus_som = TSOMPlusSOM(member_features=input_data,
+                            index_members_of_group=group_label,
+                            params_tsom=params_tsom,
+                            params_som=params_som)
 
 tsom_plus_som._fit_1st_TSOM(tsom_epoch_num=50)
 tsom_plus_som._fit_KDE(kernel_width=1.0)

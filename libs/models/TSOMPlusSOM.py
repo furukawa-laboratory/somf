@@ -4,7 +4,7 @@ import numpy as np
 from scipy.spatial import distance as dist
 
 
-class TSOM_plus_SOM:
+class TSOMPlusSOM:
     def __init__(self, member_features, index_members_of_group, params_tsom, params_som):
         self.params_tsom = params_tsom
         self.params_som = params_som

@@ -2,8 +2,8 @@ import unittest
 
 import numpy as np
 
-from libs.models.TSOM_plus_SOM import TSOM_plus_SOM
-from tests.plus_TSOM.plus_TSOM_someone import TSOM_plus_SOM_someone
+from libs.models.TSOMPlusSOM import TSOMPlusSOM
+from tests.plus_TSOM.plus_TSOM_watanabe import TSOMPlusSOMWatanabe
 
 class TestSOM(unittest.TestCase):
     def test_plusTSOM_ishida_vs_test_plusTSOM_someone(self):
@@ -37,7 +37,7 @@ class TestSOM(unittest.TestCase):
         #plus型TSOMの学習-----------------------------------------------------------
 
         #dictのパラメータ名は固定latent_dim,resolution,sigma_max,sigma_min,tauでSOMとTSOMでまとめる
-        htsom_ishida = TSOM_plus_SOM(input_data,init_TSOM,group_label, ((2, 2), 2), ((5, 10), 10), (1.0, 1.0), (0.1, 0.1), (50, 50))
+        htsom_ishida = TSOMPlusSOM(input_data, init_TSOM, group_label, ((2, 2), 2), ((5, 10), 10), (1.0, 1.0), (0.1, 0.1), (50, 50))
         htsom_someone=TSOM_plus_SOM_someone(input_data,init_TSOM ,group_label, ((2, 2), 2), ((5, 10), 10), (1.0, 1.0), (0.1, 0.1), (50, 50))
 
 
