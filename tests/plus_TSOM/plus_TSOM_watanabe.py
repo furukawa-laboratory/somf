@@ -60,9 +60,9 @@ def _main():
     htsom=TSOM_plus_SOM(input_data,init,group_label,((2,1),2),((5,10),10),(1.0,1.0),(0.1,0.1),(50,50))
 
     #plus型TSOM(TSOM*SOM)のやつ
-    htsom.fit_1st_TSOM(tsom_epoch_num=250)#1stTSOMの学習
-    htsom.fit_KDE(kernel_width=1.0)#カーネル密度推定を使って2ndSOMに渡す確率分布を作成
-    htsom.fit_2nd_SOM(som_epoch_num=250)#2ndSOMの学習
+    htsom._fit_1st_TSOM(tsom_epoch_num=250)#1stTSOMの学習
+    htsom._fit_KDE(kernel_width=1.0)#カーネル密度推定を使って2ndSOMに渡す確率分布を作成
+    htsom._fit_2nd_SOM(som_epoch_num=250)#2ndSOMの学習
 
 if __name__ == '__main__':
     _main()

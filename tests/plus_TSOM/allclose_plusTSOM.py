@@ -42,8 +42,8 @@ class TestSOM(unittest.TestCase):
 
 
         # plus型TSOM(TSOM*SOM)のやつ
-        htsom_ishida.fit_1st_TSOM(tsom_epoch_num=250)  # 1stTSOMの学習
-        htsom_someone.fit_1st_TSOM(tsom_epoch_num=250)  # 1stTSOMの学習
+        htsom_ishida._fit_1st_TSOM(tsom_epoch_num=250)  # 1stTSOMの学習
+        htsom_someone._fit_1st_TSOM(tsom_epoch_num=250)  # 1stTSOMの学習
 
         print("allclose_1stTSOM")
         np.testing.assert_allclose(htsom_ishida.tsom.history['y'], htsom_someone.tsom.history['y'])
@@ -51,16 +51,16 @@ class TestSOM(unittest.TestCase):
         np.testing.assert_allclose(htsom_ishida.tsom.history['z2'], htsom_someone.tsom.history['z2'])
 
 
-        htsom_ishida.fit_KDE(kernel_width=1.0)  # カーネル密度推定を使って2ndSOMに渡す確率分布を作成
-        htsom_someone.fit_KDE(kernel_width=1.0)  # カーネル密度推定を使って2ndSOMに渡す確率分布を作成
+        htsom_ishida._fit_KDE(kernel_width=1.0)  # カーネル密度推定を使って2ndSOMに渡す確率分布を作成
+        htsom_someone._fit_KDE(kernel_width=1.0)  # カーネル密度推定を使って2ndSOMに渡す確率分布を作成
         print("allclose_Kernel_Dnsity_Estimation")
         np.testing.assert_allclose(htsom_ishida.prob_data, htsom_someone.prob_data)
 
         init_SOM = np.random.rand(group_num, 2) * 2.0 - 1.0#2ndSOMの初期化
 
         #2ndSOMの学習
-        htsom_ishida.fit_2nd_SOM(som_epoch_num=250,init=init_SOM)  # 2ndSOMの学習
-        htsom_someone.fit_2nd_SOM(som_epoch_num=250,init=init_SOM)  # 2ndSOMの学習
+        htsom_ishida._fit_2nd_SOM(som_epoch_num=250, init=init_SOM)  # 2ndSOMの学習
+        htsom_someone._fit_2nd_SOM(som_epoch_num=250, init=init_SOM)  # 2ndSOMの学習
 
         print("allclose_2ndSOM")
         np.testing.assert_allclose(htsom_ishida.som.history['y'], htsom_someone.som.history['y'])

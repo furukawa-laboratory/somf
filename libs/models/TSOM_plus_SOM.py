@@ -15,11 +15,11 @@ class TSOM_plus_SOM:
 
     # def fit(self, tsom_epoch_num, kernel_width, som_epoch_num, init):
 
-    def fit_1st_TSOM(self, tsom_epoch_num):
+    def _fit_1st_TSOM(self, tsom_epoch_num):
         self.tsom = TSOM2(**self.params_tsom)
         self.tsom.fit(tsom_epoch_num)
 
-    def fit_KDE(self, kernel_width):  # 学習した後の潜在空間からKDEで確率分布を作る
+    def _fit_KDE(self, kernel_width):  # 学習した後の潜在空間からKDEで確率分布を作る
         prob_data = np.zeros((self.group_num, self.tsom.K1))  # group数*ノード数
         # グループごとにKDEを適用
         for i in range(self.group_num):
@@ -32,6 +32,6 @@ class TSOM_plus_SOM:
         self.params_som['X'] = prob_data
         self.params_som['metric'] = "KLdivergence"
 
-    def fit_2nd_SOM(self, som_epoch_num):  # 上位のSOMを
+    def _fit_2nd_SOM(self, som_epoch_num):  # 上位のSOMを
         self.som = SOM(**self.params_som)
         self.som.fit(som_epoch_num)
