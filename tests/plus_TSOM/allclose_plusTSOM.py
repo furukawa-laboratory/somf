@@ -8,63 +8,69 @@ from tests.plus_TSOM.plus_TSOM_watanabe import TSOMPlusSOMWatanabe
 class TestSOM(unittest.TestCase):
     def test_plusTSOM_ishida_vs_test_plusTSOM_someone(self):
         #学習データの作成-------------------------------------------
-        group_num = 10  # group数
-        input_dim = 3  # 各メンバーの特徴数
-        samples_per_group = 30  # 各グループにメンバーに何人いるのか
+        n_group = 10  # group数
+        n_features = 3  # 各メンバーの特徴数
+        n_samples_per_group = 30  # 各グループにメンバーに何人いるのか
         seed = 100
         np.random.seed(seed)
         #1stTSOMの初期値
-        Z1 = np.random.rand(group_num * samples_per_group, 2) * 2.0 - 1.0
-        Z2 = np.random.rand(input_dim, 2) * 2.0 - 1.0
-        init_TSOM = (Z1, Z2)
+        Z1 = np.random.rand(n_group * n_samples_per_group, 2) * 2.0 - 1.0
+        Z2 = np.random.rand(n_features, 2) * 2.0 - 1.0
+        init_TSOM = [Z1, Z2]
+        init_SOM = np.random.rand(n_group, 2) * 2.0 - 1.0
 
 
         #学習データの作成(平均のみが違うガウス分布からサンプリングした人工データを用いる.ガウス分布数がグループ数で,サンプル数がメンバーの数)
         # 平均ベクトルを一様分布から生成
-        mean = np.random.rand(group_num, input_dim)
-
-        input_data = np.zeros((group_num, samples_per_group, input_dim))#input dataは1stTSOMに入れるデータ
+        mean = np.random.rand(n_group, n_features)
+        member_features = np.zeros((n_group, n_samples_per_group, n_features))#input dataは1stTSOMに入れるデータ
 
         #データの生成
-        for i in range(group_num):
-            samples = np.random.multivariate_normal(mean=mean[i], cov=np.identity(input_dim), size=samples_per_group)
-            input_data[i, :, :] = samples
+        for i in range(n_group):
+            samples = np.random.multivariate_normal(mean=mean[i], cov=np.identity(n_features), size=n_samples_per_group)
+            member_features[i, :, :] = samples
 
-        input_data = input_data.reshape((group_num * samples_per_group, input_dim))
-        #グループラベルを作成
-        group_label = np.zeros((group_num, samples_per_group), dtype=int)
+        member_features = member_features.reshape((n_group * n_samples_per_group, n_features))
+        index_members_of_group = np.zeros((n_group, n_samples_per_group), dtype=int)
 
-        #plus型TSOMの学習-----------------------------------------------------------
+        params_tsom = {'latent_dim': [2, 2],
+                       'resolution': [10, 10],
+                       'SIGMA_MAX': [1.0, 1.0],
+                       'SIGMA_MIN': [0.1, 0.1],
+                       'TAU': [50, 50],
+                       'init':init_TSOM}
+        params_som = {'latent_dim': 2,
+                      'resolution': 10,
+                      'sigma_max': 2.0,
+                      'sigma_min': 0.5,
+                      'tau': 50,
+                      'init':init_SOM}
+        tsom_epoch_num = 50
+        som_epoch_num = 50
+        kernel_width = 0.3
 
-        #dictのパラメータ名は固定latent_dim,resolution,sigma_max,sigma_min,tauでSOMとTSOMでまとめる
-        htsom_ishida = TSOMPlusSOM(input_data, init_TSOM, group_label, ((2, 2), 2), ((5, 10), 10), (1.0, 1.0), (0.1, 0.1), (50, 50))
-        htsom_someone=TSOM_plus_SOM_someone(input_data,init_TSOM ,group_label, ((2, 2), 2), ((5, 10), 10), (1.0, 1.0), (0.1, 0.1), (50, 50))
+        htsom_ishida = TSOMPlusSOM(member_features=member_features,
+                                   index_members_of_group=index_members_of_group,
+                                   params_tsom=params_tsom,
+                                   params_som=params_som)
+        htsom_watanabe = TSOMPlusSOMWatanabe(member_features=member_features,
+                                             index_members_of_group=index_members_of_group,
+                                             params_tsom=params_tsom,
+                                             params_som=params_som)
 
+        htsom_ishida.fit(tsom_epoch_num=tsom_epoch_num,
+                         kernel_width=kernel_width,
+                         som_epoch_num=som_epoch_num)
+        htsom_watanabe.fit(tsom_epoch_num=tsom_epoch_num,
+                           kernel_width=kernel_width,
+                           som_epoch_num=som_epoch_num)
 
-        # plus型TSOM(TSOM*SOM)のやつ
-        htsom_ishida._fit_1st_TSOM(tsom_epoch_num=250)  # 1stTSOMの学習
-        htsom_someone._fit_1st_TSOM(tsom_epoch_num=250)  # 1stTSOMの学習
-
-        print("allclose_1stTSOM")
-        np.testing.assert_allclose(htsom_ishida.tsom.history['y'], htsom_someone.tsom.history['y'])
-        np.testing.assert_allclose(htsom_ishida.tsom.history['z1'], htsom_someone.tsom.history['z1'])
-        np.testing.assert_allclose(htsom_ishida.tsom.history['z2'], htsom_someone.tsom.history['z2'])
-
-
-        htsom_ishida._fit_KDE(kernel_width=1.0)  # カーネル密度推定を使って2ndSOMに渡す確率分布を作成
-        htsom_someone._fit_KDE(kernel_width=1.0)  # カーネル密度推定を使って2ndSOMに渡す確率分布を作成
-        print("allclose_Kernel_Dnsity_Estimation")
-        np.testing.assert_allclose(htsom_ishida.prob_data, htsom_someone.prob_data)
-
-        init_SOM = np.random.rand(group_num, 2) * 2.0 - 1.0#2ndSOMの初期化
-
-        #2ndSOMの学習
-        htsom_ishida._fit_2nd_SOM(som_epoch_num=250, init=init_SOM)  # 2ndSOMの学習
-        htsom_someone._fit_2nd_SOM(som_epoch_num=250, init=init_SOM)  # 2ndSOMの学習
-
-        print("allclose_2ndSOM")
-        np.testing.assert_allclose(htsom_ishida.som.history['y'], htsom_someone.som.history['y'])
-        np.testing.assert_allclose(htsom_ishida.som.history['z'], htsom_someone.som.history['z'])
+        np.testing.assert_allclose(htsom_ishida.tsom.history['y'], htsom_watanabe.tsom.history['y'])
+        np.testing.assert_allclose(htsom_ishida.tsom.history['z1'], htsom_watanabe.tsom.history['z1'])
+        np.testing.assert_allclose(htsom_ishida.tsom.history['z2'], htsom_watanabe.tsom.history['z2'])
+        np.testing.assert_allclose(htsom_ishida.params_som['X'], htsom_watanabe.params_som['X'])
+        np.testing.assert_allclose(htsom_ishida.som.history['y'], htsom_watanabe.som.history['y'])
+        np.testing.assert_allclose(htsom_ishida.som.history['z'], htsom_watanabe.som.history['z'])
 
 
 
