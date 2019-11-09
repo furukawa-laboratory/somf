@@ -13,6 +13,8 @@ class TSOM_plus_SOM:
         self.group_label = group_label  # グループ数の確認
         self.group_num = len(self.group_label)
 
+    # def fit(self, tsom_epoch_num, kernel_width, som_epoch_num, init):
+
     def fit_1st_TSOM(self, tsom_epoch_num):
         self.tsom = TSOM2(**self.params_tsom)
         self.tsom.fit(tsom_epoch_num)
@@ -30,7 +32,6 @@ class TSOM_plus_SOM:
         self.params_som['X'] = prob_data
         self.params_som['metric'] = "KLdivergence"
 
-    def fit_2nd_SOM(self, som_epoch_num, init):  # 上位のSOMを
-        self.params_som['init'] = init
+    def fit_2nd_SOM(self, som_epoch_num):  # 上位のSOMを
         self.som = SOM(**self.params_som)
         self.som.fit(som_epoch_num)
