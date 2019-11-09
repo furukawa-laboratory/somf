@@ -26,7 +26,8 @@ class TSOMPlusSOM:
         prob_data = np.zeros((self.group_num, self.tsom.K1))  # group数*ノード数
         # グループごとにKDEを適用
         for i in range(self.group_num):
-            Dist = dist.cdist(self.tsom.Zeta1, self.tsom.Z1[self.index_members_of_group[i], :], 'sqeuclidean')  # KxNの距離行列を計算
+            Dist = dist.cdist(self.tsom.Zeta1, self.tsom.Z1[self.index_members_of_group[i], :],
+                              'sqeuclidean')  # KxNの距離行列を計算
             H = np.exp(-Dist / (2 * kernel_width * kernel_width))  # KxNの学習量行列を計算
             prob = np.sum(H, axis=1)
             prob_sum = np.sum(prob)

@@ -32,7 +32,7 @@ for i in range(int(group_num / 2)):
 # for i in range(group_num):
 #     ax.scatter(input_data[i, :, 0], input_data[i, :, 1], input_data[i, :, 2])
 # plt.show()
-input_data = input_data.reshape(-1,3)
+input_data = input_data.reshape(-1, 3)
 
 # グループラベルの作成
 group_label = []
@@ -40,17 +40,17 @@ for i in range(group_num):
     group_label_i = np.arange(int(100 * (i)), int(100 * (i + 1)))
     group_label.append(group_label_i)
 
-params_tsom = {'latent_dim':[2,2],
-               'resolution':[10,10],
-               'SIGMA_MAX':[1.0,1.0],
-               'SIGMA_MIN':[0.1,0.1],
-               'TAU':[50,50]}
-params_som = {'latent_dim':2,
-              'resolution':10,
-              'sigma_max':2.0,
-              'sigma_min':0.5,
-              'tau':50,
-              'init':'random'}
+params_tsom = {'latent_dim': [2, 2],
+               'resolution': [10, 10],
+               'SIGMA_MAX': [1.0, 1.0],
+               'SIGMA_MIN': [0.1, 0.1],
+               'TAU': [50, 50]}
+params_som = {'latent_dim': 2,
+              'resolution': 10,
+              'sigma_max': 2.0,
+              'sigma_min': 0.5,
+              'tau': 50,
+              'init': 'random'}
 
 # +型階層TSOMのclass読み込み
 # group_label以降の変数ははlatent_dim,resolution,sigma_max,sigma_min,tauでSOMとTSOMでまとめている
