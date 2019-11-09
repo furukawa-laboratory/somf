@@ -12,6 +12,10 @@ class TSOMPlusSOMWatanabe:
 
         self.params_tsom['X'] = member_features
 
+    def fit(self,tsom_epoch_num,kernel_width,som_epoch_num):
+        self._fit_1st_TSOM(tsom_epoch_num)
+        self._fit_KDE(kernel_width)
+        self._fit_2nd_SOM(som_epoch_num)
 
     def _fit_1st_TSOM(self,tsom_epoch_num):
         self.tsom = TSOM2(**self.params_tsom)
@@ -28,6 +32,6 @@ class TSOMPlusSOMWatanabe:
         self.params_som['X'] = group_density
         self.params_som['metric'] = 'KLdivergence'
 
-    def _fit_2nd_SOM(self,som_epoch_num,init):#上位のSOMを
+    def _fit_2nd_SOM(self,som_epoch_num):#上位のSOMを
         self.som = SOM(**self.params_som)
         self.som.fit(som_epoch_num)
