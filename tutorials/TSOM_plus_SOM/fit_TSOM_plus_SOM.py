@@ -6,6 +6,7 @@ from libs.models.TSOM_plus_SOM import TSOM_plus_SOM
 from mpl_toolkits.mplot3d import Axes3D
 from libs.visualization.som.Grad_norm import Grad_Norm
 
+np.random.seed(18)
 # 人工データの検証
 xsamples = 40  # x_samplesでメンバーの人数が100人になるように調整
 ysamples = 20
