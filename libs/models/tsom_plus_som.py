@@ -25,14 +25,17 @@ class TSOMPlusSOM:
     def _fit_KDE(self, kernel_width):  # 学習した後の潜在空間からKDEで確率分布を作る
         prob_data = np.zeros((self.group_num, self.tsom.K1))  # group数*ノード数
         # グループごとにKDEを適用
-        for i in range(self.group_num):
-            Dist = dist.cdist(self.tsom.Zeta1, self.tsom.Z1[self.index_members_of_group[i], :],
-                              'sqeuclidean')  # KxNの距離行列を計算
-            H = np.exp(-Dist / (2 * kernel_width * kernel_width))  # KxNの学習量行列を計算
-            prob = np.sum(H, axis=1)
-            prob_sum = np.sum(prob)
-            prob = prob / prob_sum
-            prob_data[i, :] = prob
+        if isinstance(self.index_members_of_group, np.ndarray) and self.index_members_of_group.ndim == 2:
+            pass
+        else:
+            for i in range(self.group_num):
+                Dist = dist.cdist(self.tsom.Zeta1, self.tsom.Z1[self.index_members_of_group[i], :],
+                                  'sqeuclidean')  # KxNの距離行列を計算
+                H = np.exp(-Dist / (2 * kernel_width * kernel_width))  # KxNの学習量行列を計算
+                prob = np.sum(H, axis=1)
+                prob_sum = np.sum(prob)
+                prob = prob / prob_sum
+                prob_data[i, :] = prob
         self.params_som['X'] = prob_data
         self.params_som['metric'] = "KLdivergence"
 
