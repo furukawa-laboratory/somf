@@ -6,8 +6,8 @@ from libs.models.TSOMPlusSOM import TSOMPlusSOM
 from tests.plus_TSOM.plus_TSOM_watanabe import TSOMPlusSOMWatanabe
 
 
-class TestSOM(unittest.TestCase):
-    def test_plusTSOM_ishida_vs_test_plusTSOM_someone(self):
+class TestTSOMPlusSOM(unittest.TestCase):
+    def test_plusTSOM_ishida_vs_test_plusTSOM_watanabe(self):
         # 学習データの作成-------------------------------------------
         n_group = 10  # group数
         n_features = 3  # 各メンバーの特徴数
@@ -69,7 +69,6 @@ class TestSOM(unittest.TestCase):
         np.testing.assert_allclose(htsom_ishida.params_som['X'], htsom_watanabe.params_som['X'])
         np.testing.assert_allclose(htsom_ishida.som.history['y'], htsom_watanabe.som.history['y'])
         np.testing.assert_allclose(htsom_ishida.som.history['z'], htsom_watanabe.som.history['z'])
-
 
 if __name__ == "__main__":
     unittest.main()
