@@ -18,28 +18,22 @@ class TestTSOMPlusSOM(unittest.TestCase):
         return x, index_members_of_group
 
     def test_plusTSOM_ishida_vs_test_plusTSOM_watanabe(self):
-        # 学習データの作成-------------------------------------------
-        n_group = 10  # group数
-        n_features = 3  # 各メンバーの特徴数
-        n_samples_per_group = 30  # 各グループにメンバーに何人いるのか
         seed = 100
         np.random.seed(seed)
+        # 学習データの作成-------------------------------------------
+        n_groups = 10  # group数
+        n_features = 3  # 各メンバーの特徴数
+        n_samples_per_group = 30  # 各グループにメンバーに何人いるのか
+        meber_features,index_members_of_group = self.create_artficial_data(n_samples,
+                                                                           n_features,
+                                                                           n_groups,
+                                                                           n_samples_per_group)
         # 1stTSOMの初期値
-        Z1 = np.random.rand(n_group * n_samples_per_group, 2) * 2.0 - 1.0
+        Z1 = np.random.rand(n_groups * n_samples_per_group, 2) * 2.0 - 1.0
         Z2 = np.random.rand(n_features, 2) * 2.0 - 1.0
         init_TSOM = [Z1, Z2]
-        init_SOM = np.random.rand(n_group, 2) * 2.0 - 1.0
+        init_SOM = np.random.rand(n_groups, 2) * 2.0 - 1.0
 
-        # 学習データの用意
-        mean = np.random.rand(n_group, n_features)
-        member_features = np.zeros((n_group, n_samples_per_group, n_features))
-
-        for i in range(n_group):
-            samples = np.random.multivariate_normal(mean=mean[i], cov=np.identity(n_features), size=n_samples_per_group)
-            member_features[i, :, :] = samples
-
-        member_features = member_features.reshape((n_group * n_samples_per_group, n_features))
-        index_members_of_group = np.random.randint(0,n_members)
 
         params_tsom = {'latent_dim': [2, 2],
                        'resolution': [10, 10],
