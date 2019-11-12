@@ -34,25 +34,24 @@ class TSOM2():
             elif X.shape==gamma.shape:#データのサイズとgammaのサイズが一致する時
                 if np.any(np.isnan(self.X)) ==1:#gamma指定してデータに欠損がある場合
                     temp_gamma = np.where(np.isnan(self.X) == 1, 0, 1)  #データに基づいてgammaを作る
-                    temp_frag=np.allclose(temp_gamma,gamma)
-                    if temp_frag is True:#データの欠損しているところとgammaの0の値が一致する時
+                    temp_is_missing=np.allclose(temp_gamma,gamma)
+                    if temp_is_missing is True:#データの欠損しているところとgammaの0の値が一致する時
                         self.gamma=gamma
-                        self.frag=1
+                        self.is_missing=1
                     else:
                         raise ValueError("invalid gamma: {}\ndata size and gamma size is not match. ".format(gamma))
                 elif np.any(np.isnan(self.X)) ==0:#gamma指定してデータに欠損がない場合.つまり意図的にデータを欠損とみなしたいとき
                     self.gamma=gamma
-                    self.frag=1
+                    self.is_missing=1
         elif gamma is None:#データXに欠損がある場合はそれに基づいてgammaを作成する
-            frag = np.any(np.isnan(self.X))# 欠損値があるかを判定.欠損があれば1,欠損がなければ0
-            self.frag=frag
+            self.is_missing=np.any(np.isnan(self.X))# 欠損値があるかを判定.欠損があれば1,欠損がなければ0
             # 欠損値がある場合
-            if self.frag == 1:
+            if self.is_missing == 1:
                 gamma = np.where(np.isnan(self.X) == 1, 0, 1)#nanがあるところ
                 # X の欠損値を 0 で置換
                 self.gamma = gamma
                 self.X[np.isnan(self.X)] = 0
-            elif self.frag==0:#欠損値がない場合はgammaは作らない
+            elif self.is_missing==0:#欠損値がない場合はgammaは作らない
                 pass
 
         # 1次モデル型と直接型を選択する引数

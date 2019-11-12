@@ -2,7 +2,7 @@ import numpy as np
 import random
 import itertools
 
-def load_kura_tsom(xsamples, ysamples, missing_num=None,retz=False):
+def load_kura_tsom(xsamples, ysamples, missing_rate=None,retz=False):
     z1 = np.linspace(-1, 1, xsamples)
     z2 = np.linspace(-1, 1, ysamples)
 
@@ -14,8 +14,8 @@ def load_kura_tsom(xsamples, ysamples, missing_num=None,retz=False):
     x = np.concatenate((x1[:, :, np.newaxis], x2[:, :, np.newaxis], x3[:, :, np.newaxis]), axis=2)
     truez = np.concatenate((z1_repeated[:, :, np.newaxis], z2_repeated[:, :, np.newaxis]), axis=2)
 
-    #欠損値を入れない場合(missing_numが0か特に指定していない場合はそのまま返す)
-    if missing_num == 0 or missing_num == None:
+    #欠損値を入れない場合(missing_rateが0か特に指定していない場合はそのまま返す)
+    if missing_rate == 0 or missing_rate == None:
         if retz:
             return x, truez
         else:
@@ -24,14 +24,14 @@ def load_kura_tsom(xsamples, ysamples, missing_num=None,retz=False):
     #欠損値を入れる場合
     else:
         # データをどこくらい欠損させるかを決定する
-        if 0 < missing_num < 1:  # missing_numが1未満の場合、missing_rateにして全体のサンプル数から率から欠損数を計算する
-            missing_rate = missing_num
+        if 0 < missing_rate < 1:  # missing_numが1未満の場合、missing_rateにして全体のサンプル数から率から欠損数を計算する
+            missing_num = missing_rate
             all_samples = xsamples * ysamples
-            missing_num = int(all_samples * missing_rate)
-        elif missing_num >= 1 & missing_num <= xsamples * ysamples:  # missing_numが1以上、全サンプル数以下の場合、missing_numだけ欠損
+            missing_rate = int(all_samples * missing_num)
+        elif missing_rate >= 1 & missing_rate <= xsamples * ysamples:  # missing_rateが1以上、全サンプル数以下の場合、missing_rateだけ欠損
             pass
         else:  # 負数の場合や、サンプル数以上の場合はerror文を返す
-            raise ValueError("invalid missing_num: {}\nmissing_num must not be negative number".format(missing_num))
+            raise ValueError("invalid missing_rate: {}\nmissing_rate must not be negative number".format(missing_rate))
 
         #どのデータを欠損させるかを決定する
         
@@ -43,7 +43,7 @@ def load_kura_tsom(xsamples, ysamples, missing_num=None,retz=False):
 
         Gamma = np.ones((xsamples, ysamples))#Gammaはどのデータが欠損かを表す
 
-        for n in np.arange(missing_num):  # 欠損させたいデータ数分、Gammaの要素を欠損させる
+        for n in np.arange(missing_rate):  # 欠損させたいデータ数分、Gammaの要素を欠損させる
             tempp = p[n]
             i = tempp[0]
             j = tempp[1]
@@ -53,7 +53,7 @@ def load_kura_tsom(xsamples, ysamples, missing_num=None,retz=False):
                 raise ValueError("invalid Gamma: {}\n".format(Gamma))
 
         #true_zを欠損させる
-        for n in np.arange(missing_num):
+        for n in np.arange(missing_rate):
             tempp = p[n]
             i = tempp[0]
             j = tempp[1]
@@ -82,10 +82,10 @@ if __name__ == '__main__':
     ysamples = 10
 
     #欠損なしver
-    x, truez = load_kura_tsom(xsamples, ysamples, retz=True)
+    # x, truez = load_kura_tsom(xsamples, ysamples, retz=True)
 
     # 欠損ありver
-    #x, truez, Gamma = load_kura_tsom(xsamples, ysamples, retz=True,missing_num=0.7)
+    x, truez, Gamma = load_kura_tsom(xsamples, ysamples, retz=True,missing_rate=0.7)
 
     fig = plt.figure(figsize=[10, 5])
     ax_x = fig.add_subplot(1, 2, 1, projection='3d')
@@ -95,3 +95,4 @@ if __name__ == '__main__':
     ax_x.set_title('Generated three-dimensional data')
     ax_truez.set_title('True two-dimensional latent variable')
     plt.show()
+
