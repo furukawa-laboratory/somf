@@ -7,6 +7,16 @@ from tests.plus_TSOM.plus_TSOM_watanabe import TSOMPlusSOMWatanabe
 
 
 class TestTSOMPlusSOM(unittest.TestCase):
+    def create_artficial_data(self,n_samples,n_features,n_groups,n_samples_per_group):
+        x = np.random.normal(0.0,1.0,(n_samples,n_features))
+        if isinstance(n_samples_per_group,int):
+            index_members_of_group = np.random.randint(0,n_samples,(n_groups,n_samples_per_group))
+        elif isinstance(n_samples_per_group,np.ndarray):
+            index_members_of_group = []
+            for n_samples_in_the_group in n_samples_per_group:
+                index_members_of_group.append(np.random.randint(0,n_samples,n_samples_in_the_group))
+        return x, index_members_of_group
+
     def test_plusTSOM_ishida_vs_test_plusTSOM_watanabe(self):
         # 学習データの作成-------------------------------------------
         n_group = 10  # group数
@@ -29,7 +39,7 @@ class TestTSOMPlusSOM(unittest.TestCase):
             member_features[i, :, :] = samples
 
         member_features = member_features.reshape((n_group * n_samples_per_group, n_features))
-        index_members_of_group = np.zeros((n_group, n_samples_per_group), dtype=int)
+        index_members_of_group = np.random.randint(0,n_members)
 
         params_tsom = {'latent_dim': [2, 2],
                        'resolution': [10, 10],
