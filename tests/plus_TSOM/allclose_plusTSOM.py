@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from libs.models.TSOMPlusSOM import TSOMPlusSOM
+from libs.models.tsom_plus_som import TSOMPlusSOM
 from tests.plus_TSOM.plus_TSOM_watanabe import TSOMPlusSOMWatanabe
 
 
@@ -20,16 +20,16 @@ class TestTSOMPlusSOM(unittest.TestCase):
     def test_plusTSOM_ishida_vs_test_plusTSOM_watanabe(self):
         seed = 100
         np.random.seed(seed)
-        # 学習データの作成-------------------------------------------
+        n_samples = 1000
         n_groups = 10  # group数
         n_features = 3  # 各メンバーの特徴数
         n_samples_per_group = 30  # 各グループにメンバーに何人いるのか
-        meber_features,index_members_of_group = self.create_artficial_data(n_samples,
+        member_features,index_members_of_group = self.create_artficial_data(n_samples,
                                                                            n_features,
                                                                            n_groups,
                                                                            n_samples_per_group)
         # 1stTSOMの初期値
-        Z1 = np.random.rand(n_groups * n_samples_per_group, 2) * 2.0 - 1.0
+        Z1 = np.random.rand(n_samples, 2) * 2.0 - 1.0
         Z2 = np.random.rand(n_features, 2) * 2.0 - 1.0
         init_TSOM = [Z1, Z2]
         init_SOM = np.random.rand(n_groups, 2) * 2.0 - 1.0
