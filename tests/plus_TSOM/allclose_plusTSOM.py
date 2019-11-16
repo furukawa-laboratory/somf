@@ -2,34 +2,38 @@ import unittest
 
 import numpy as np
 
-from libs.models.TSOMPlusSOM import TSOMPlusSOM
+from libs.models.tsom_plus_som import TSOMPlusSOM
 from tests.plus_TSOM.plus_TSOM_watanabe import TSOMPlusSOMWatanabe
 
 
-class TestSOM(unittest.TestCase):
-    def test_plusTSOM_ishida_vs_test_plusTSOM_someone(self):
-        # 学習データの作成-------------------------------------------
-        n_group = 10  # group数
-        n_features = 3  # 各メンバーの特徴数
-        n_samples_per_group = 30  # 各グループにメンバーに何人いるのか
+class TestTSOMPlusSOM(unittest.TestCase):
+    def create_artficial_data(self,n_samples,n_features,n_groups,n_samples_per_group):
+        x = np.random.normal(0.0,1.0,(n_samples,n_features))
+        if isinstance(n_samples_per_group,int):
+            index_members_of_group = np.random.randint(0,n_samples,(n_groups,n_samples_per_group))
+        elif isinstance(n_samples_per_group,np.ndarray):
+            index_members_of_group = []
+            for n_samples_in_the_group in n_samples_per_group:
+                index_members_of_group.append(np.random.randint(0,n_samples,n_samples_in_the_group))
+        return x, index_members_of_group
+
+    def test_plusTSOM_ishida_vs_test_plusTSOM_watanabe(self):
         seed = 100
         np.random.seed(seed)
+        n_samples = 1000
+        n_groups = 10  # group数
+        n_features = 3  # 各メンバーの特徴数
+        n_samples_per_group = 30  # 各グループにメンバーに何人いるのか
+        member_features,index_members_of_group = self.create_artficial_data(n_samples,
+                                                                           n_features,
+                                                                           n_groups,
+                                                                           n_samples_per_group)
         # 1stTSOMの初期値
-        Z1 = np.random.rand(n_group * n_samples_per_group, 2) * 2.0 - 1.0
+        Z1 = np.random.rand(n_samples, 2) * 2.0 - 1.0
         Z2 = np.random.rand(n_features, 2) * 2.0 - 1.0
         init_TSOM = [Z1, Z2]
-        init_SOM = np.random.rand(n_group, 2) * 2.0 - 1.0
+        init_SOM = np.random.rand(n_groups, 2) * 2.0 - 1.0
 
-        # 学習データの用意
-        mean = np.random.rand(n_group, n_features)
-        member_features = np.zeros((n_group, n_samples_per_group, n_features))
-
-        for i in range(n_group):
-            samples = np.random.multivariate_normal(mean=mean[i], cov=np.identity(n_features), size=n_samples_per_group)
-            member_features[i, :, :] = samples
-
-        member_features = member_features.reshape((n_group * n_samples_per_group, n_features))
-        index_members_of_group = np.zeros((n_group, n_samples_per_group), dtype=int)
 
         params_tsom = {'latent_dim': [2, 2],
                        'resolution': [10, 10],
@@ -69,7 +73,6 @@ class TestSOM(unittest.TestCase):
         np.testing.assert_allclose(htsom_ishida.params_som['X'], htsom_watanabe.params_som['X'])
         np.testing.assert_allclose(htsom_ishida.som.history['y'], htsom_watanabe.som.history['y'])
         np.testing.assert_allclose(htsom_ishida.som.history['z'], htsom_watanabe.som.history['z'])
-
 
 if __name__ == "__main__":
     unittest.main()
