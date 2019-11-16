@@ -26,13 +26,14 @@ class TSOMPlusSOM:
         prob_data = np.zeros((self.group_num, self.tsom.K1))  # group数*ノード数
         # グループごとにKDEを適用
         if isinstance(self.index_members_of_group, np.ndarray) and self.index_members_of_group.ndim == 2:
-            distance = dist.cdist(self.tsom.Zeta1, self.tsom.Z1,'sqeuclidean') #K1 x num_members
-            H = np.exp(-0.5*distance/(kernel_width*kernel_width))#KxN
-            prob_data = self.index_members_of_group @ H.T #num_group x K1
-            prob_data = prob_data / prob_data.sum(axis=1)[:,None]
+            distance = dist.cdist(self.tsom.Zeta1, self.tsom.Z1, 'sqeuclidean')  # K1 x num_members
+            H = np.exp(-0.5 * distance / (kernel_width * kernel_width))  # KxN
+            prob_data = self.index_members_of_group @ H.T  # num_group x K1
+            prob_data = prob_data / prob_data.sum(axis=1)[:, None]
         else:
             for i in range(self.group_num):
-                Dist = dist.cdist(self.tsom.Zeta1, self.tsom.Z1[self.index_members_of_group[i], :],
+                Dist = dist.cdist(self.tsom.Zeta1,
+                                  self.tsom.Z1[self.index_members_of_group[i], :],
                                   'sqeuclidean')  # KxNの距離行列を計算
                 H = np.exp(-Dist / (2 * kernel_width * kernel_width))  # KxNの学習量行列を計算
                 prob = np.sum(H, axis=1)
