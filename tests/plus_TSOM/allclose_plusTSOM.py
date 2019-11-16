@@ -74,5 +74,27 @@ class TestTSOMPlusSOM(unittest.TestCase):
         np.testing.assert_allclose(htsom_ishida.som.history['y'], htsom_watanabe.som.history['y'])
         np.testing.assert_allclose(htsom_ishida.som.history['z'], htsom_watanabe.som.history['z'])
 
+    def _transform_list_to_bag(self,list_of_indexes):
+        for indexes in list_of_indexes:
+
+    def test_matching_index_member_as_list_or_bag(self):
+        seed = 100
+        np.random.seed(seed)
+        n_samples = 1000
+        n_groups = 10  # group数
+        n_features = 3  # 各メンバーの特徴数
+        n_samples_per_group = 30  # 各グループにメンバーに何人いるのか
+        member_features,index_members_of_group = self.create_artficial_data(n_samples,
+                                                                            n_features,
+                                                                            n_groups,
+                                                                            n_samples_per_group)
+
+
+        Z1 = np.random.rand(n_samples, 2) * 2.0 - 1.0
+        Z2 = np.random.rand(n_features, 2) * 2.0 - 1.0
+        init_TSOM = [Z1, Z2]
+        init_SOM = np.random.rand(n_groups, 2) * 2.0 - 1.0
+
+
 if __name__ == "__main__":
     unittest.main()
