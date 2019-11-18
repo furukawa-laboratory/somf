@@ -19,6 +19,6 @@ if __name__ == '__main__':
 
 
 
-    comp = TSOM2_V(y=tsom.historyY[-1], winner1=tsom.bmus1[-1], winner2=tsom.bmus2[-1], label1=labels_animal,
+    comp = TSOM2_V(y=tsom.historyY[-1], winner1=tsom.historyB1, winner2=tsom.historyB2, label1=labels_animal,
                    label2=labels_feature)
     comp.draw_map()

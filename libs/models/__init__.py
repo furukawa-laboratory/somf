@@ -1,2 +1,0 @@
-from .kernel_smoothing import KernelSmoothing
-from .kernel_smoothing_theano import KernelSmoothingTheano
