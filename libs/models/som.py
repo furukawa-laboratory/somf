@@ -44,6 +44,9 @@ class SOM:
             self.Z = self.Zeta[init_bmus,:]
         elif isinstance(init, str) and init == 'PCA':
             self.Z = pca.transform(X)/comp1
+        elif isinstance(init, np.ndarray) and init.dtype == int:
+            init_bmus = init.copy()
+            self.Z = self.Zeta[init_bmus, :]
         elif isinstance(init, np.ndarray) and init.shape == (self.N, latent_dim):
             self.Z = init.copy()
         else:

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from libs.models import KernelSmoothing
+from libs.models.kernel_smoothing import KernelSmoothing
 
 
 def _main():
