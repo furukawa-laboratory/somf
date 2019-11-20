@@ -59,7 +59,7 @@ class SOM:
         elif metric == "KLdivergence":
             self.metric = "KLdivergence"
         else:
-            raise ValueError("invalid metric: {}".format(self.metric))
+            raise ValueError("invalid metric: {}".format(metric))
 
         self.history = {}
 
