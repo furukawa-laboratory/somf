@@ -92,7 +92,7 @@ class UnsupervisedKernelRegression(object):
         self._done_fit = True
         return self.history
 
-    def calcF(self, resolution, size='auto'):
+    def calculation_history_of_mapping(self, resolution, size='auto'):
         """
         :param resolution:
         :param size:
