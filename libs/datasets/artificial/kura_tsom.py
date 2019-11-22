@@ -49,10 +49,7 @@ def load_kura_tsom(xsamples, ysamples, missing_rate=None,retz=False):
 
         #true_zを欠損させる
         for n in np.arange(missing_rate):
-            tempp = p[n]
-            i = tempp[0]
-            j = tempp[1]
-            truez[i,j,:]=np.nan
+            truez[p[n][0],p[n][1],:]=np.nan
 
         #Gammaに基づいてデータ行列を欠損させる
         # 欠損値をNan埋めする
