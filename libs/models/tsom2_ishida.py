@@ -190,12 +190,11 @@ class TSOM2_ishida():
 
             else: # 欠損値無し
                 #２次モデルの決定
-                self.Y = (np.einsum('ki,lj,ij,ijd->kld', H1, H2,self.X)) / G12[:, :, np.newaxis]
+                self.Y = (np.einsum('ki,lj,ij,ijd->kld', H1, H2,self.X)) / (G1[:,np.newaxis,np.newaxis]*G2[np.newaxis,:,np.newaxis])
                 if self.model == "indirect": # 1次モデル型
                     # １次モデル，２次モデルの決定
-                    self.U = np.einsum('lj,ijd->ild', R2, self.X)
-                    self.V = np.einsum('ki,ijd->kjd', R1, self.X)
-
+                    self.U = np.einsum('lj,ijd->ild', H2, self.X) / G2[:, :, np.newaxis]
+                    self.V = (np.einsum('ki,ijd->kjd', H1,self.X)) / G1[:, :, np.newaxis]
                     # 勝者決定
                     self.k_star1 = np.argmin(
                         np.sum(np.square(self.U[:, None, :, :] - self.Y[None, :, :, :]), axis=(2, 3)), axis=1)
@@ -204,10 +203,10 @@ class TSOM2_ishida():
 
                 elif self.model == "direct": # 直接型
                     # 勝者決定
-                    Dist = np.square(
-                        self.X[:, :, None, None, :] - self.Y[None, None, :, :, :])
-                    self.k_star1 = np.argmin(np.einsum("jl,ijklm->ik", H2.T, Dist), axis=1)
-                    self.k_star2 = np.argmin(np.einsum("ik,ijklm->jl", H1.T, Dist), axis=1)
+                    winner1_Dist = np.sum(H2[np.newaxis, :, np.newaxis, :, np.newaxis]*(np.square(self.X[np.newaxis, np.newaxis, :, :, :] - self.Y[:, :, np.newaxis, np.newaxis, :])),axis=(1, 3, 4))  # K1*K2*N1*N2*D
+                    winner2_Dist = np.sum((H1[:, np.newaxis, :, np.newaxis, np.newaxis]  (np.square(self.X[np.newaxis, np.newaxis, :, :, :] - self.Y[:, :, np.newaxis, np.newaxis, :]))),axis=(0, 2, 4))  # K1*K2*N1*N2*D
+                    self.k_star1 = np.argmin(winner1_Dist, axis=0)  # K1*N1
+                    self.k_star2 = np.argmin(winner2_Dist, axis=0)  # K2*N2
 
                 else:
                     raise ValueError("invalid model: {}\nmodel must be None or direct".format(self.model))
