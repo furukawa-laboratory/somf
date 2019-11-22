@@ -31,7 +31,7 @@ class TSOM2():
 
             if X.shape !=gamma.shape:
                 raise ValueError("invalid gamma: {}\ndata size and gamma size is not match. ".format(gamma))
-            elif X.shape==gamma.shape:#データのサイズとgammaのサイズが一致する時
+            elif X.shape==gamma.shape:
                 if np.any(np.isnan(self.X)) ==1:#gamma指定してデータに欠損がある場合
                     temp_gamma = np.where(np.isnan(self.X) == 1, 0, 1)  #データに基づいてgammaを作る
                     temp_is_missing=np.allclose(temp_gamma,gamma)
@@ -40,17 +40,16 @@ class TSOM2():
                         self.is_missing=1
                     else:
                         raise ValueError("invalid gamma: {}\ndata size and gamma size is not match. ".format(gamma))
-                elif np.any(np.isnan(self.X)) ==0:#gamma指定してデータに欠損がない場合.つまり意図的にデータを欠損とみなしたいとき
+                elif np.any(np.isnan(self.X)) ==0:#観測データの一部を無視したい時
                     self.gamma=gamma
                     self.is_missing=1
         elif gamma is None:#データXに欠損がある場合はそれに基づいてgammaを作成する
             self.is_missing=np.any(np.isnan(self.X))# 欠損値があるかを判定.欠損があれば1,欠損がなければ0
             # 欠損値がある場合
             if self.is_missing == 1:
-                gamma = np.where(np.isnan(self.X) == 1, 0, 1)#nanがあるところ
-                # X の欠損値を 0 で置換
+                gamma = np.where(np.isnan(self.X) == 1, 0, 1)#nan格納されているindexを返す
                 self.gamma = gamma
-                self.X[np.isnan(self.X)] = 0
+                self.X[np.isnan(self.X)] = 0#欠損値の部分を0で置換
             elif self.is_missing==0:#欠損値がない場合はgammaは作らない
                 pass
 
@@ -103,7 +102,7 @@ class TSOM2():
             raise ValueError("invalid resolution: {}".format(resolution))
 
         # 潜在空間の設定
-        if type(latent_dim) is int:  # latent_dimがintであればどちらのモードも潜在空間の次元は同じ
+        if type(latent_dim) is int:
             self.latent_dim1 = latent_dim
             self.latent_dim2 = latent_dim
 
@@ -116,7 +115,6 @@ class TSOM2():
         self.Zeta1 = create_zeta(-1.0, 1.0, latent_dim=self.latent_dim1, resolution=resolution1, include_min_max=True)
         self.Zeta2 = create_zeta(-1.0, 1.0, latent_dim=self.latent_dim2, resolution=resolution2, include_min_max=True)
 
-        # K1とK2は潜在空間の設定が終わった後がいいよね
         self.K1 = self.Zeta1.shape[0]
         self.K2 = self.Zeta2.shape[0]
 
