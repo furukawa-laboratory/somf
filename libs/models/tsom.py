@@ -163,7 +163,7 @@ class TSOM2():
             G2 = np.sum(H2, axis=1)  # Gは行ごとの和をとったベクトル
             R2 = (H2.T / G2).T  # 行列の計算なので.Tで転置を行う
 
-            if self.frag == 1: # 欠損値有り
+            if self.is_missing == 1: # 欠損値有り
                 # ２次モデルの決定
 
                 G = np.einsum("ik,jl,ijd->kld", H1.T, H2.T, self.gamma)#K1*K2*D

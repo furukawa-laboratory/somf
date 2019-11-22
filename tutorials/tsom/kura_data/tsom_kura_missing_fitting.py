@@ -6,7 +6,7 @@ import matplotlib.animation as animation
 
 
 
-X,Gamma=load_kura_tsom(xsamples=10,ysamples=20,missing_num=0.1)
+X,Gamma=load_kura_tsom(xsamples=10,ysamples=20,missing_rate=0.7)
 
 
 tau1=50
@@ -17,8 +17,8 @@ sigma2_min=0.1
 sigma2_zero=1.2
 
 
-tsom2=TSOM2(X,latent_dim=(1,1),resolution=(10,15),SIGMA_MAX=(sigma1_zero,sigma2_zero),
-                  SIGMA_MIN=sigma1_min, TAU=(tau1,tau2),model = 'direct')
+tsom2=TSOM2(X,latent_dim=(1,1),resolution=(30,20),SIGMA_MAX=(sigma1_zero,sigma2_zero),
+                  SIGMA_MIN=sigma1_min, TAU=(tau1,tau2),model = 'indirect')
 tsom2.fit(nb_epoch=250)
 #観測空間の描画
 
