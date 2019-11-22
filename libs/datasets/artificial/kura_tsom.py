@@ -42,13 +42,9 @@ def load_kura_tsom(xsamples, ysamples, missing_rate=None,retz=False):
         Gamma = np.ones((xsamples, ysamples))#Gammaはどのデータが欠損かを表す
 
         for n in np.arange(missing_rate):  # 欠損させたいデータ数分、Gammaの要素を欠損させる
-            tempp = p[n]
-            # print(p[n][0])
-            # i = tempp[0]
-            # j = tempp[1]
-            if Gamma[p[n][0], p[n][1]] == 1:
-                Gamma[p[n][0], p[n][1]] = 0
-            elif Gamma[p[n][0], p[n][1]] == 0:#同じ場所を欠損させようとしたらエラーを吐く
+            if Gamma[p[n]] == 1:
+                Gamma[p[n]] = 0
+            elif Gamma[p[n]] == 0:#同じ場所を欠損させようとしたらエラーを吐く
                 raise ValueError("invalid Gamma: {}\n".format(Gamma))
 
         #true_zを欠損させる
