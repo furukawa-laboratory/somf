@@ -23,15 +23,13 @@ def load_kura_tsom(xsamples, ysamples, missing_rate=None,retz=False):
 
     #欠損値を入れる場合
     else:
-        # データをどこくらい欠損させるかを決定する
-        if 0 < missing_rate < 1:  # missing_numが1未満の場合、missing_rateにして全体のサンプル数から率から欠損数を計算する
+        # データの欠損数を決定する
+        if 0 < missing_rate < 1:  #全体のサンプル数から率から欠損数を計算する
             missing_num = missing_rate
             all_samples = xsamples * ysamples
             missing_rate = int(all_samples * missing_num)
-        elif missing_rate >= 1 & missing_rate <= xsamples * ysamples:  # missing_rateが1以上、全サンプル数以下の場合、missing_rateだけ欠損
-            pass
-        else:  # 負数の場合や、サンプル数以上の場合はerror文を返す
-            raise ValueError("invalid missing_rate: {}\nmissing_rate must not be negative number".format(missing_rate))
+        else:  #missing_rateが0~1でなかったら場合はerror文を返す
+            raise ValueError("invalid missing_rate: {}\nmissing_rate is 0<=missing_rate<1.".format(missing_rate))
 
         #どのデータを欠損させるかを決定する
         
