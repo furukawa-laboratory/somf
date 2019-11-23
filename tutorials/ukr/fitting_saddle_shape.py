@@ -19,13 +19,13 @@ if __name__ == '__main__':
     # common parameter
     n_components = 2
     bandwidth_gaussian_kernel = 0.2
-    nb_epoch = 50
+    nb_epoch = 100
 
     # ukr parameter
     is_compact = True
     is_save_history = True
     lambda_ = 0.0
-    eta = 0.020
+    eta = 3.0
 
     # som parameter
     tau = nb_epoch
@@ -64,7 +64,7 @@ if __name__ == '__main__':
         ax_som.set_title('som')
         ax_ukr.set_title('ukr')
 
-    ani = animation.FuncAnimation(fig, plot,frames=nb_epoch,interval=100, repeat=False)
+    ani = animation.FuncAnimation(fig, plot,frames=nb_epoch,interval=50, repeat=False)
     plt.show()
 
     # anime_learning_process_3d(X=ukr.X, Y_allepoch=ukr.history['f'])
