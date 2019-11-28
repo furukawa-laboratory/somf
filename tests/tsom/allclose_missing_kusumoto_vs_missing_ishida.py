@@ -20,7 +20,7 @@ class TestTSOM_missing(unittest.TestCase):
         X = np.random.normal(0, 1, (nb_samples1, nb_samples2, observed_dim))
 
         # set learning parameter
-        nb_epoch = 1
+        nb_epoch = 250
         latent_dim = [1, 2]
         resolution = [7, 9]
         sigma_max = [2.0, 2.2]

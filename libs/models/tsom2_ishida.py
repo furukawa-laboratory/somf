@@ -163,9 +163,7 @@ class TSOM2_ishida():
 
             if self.is_missing == 1: # 欠損値有り
                 # ２次モデルの決定
-
                 G = np.einsum('ki,lj,ij->kl', H1, H2, self.gamma)  # K1*K2
-
                 self.Y = (np.einsum('ki,lj,ij,ijd->kld', H1, H2, self.gamma, self.X)) / G[:, :, np.newaxis]  # K1*N2*D
                 if self.model == "indirect": # 1次モデル型
                     # １次モデル，２次モデルの決定
@@ -190,11 +188,11 @@ class TSOM2_ishida():
 
             else: # 欠損値無し
                 #２次モデルの決定
-                self.Y = (np.einsum('ki,lj,ij,ijd->kld', H1, H2,self.X)) / (G1[:,np.newaxis,np.newaxis]*G2[np.newaxis,:,np.newaxis])
+                self.Y = np.einsum('ki,lj,ijd->kld', R1, R2,self.X)
                 if self.model == "indirect": # 1次モデル型
                     # １次モデル，２次モデルの決定
-                    self.U = np.einsum('lj,ijd->ild', H2, self.X) / G2[:, :, np.newaxis]
-                    self.V = (np.einsum('ki,ijd->kjd', H1,self.X)) / G1[:, :, np.newaxis]
+                    self.U = np.einsum('lj,ijd->ild', R2, self.X)
+                    self.V = (np.einsum('ki,ijd->kjd', R1,self.X))
                     # 勝者決定
                     self.k_star1 = np.argmin(
                         np.sum(np.square(self.U[:, None, :, :] - self.Y[None, :, :, :]), axis=(2, 3)), axis=1)
