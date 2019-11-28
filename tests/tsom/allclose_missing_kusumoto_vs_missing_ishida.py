@@ -13,9 +13,9 @@ class TestTSOM_missing(unittest.TestCase):
         np.random.seed(seed)
 
         # prepare observed data
-        nb_samples1 = 10
-        nb_samples2 = 5
-        observed_dim = 2
+        nb_samples1 = 20
+        nb_samples2 = 7
+        observed_dim = 3
 
         X = np.random.normal(0, 1, (nb_samples1, nb_samples2, observed_dim))
 
@@ -35,10 +35,10 @@ class TestTSOM_missing(unittest.TestCase):
         # generate tsom instance
         tsom_kusumoto = TSOM2(X, latent_dim=latent_dim, resolution=resolution,
                            SIGMA_MAX=sigma_max, SIGMA_MIN=sigma_min, TAU=tau,
-                           init=init,model = 'indirect')
+                           init=init,model = 'direct')
         tsom_ishida = TSOM2_ishida(X, latent_dim=latent_dim, resolution=resolution,
                                    SIGMA_MAX=sigma_max, SIGMA_MIN=sigma_min, TAU=tau,
-                                   init=init,model = 'indirect')
+                                   init=init,model = 'direct')
 
         # learn
         tsom_kusumoto.fit(nb_epoch=nb_epoch)
