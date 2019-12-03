@@ -173,8 +173,8 @@ class TSOM2_ishida():
 
                 elif self.model == "direct": # 直接型
                     # 勝者決定
-                    winner1_Dist = np.sum(H2[np.newaxis, :, np.newaxis, :, np.newaxis] * self.gamma[np.newaxis, np.newaxis, :, :,np.newaxis] * (np.square(self.X[np.newaxis, np.newaxis, :, :, :] - self.Y[:, :, np.newaxis, np.newaxis, :])),axis=(1, 3, 4))  # K1*K2*N1*N2*D
-                    winner2_Dist = np.sum(H1[:, np.newaxis, :, np.newaxis, np.newaxis] * self.gamma[np.newaxis,np.newaxis, :, :,np.newaxis] * (np.square(self.X[np.newaxis, np.newaxis, :, :, :] - self.Y[:, :, np.newaxis, np.newaxis, :])),axis=(0, 2, 4))  # K1*K2*N1*N2*D
+                    winner1_Dist = np.sum(H2[np.newaxis, :, np.newaxis, :, np.newaxis] * self.gamma[np.newaxis, np.newaxis, :, :,:] * (np.square(self.X[np.newaxis, np.newaxis, :, :, :] - self.Y[:, :, np.newaxis, np.newaxis, :])),axis=(1, 3, 4))  # K1*K2*N1*N2*D
+                    winner2_Dist = np.sum(H1[:, np.newaxis, :, np.newaxis, np.newaxis] * self.gamma[np.newaxis,np.newaxis, :, :,:] * (np.square(self.X[np.newaxis, np.newaxis, :, :, :] - self.Y[:, :, np.newaxis, np.newaxis, :])),axis=(0, 2, 4))  # K1*K2*N1*N2*D
                     self.k_star1 = np.argmin(winner1_Dist, axis=0)  # K1*N1
                     self.k_star2 = np.argmin(winner2_Dist, axis=0)  # K2*N2
 
