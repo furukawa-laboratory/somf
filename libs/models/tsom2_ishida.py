@@ -24,14 +24,11 @@ class TSOM2_ishida():
 
         if gamma is not None:#gammaが指定されている時
             # 欠損値アルゴリズム処理
-            if self.X.ndim == 2:
-                gamma = gamma.reshape((gamma.shape[0], gamma.shape[1], self.observed_dim))
-            elif self.X.ndim == 3:
-                pass
-
-            if X.shape !=gamma.shape:
+            if X[:,:,0].shape !=gamma.shape:
                 raise ValueError("invalid gamma: {}\ndata size and gamma size is not match. ".format(gamma))
-            elif X.shape==gamma.shape:
+            elif gamma.ndim !=2:
+                raise ValueError("invalid gamma: {}\n gammais only 2d array. ".format(gamma))
+            elif X[:,:,0].shape==gamma.shape:
                 if np.any(np.isnan(self.X)) ==1:#gamma指定してデータに欠損がある場合
                     temp_gamma = np.where(np.isnan(self.X) == 1, 0, 1)  #データに基づいてgammaを作る
                     temp_is_missing=np.allclose(temp_gamma,gamma)
