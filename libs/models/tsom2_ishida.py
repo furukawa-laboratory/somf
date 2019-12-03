@@ -166,8 +166,8 @@ class TSOM2_ishida():
                     # １次モデル，２次モデルの決定
                     G1 = np.einsum('ki,ijd->kjd', H1, self.gamma)  # K1*N2*D
                     G2 = np.einsum('lj,ijd->lid', H2, self.gamma)  # K2*N1*D
-                    self.U = np.einsum('lj,ij,ijd->ild', H2, self.gamma, self.X) / G2.T
-                    self.V = (np.einsum('ki,ij,ijd->kjd', H1, self.gamma, self.X)) / G1
+                    self.U = np.einsum('lj,ijd,ijd->ild', H2, self.gamma, self.X) / G2.T
+                    self.V = (np.einsum('ki,ijd,ijd->kjd', H1, self.gamma, self.X)) / G1.T
                     # 勝者決定
                     self.k_star1 = np.argmin(np.sum(np.square(self.U[:, None, :, :] - self.Y[None, :, :, :]), axis=(2, 3)), axis=1)
                     self.k_star2 = np.argmin(np.sum(np.square(self.V[:, :, None, :] - self.Y[:, None, :, :]), axis=(0, 3)), axis=1)
