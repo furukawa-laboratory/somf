@@ -22,24 +22,23 @@ class TSOM2():
         else:
             raise ValueError("invalid X: {}\nX must be 2d or 3d ndarray".format(X))
 
-        if gamma is not None:#gammaが指定されている時
+        if gamma is not None:  # gammaが指定されている時
             # 欠損値アルゴリズム処理
-            if X[:,:,0].shape !=gamma.shape:
+            if X.shape != gamma.shape:
                 raise ValueError("invalid gamma: {}\ndata size and gamma size is not match. ".format(gamma))
-            elif gamma.ndim !=2:
-                raise ValueError("invalid gamma: {}\n gammais only 2d array. ".format(gamma))
-            elif X[:,:,0].shape==gamma.shape:
-                if np.any(np.isnan(self.X)) ==1:#gamma指定してデータに欠損がある場合
-                    temp_gamma = np.where(np.isnan(self.X) == 1, 0, 1)  #データに基づいてgammaを作る
-                    temp_is_missing=np.allclose(temp_gamma,gamma)
-                    if temp_is_missing is True:#データの欠損しているところとgammaの0の値が一致する時
-                        self.gamma=gamma
-                        self.is_missing=1
+
+            elif X.shape == gamma.shape:
+                if np.any(np.isnan(self.X)) == 1:  # gamma指定してデータに欠損がある場合
+                    temp_gamma = np.where(np.isnan(self.X) == 1, 0, 1)  # データに基づいてgammaを作る
+                    temp_is_missing = np.allclose(temp_gamma, gamma)
+                    if temp_is_missing is True:  # データの欠損しているところとgammaの0の値が一致する時
+                        self.gamma = gamma
+                        self.is_missing = 1
                     else:
                         raise ValueError("invalid gamma: {}\ndata size and gamma size is not match. ".format(gamma))
-                elif np.any(np.isnan(self.X)) ==0:#観測データの一部を無視したい時
-                    self.gamma=gamma
-                    self.is_missing=1
+                elif np.any(np.isnan(self.X)) == 0:  # 観測データの一部を無視したい時
+                    self.gamma = gamma
+                    self.is_missing = 1
         elif gamma is None:#データXに欠損がある場合はそれに基づいてgammaを作成する
             self.is_missing=np.any(np.isnan(self.X))# 欠損値があるかを判定.欠損があれば1,欠損がなければ0
             # 欠損値がある場合
