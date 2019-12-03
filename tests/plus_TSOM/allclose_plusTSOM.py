@@ -10,11 +10,10 @@ class TestTSOMPlusSOM(unittest.TestCase):
     def create_artficial_data(self,n_samples,n_features,n_groups,n_samples_per_group):
         x = np.random.normal(0.0,1.0,(n_samples,n_features))
         if isinstance(n_samples_per_group,int):
-            index_members_of_group = np.random.randint(0,n_samples,(n_groups,n_samples_per_group))
-        elif isinstance(n_samples_per_group,np.ndarray):
-            index_members_of_group = []
-            for n_samples_in_the_group in n_samples_per_group:
-                index_members_of_group.append(np.random.randint(0,n_samples,n_samples_in_the_group))
+            n_samples_per_group = np.ones(n_groups,int) * n_samples_per_group
+        index_members_of_group = []
+        for n_samples_in_the_group in n_samples_per_group:
+            index_members_of_group.append(np.random.randint(0,n_samples,n_samples_in_the_group))
         return x, index_members_of_group
 
     def test_plusTSOM_ishida_vs_test_plusTSOM_watanabe(self):
@@ -23,7 +22,7 @@ class TestTSOMPlusSOM(unittest.TestCase):
         n_samples = 1000
         n_groups = 10  # group数
         n_features = 3  # 各メンバーの特徴数
-        n_samples_per_group = 30  # 各グループにメンバーに何人いるのか
+        n_samples_per_group = np.random.randint(1,30,n_groups)  # 各グループにメンバーに何人いるのか
         member_features,index_members_of_group = self.create_artficial_data(n_samples,
                                                                            n_features,
                                                                            n_groups,
@@ -52,7 +51,7 @@ class TestTSOMPlusSOM(unittest.TestCase):
         kernel_width = 0.3
 
         htsom_ishida = TSOMPlusSOM(member_features=member_features,
-                                   index_members_of_group=index_members_of_group,
+                                   group_features=index_members_of_group,
                                    params_tsom=params_tsom,
                                    params_som=params_som)
         htsom_watanabe = TSOMPlusSOMWatanabe(member_features=member_features,
@@ -87,7 +86,7 @@ class TestTSOMPlusSOM(unittest.TestCase):
         n_members = 100
         n_groups = 10  # group数
         n_features = 3  # 各メンバーの特徴数
-        n_samples_per_group = 30  # 各グループにメンバーに何人いるのか
+        n_samples_per_group = np.random.randint(1,50,n_groups)  # 各グループにメンバーに何人いるのか
         member_features,index_members_of_group = self.create_artficial_data(n_members,
                                                                             n_features,
                                                                             n_groups,
@@ -115,13 +114,13 @@ class TestTSOMPlusSOM(unittest.TestCase):
         kernel_width = 0.3
 
         tsom_plus_som_input_list = TSOMPlusSOM(member_features=member_features,
-                                               index_members_of_group=index_members_of_group,
+                                               group_features=index_members_of_group,
                                                params_tsom=params_tsom,
                                                params_som=params_som)
         tsom_plus_som_input_bag = TSOMPlusSOM(member_features=member_features,
-                                               index_members_of_group=bag_of_members,
-                                               params_tsom=params_tsom,
-                                               params_som=params_som)
+                                              group_features=bag_of_members,
+                                              params_tsom=params_tsom,
+                                              params_som=params_som)
 
         tsom_plus_som_input_list.fit(tsom_epoch_num=tsom_epoch_num,
                          kernel_width=kernel_width,
