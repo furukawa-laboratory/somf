@@ -13,15 +13,15 @@ class TestTSOM_missing(unittest.TestCase):
         np.random.seed(seed)
 
         # prepare observed data
-        nb_samples1 = 20
-        nb_samples2 = 7
+        nb_samples1 = 10
+        nb_samples2 = 20
         observed_dim = 3
 
         X = np.random.normal(0, 1, (nb_samples1, nb_samples2, observed_dim))
 
         # set learning parameter
-        nb_epoch = 250
-        latent_dim = [1, 2]
+        nb_epoch = 60
+        latent_dim = [1, 1]
         resolution = [7, 9]
         sigma_max = [2.0, 2.2]
         sigma_min = [0.4, 0.2]
@@ -45,7 +45,7 @@ class TestTSOM_missing(unittest.TestCase):
         tsom_ishida.fit(nb_epoch=nb_epoch)
 
         # test
-        np.testing.assert_allclose(tsom_kusumoto.history['y'], tsom_ishida.history['y'])
+        np.testing.assert_allclose(tsom_kusumoto.history['y'], tsom_ishida.history['y'],rtol=1e-09)
         np.testing.assert_allclose(tsom_kusumoto.history['z1'], tsom_ishida.history['z1'])
         np.testing.assert_allclose(tsom_kusumoto.history['z2'], tsom_ishida.history['z2'])
 
