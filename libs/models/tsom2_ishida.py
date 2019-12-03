@@ -201,11 +201,9 @@ class TSOM2_ishida():
                     # winner2_Dist = np.sum(H1[:, np.newaxis, :, np.newaxis, np.newaxis]*(np.square(self.X[np.newaxis, np.newaxis, :, :, :] - self.Y[:, :, np.newaxis, np.newaxis, :])),axis=(0, 2, 4))  # K1*K2*N1*N2*D
                     # self.k_star1 = np.argmin(winner1_Dist, axis=0)  # K1*N1
                     # self.k_star2 = np.argmin(winner2_Dist, axis=0)  # K2*N2
-                    Dist = np.square(
-                        self.X[:, :, None, None, :] - self.Y[None, None, :, :, :])
+                    Dist = np.square(self.X[:, :, None, None, :] - self.Y[None, None, :, :, :])
                     self.k_star1 = np.argmin(np.einsum("jl,ijklm->ik", H2.T, Dist), axis=1)
                     self.k_star2 = np.argmin(np.einsum("ik,ijklm->jl", H1.T, Dist), axis=1)
-
 
                 else:
                     raise ValueError("invalid model: {}\nmodel must be None or direct".format(self.model))
