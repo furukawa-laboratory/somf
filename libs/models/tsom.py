@@ -31,6 +31,7 @@ class TSOM2():
                 if np.any(np.isnan(self.X)) == 1:  # gamma指定してデータに欠損がある場合
                     temp_gamma = np.where(np.isnan(self.X) == 1, 0, 1)  # データに基づいてgammaを作る
                     temp_is_missing = np.allclose(temp_gamma, gamma)
+                    self.X[np.isnan(self.X)] = 0  # 欠損値の部分を0で置換
                     if temp_is_missing is True:  # データの欠損しているところとgammaの0の値が一致する時
                         self.gamma = gamma
                         self.is_missing = 1
