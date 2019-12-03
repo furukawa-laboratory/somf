@@ -24,11 +24,10 @@ class TSOM2_ishida():
 
         if gamma is not None:#gammaが指定されている時
             # 欠損値アルゴリズム処理
-            if X[:,:,0].shape !=gamma.shape:
+            if X.shape !=gamma.shape:
                 raise ValueError("invalid gamma: {}\ndata size and gamma size is not match. ".format(gamma))
-            elif gamma.ndim !=2:
-                raise ValueError("invalid gamma: {}\n gammais only 2d array. ".format(gamma))
-            elif X[:,:,0].shape==gamma.shape:
+
+            elif X.shape==gamma.shape:
                 if np.any(np.isnan(self.X)) ==1:#gamma指定してデータに欠損がある場合
                     temp_gamma = np.where(np.isnan(self.X) == 1, 0, 1)  #データに基づいてgammaを作る
                     temp_is_missing=np.allclose(temp_gamma,gamma)
@@ -146,28 +145,28 @@ class TSOM2_ishida():
             # 学習量の決定
             # sigma1 = self.SIGMA1_MIN + (self.SIGMA1_MAX - self.SIGMA1_MIN) * np.exp(-epoch / self.TAU1)
             sigma1 = max(self.SIGMA1_MIN, self.SIGMA1_MAX * (1 - (epoch / self.TAU1)))
-            distance1 = distance.cdist(self.Zeta1, self.Z1, 'sqeuclidean')  # 距離行列をつくるDはK*N行列
+            distance1 = distance.cdist(self.Zeta1, self.Z1, 'sqeuclidean')  # 距離行列をつくるDはK1*N1行列
             H1 = np.exp(-distance1 / (2 * pow(sigma1, 2)))  # かっこに気を付ける
             G1 = np.sum(H1, axis=1)  # Gは行ごとの和をとったベクトル
             R1 = (H1.T / G1).T  # 行列の計算なので.Tで転置を行う
 
             # sigma2 = self.SIGMA2_MIN + (self.SIGMA2_MAX - self.SIGMA2_MIN) * np.exp(-epoch / self.TAU2)
             sigma2 = max(self.SIGMA2_MIN, self.SIGMA2_MAX * (1 - (epoch / self.TAU2)))
-            distance2 = distance.cdist(self.Zeta2, self.Z2, 'sqeuclidean')  # 距離行列をつくるDはK*N行列
+            distance2 = distance.cdist(self.Zeta2, self.Z2, 'sqeuclidean')  # 距離行列をつくるDはK2*N2行列
             H2 = np.exp(-distance2 / (2 * pow(sigma2, 2)))  # かっこに気を付ける
             G2 = np.sum(H2, axis=1)  # Gは行ごとの和をとったベクトル
             R2 = (H2.T / G2).T  # 行列の計算なので.Tで転置を行う
 
             if self.is_missing == 1: # 欠損値有り
                 # ２次モデルの決定
-                G = np.einsum('ki,lj,ijd->kl', H1, H2, self.gamma)  # K1*K2
+                G = np.einsum('ki,lj,ijd->kld', H1, H2, self.gamma)  # K1*K2*D
                 self.Y = (np.einsum('ki,lj,ijd,ijd->kld', H1, H2, self.gamma, self.X)) / G  # K1*N2*D
                 if self.model == "indirect": # 1次モデル型
                     # １次モデル，２次モデルの決定
                     G1 = np.einsum('ki,ijd->kjd', H1, self.gamma)  # K1*N2*D
                     G2 = np.einsum('lj,ijd->lid', H2, self.gamma)  # K2*N1*D
-                    self.U = np.einsum('lj,ijd,ijd->ild', H2, self.gamma, self.X) / G2.T
-                    self.V = (np.einsum('ki,ijd,ijd->kjd', H1, self.gamma, self.X)) / G1.T
+                    self.U = np.einsum('lj,ijd,ijd->ild', H2, self.gamma, self.X) / G2.transpose(1,0,2)
+                    self.V = (np.einsum('ki,ijd,ijd->kjd', H1, self.gamma, self.X)) / G1
                     # 勝者決定
                     self.k_star1 = np.argmin(np.sum(np.square(self.U[:, None, :, :] - self.Y[None, :, :, :]), axis=(2, 3)), axis=1)
                     self.k_star2 = np.argmin(np.sum(np.square(self.V[:, :, None, :] - self.Y[:, None, :, :]), axis=(0, 3)), axis=1)
