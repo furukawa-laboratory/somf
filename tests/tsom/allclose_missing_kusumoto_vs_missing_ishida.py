@@ -44,10 +44,10 @@ class TestTSOM_missing(unittest.TestCase):
         # generate tsom instance
         tsom_kusumoto = TSOM2(X, latent_dim=latent_dim, resolution=resolution,
                            SIGMA_MAX=sigma_max, SIGMA_MIN=sigma_min, TAU=tau,
-                           init=init,model = 'indirect',gamma=gamma)
+                           init=init,model = 'direct',gamma=gamma)
         tsom_ishida = TSOM2_ishida(X, latent_dim=latent_dim, resolution=resolution,
                                    SIGMA_MAX=sigma_max, SIGMA_MIN=sigma_min, TAU=tau,
-                                   init=init,model = 'indirect',gamma=gamma)
+                                   init=init,model = 'direct',gamma=gamma)
 
         # learn
         tsom_kusumoto.fit(nb_epoch=nb_epoch)
