@@ -19,16 +19,17 @@ class TestTSOM_missing(unittest.TestCase):
 
         X = np.random.normal(0, 1, (nb_samples1, nb_samples2, observed_dim))
         #gammaの生成
-        gamma=np.random.rand(nb_samples1, nb_samples2)
+        gamma=np.random.rand(nb_samples1, nb_samples2, observed_dim)
         for i in np.arange(nb_samples1):
             for j in np.arange(nb_samples2):
-                if gamma[i,j]>=0.5:
-                    gamma[i,j]=1
-                elif gamma[i,j]<0.5:
-                    gamma[i, j] = 0
-        print(gamma)
+                for k in np.arange(observed_dim):
+                    if gamma[i,j,k]>=0.5:
+                        gamma[i,j,k]=1
+                    elif gamma[i,j,k]<0.5:
+                        gamma[i, j,k] = 0
+        #print(gamma)
         # set learning parameter
-        nb_epoch = 60
+        nb_epoch = 250
         latent_dim = [1, 1]
         resolution = [7, 9]
         sigma_max = [2.0, 2.2]
@@ -53,9 +54,9 @@ class TestTSOM_missing(unittest.TestCase):
         tsom_ishida.fit(nb_epoch=nb_epoch)
 
         # test
-        # np.testing.assert_allclose(tsom_kusumoto.history['y'], tsom_ishida.history['y'],rtol=1e-09)
-        # np.testing.assert_allclose(tsom_kusumoto.history['z1'], tsom_ishida.history['z1'])
-        # np.testing.assert_allclose(tsom_kusumoto.history['z2'], tsom_ishida.history['z2'])
+        np.testing.assert_allclose(tsom_kusumoto.history['y'], tsom_ishida.history['y'],rtol=1e-09)
+        np.testing.assert_allclose(tsom_kusumoto.history['z1'], tsom_ishida.history['z1'])
+        np.testing.assert_allclose(tsom_kusumoto.history['z2'], tsom_ishida.history['z2'])
 
     # def test_arg_in_constructor(self):
     #     # random seed setting
