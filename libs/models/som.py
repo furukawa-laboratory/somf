@@ -110,3 +110,11 @@ class SOM:
             self.history['z'][epoch] = self.Z
             self.history['y'][epoch] = self.Y
             self.history['sigma'][epoch] = sigma
+
+    def transform(self,X):
+        if self.metric == "sqeuclidean":
+            distance = dist.cdist(X,self.Y,self.metric)
+            return self.Zeta[distance.argmin(axis=1)]
+        elif self.metric == "KLdivergence":
+            divergence = -np.sum(self.X[:,np.newaxis,:] * np.log(self.Y[np.newaxis,:,:]),axis=2) # NxK
+            return self.Zeta[divergence.argmin(axis=1)]
