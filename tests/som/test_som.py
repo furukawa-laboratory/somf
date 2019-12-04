@@ -96,6 +96,37 @@ class TestSOM(unittest.TestCase):
 
         np.testing.assert_allclose(SOMResult, EVDResult/np.sqrt(Lambda.real.max()), rtol=1e-06)
 
+    def test_transform(self):
+        n_distributon = 100
+        n_category = 20
+
+        # create categorical distribution
+        X_categorical = np.random.rand(n_distributon,n_category)
+        X_categorical = X_categorical / X_categorical.sum(axis=1)[:,None]
+
+        np.testing.assert_allclose(X_categorical.sum(axis=1),np.ones(X_categorical.shape[0]))
+
+        # fit
+        som_categorical = SOM(X_categorical,latent_dim=2,resolution=50,sigma_max=2.0,sigma_min=0.3,tau=50,metric="KLdivergence")
+        som_categorical.fit(50)
+        Z_fit = som_categorical.Z
+        Z_transformed = som_categorical.transform(X_categorical)
+
+        np.testing.assert_allclose(Z_transformed,Z_fit)
+
+        # confirm to multi variable dataset
+        n_samples = 100
+        n_features = 20
+
+        X_multi_variate = np.random.normal(0.0,1.0,(n_samples,n_features))
+
+        # fit
+        som_multi_variate = SOM(X_multi_variate,latent_dim=2,resolution=50,sigma_max=2.0,sigma_min=0.2,tau=50,metric="sqeuclidean")
+        som_multi_variate.fit(10)
+        Z_fit = som_multi_variate.Z
+        Z_transformed = som_multi_variate.transform(X_multi_variate)
+
+        np.testing.assert_allclose(Z_fit,Z_transformed)
 
 
 
