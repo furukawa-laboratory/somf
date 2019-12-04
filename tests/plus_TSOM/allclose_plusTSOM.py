@@ -136,5 +136,62 @@ class TestTSOMPlusSOM(unittest.TestCase):
         np.testing.assert_allclose(tsom_plus_som_input_list.som.history['y'], tsom_plus_som_input_bag.som.history['y'])
         np.testing.assert_allclose(tsom_plus_som_input_list.som.history['z'], tsom_plus_som_input_bag.som.history['z'])
 
+    def test_transform(self):
+        # prepare dataset
+        seed = 100
+        np.random.seed(seed)
+        n_members = 1000
+        n_groups = 10  # group数
+        n_features = 3  # 各メンバーの特徴数
+        n_members_per_group = np.random.randint(1,30,n_groups)  # 各グループにメンバーに何人いるのか
+        member_features,index_members_of_group = self.create_artficial_data(n_members,
+                                                                            n_features,
+                                                                            n_groups,
+                                                                            n_members_per_group)
+        bag_of_members = self._transform_list_to_bag(index_members_of_group,num_members=n_members)
+
+        # prepare parameters
+        Z1 = np.random.rand(n_members, 2) * 2.0 - 1.0
+        Z2 = np.random.rand(n_features, 2) * 2.0 - 1.0
+        init_TSOM = [Z1, Z2]
+        init_SOM = np.random.rand(n_groups, 2) * 2.0 - 1.0
+        params_tsom = {'latent_dim': [2, 2],
+                       'resolution': [10, 10],
+                       'SIGMA_MAX': [1.0, 1.0],
+                       'SIGMA_MIN': [0.1, 0.1],
+                       'TAU': [50, 50],
+                       'init': init_TSOM}
+        params_som = {'latent_dim': 2,
+                      'resolution': 10,
+                      'sigma_max': 2.0,
+                      'sigma_min': 0.5,
+                      'tau': 50,
+                      'init': init_SOM}
+        tsom_epoch_num = 50
+        kernel_width = 0.3
+        som_epoch_num = 50
+
+        # fit
+        htsom_bag = TSOMPlusSOM(member_features=member_features,
+                            group_features=bag_of_members,
+                            params_tsom=params_tsom,
+                            params_som=params_som)
+        htsom_bag.fit(tsom_epoch_num,kernel_width,som_epoch_num)
+        Z_fit_bag = htsom_bag.som.Z
+        Z_transformed_bag = htsom_bag.transform(group_features=bag_of_members,kernel_width=kernel_width)
+
+        htsom_list = TSOMPlusSOM(member_features=member_features,
+                                group_features=index_members_of_group,
+                                params_tsom=params_tsom,
+                                params_som=params_som)
+        htsom_list.fit(tsom_epoch_num,kernel_width,som_epoch_num)
+        Z_fit_list = htsom_list.som.Z
+        Z_transformed_list = htsom_list.transform(group_features=index_members_of_group,kernel_width=kernel_width)
+
+        # compare estimated latent variables in fit and one in transform
+        np.testing.assert_allclose(Z_fit_bag,Z_transformed_bag)
+        np.testing.assert_allclose(Z_fit_list,Z_transformed_list)
+
+
 if __name__ == "__main__":
     unittest.main()
