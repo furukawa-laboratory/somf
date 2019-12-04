@@ -6,7 +6,7 @@ from sklearn.decomposition import PCA
 
 
 class SOM:
-    def __init__(self, X, latent_dim, resolution, sigma_max, sigma_min, tau, init='random',metric="sqeuclidean"):
+    def __init__(self, X, latent_dim, resolution, sigma_max, sigma_min, tau, init='random', metric="sqeuclidean"):
         self.X = X
         self.N = self.X.shape[0]
 
@@ -28,22 +28,23 @@ class SOM:
         elif latent_dim == 2:
             if isinstance(init, str) and init == 'PCA':
                 comp1, comp2 = pca.singular_values_[0], pca.singular_values_[1]
-                zeta = np.meshgrid(np.linspace(-1, 1, resolution), np.linspace(-comp2/comp1, comp2/comp1, resolution))
+                zeta = np.meshgrid(np.linspace(-1, 1, resolution),
+                                   np.linspace(-comp2 / comp1, comp2 / comp1, resolution))
             else:
                 zeta = np.meshgrid(np.linspace(-1, 1, resolution), np.linspace(-1, 1, resolution))
-            self.Zeta = np.dstack(zeta).reshape(resolution**2, latent_dim)
+            self.Zeta = np.dstack(zeta).reshape(resolution ** 2, latent_dim)
         else:
             raise ValueError("invalid latent dimension: {}".format(latent_dim))
 
-        self.K = resolution**self.L
+        self.K = resolution ** self.L
 
         if isinstance(init, str) and init == 'random':
             self.Z = np.random.rand(self.N, latent_dim) * 2.0 - 1.0
         elif isinstance(init, str) and init == 'random_bmu':
             init_bmus = np.random.randint(0, self.Zeta.shape[0] - 1, self.N)
-            self.Z = self.Zeta[init_bmus,:]
+            self.Z = self.Zeta[init_bmus, :]
         elif isinstance(init, str) and init == 'PCA':
-            self.Z = pca.transform(X)/comp1
+            self.Z = pca.transform(X) / comp1
         elif isinstance(init, np.ndarray) and init.dtype == int:
             init_bmus = init.copy()
             self.Z = self.Zeta[init_bmus, :]
@@ -52,9 +53,9 @@ class SOM:
         else:
             raise ValueError("invalid init: {}".format(init))
 
-        #metricに関する処理
+        # metricに関する処理
         if metric == "sqeuclidean":
-            self.metric="sqeuclidean"
+            self.metric = "sqeuclidean"
 
         elif metric == "KLdivergence":
             self.metric = "KLdivergence"
@@ -78,18 +79,18 @@ class SOM:
             # 協調過程
             # 学習量を計算
             # sigma = self.sigma_min + (self.sigma_max - self.sigma_min) * np.exp(-epoch / self.tau) # 近傍半径を設定
-            sigma = max(self.sigma_min, self.sigma_max * ( 1 - (epoch / self.tau) ) )# 近傍半径を設定
+            sigma = max(self.sigma_min, self.sigma_max * (1 - (epoch / self.tau)))  # 近傍半径を設定
             Dist = dist.cdist(self.Zeta, self.Z, 'sqeuclidean')
             # KxNの距離行列を計算
             # ノードと勝者ノードの全ての組み合わせにおける距離を網羅した行列
-            H = np.exp(-Dist / (2 * sigma * sigma)) # KxNの学習量行列を計算
+            H = np.exp(-Dist / (2 * sigma * sigma))  # KxNの学習量行列を計算
 
             # 適合過程
             # 参照ベクトルの更新
-            G = np.sum(H, axis=1)[:, np.newaxis] # 各ノードが受ける学習量の総和を保持するKx1の列ベクトルを計算
-            Ginv = np.reciprocal(G) # Gのそれぞれの要素の逆数を取る
-            R = H * Ginv # 学習量の総和が1になるように規格化
-            self.Y = R @ self.X # 学習量を重みとして観測データの平均を取り参照ベクトルとする
+            G = np.sum(H, axis=1)[:, np.newaxis]  # 各ノードが受ける学習量の総和を保持するKx1の列ベクトルを計算
+            Ginv = np.reciprocal(G)  # Gのそれぞれの要素の逆数を取る
+            R = H * Ginv  # 学習量の総和が1になるように規格化
+            self.Y = R @ self.X  # 学習量を重みとして観測データの平均を取り参照ベクトルとする
 
             # 競合過程
             if self.metric is "sqeuclidean":  # ユークリッド距離を使った勝者決定
@@ -111,10 +112,10 @@ class SOM:
             self.history['y'][epoch] = self.Y
             self.history['sigma'][epoch] = sigma
 
-    def transform(self,X):
+    def transform(self, X):
         if self.metric == "sqeuclidean":
-            distance = dist.cdist(X,self.Y,self.metric)
+            distance = dist.cdist(X, self.Y, self.metric)
             return self.Zeta[distance.argmin(axis=1)]
         elif self.metric == "KLdivergence":
-            divergence = -np.sum(self.X[:,np.newaxis,:] * np.log(self.Y[np.newaxis,:,:]),axis=2) # NxK
+            divergence = -np.sum(self.X[:, np.newaxis, :] * np.log(self.Y[np.newaxis, :, :]), axis=2)  # NxK
             return self.Zeta[divergence.argmin(axis=1)]
