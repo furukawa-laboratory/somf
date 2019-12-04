@@ -27,7 +27,6 @@ class TestTSOM_missing(unittest.TestCase):
                         gamma[i,j,k]=1
                     elif gamma[i,j,k]<0.5:
                         gamma[i, j,k] = 0
-        #print(gamma)
         # set learning parameter
         nb_epoch = 250
         latent_dim = [1, 1]
@@ -57,47 +56,6 @@ class TestTSOM_missing(unittest.TestCase):
         np.testing.assert_allclose(tsom_kusumoto.history['y'], tsom_ishida.history['y'],rtol=1e-09)
         np.testing.assert_allclose(tsom_kusumoto.history['z1'], tsom_ishida.history['z1'])
         np.testing.assert_allclose(tsom_kusumoto.history['z2'], tsom_ishida.history['z2'])
-
-    # def test_arg_in_constructor(self):
-    #     # random seed setting
-    #     seed = 100
-    #     np.random.seed(seed)
-    #
-    #     # prepare observed data
-    #     nb_samples1 = 25
-    #     nb_samples2 = 35
-    #     observed_dim = 1
-    #
-    #     X_3d = np.random.normal(0, 1, (nb_samples1, nb_samples2, observed_dim))
-    #     X_2d = X_3d.reshape(nb_samples1,nb_samples2)
-    #
-    #     # set learning parameter
-    #     nb_epoch = 60
-    #
-    #     latent_dim = [1, 1]
-    #     resolution = [20, 20]
-    #     sigma_max = [2.0, 2.0]
-    #     sigma_min = [0.4, 0.4]
-    #     tau = [50, 50]
-    #
-    #     ## prepare init
-    #     Z1init = np.random.rand(nb_samples1, latent_dim[0])
-    #     Z2init = np.random.rand(nb_samples2, latent_dim[1])
-    #     init = [Z1init, Z2init]
-    #
-    #     tsom_type1 = TSOM2(X=X_3d, latent_dim=latent_dim, resolution=resolution,
-    #                        SIGMA_MAX=sigma_max,SIGMA_MIN=sigma_min,TAU=tau,init=init)
-    #
-    #     tsom_type2 = TSOM2(X=X_2d, latent_dim=latent_dim[0], resolution=resolution[0],
-    #                        SIGMA_MAX=sigma_max[0],SIGMA_MIN=sigma_min[0],TAU=tau[0],init=init)
-    #
-    #     tsom_type1.fit(nb_epoch=nb_epoch)
-    #     tsom_type2.fit(nb_epoch=nb_epoch)
-    #
-    #     np.testing.assert_allclose(tsom_type1.history['y'], tsom_type2.history['y'])
-    #     np.testing.assert_allclose(tsom_type1.history['z1'], tsom_type2.history['z1'])
-    #     np.testing.assert_allclose(tsom_type1.history['z2'], tsom_type2.history['z2'])
-
 
 if __name__ == "__main__":
     unittest.main()
