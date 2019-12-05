@@ -26,12 +26,17 @@ class TSOM2_Viewer:
         self.Winner2 = winner2
 
         # ----------コンポーネントプレーン用---------- #
-        self.Map1_click_unit = 0  # Map0のクリック位置
-        self.Map2_click_unit = 0  # Map1のクリック位置
+        self.Map1_click_unit = -1  # Map0のクリック位置.初期値はNoneで
+        self.Map2_click_unit = -1  # Map1のクリック位置. 初期値はNoneで
         self.Map3_click_unit = 0  # add machida Map3のクリック位置
         self.map1x_num = int(np.sqrt(self.Mode1_Num))  # マップの1辺を算出（正方形が前提）
         self.map2x_num = int(np.sqrt(self.Mode2_Num))  # マップの1辺を算出（正方形が前提）
 
+        self.map1_click_unit_t=-1
+        #self.map1_click_unit_t_plus = -1
+
+        self.map2_click_unit_t = -1
+        #self.map2_click_unit_t_plus = -1
 
 
         # マップ上の座標
@@ -74,9 +79,10 @@ class TSOM2_Viewer:
         self.__calc_marginal_comp(1)
         self.__calc_marginal_comp(2)
         
-        self.click_map = 0
+        self.click_map = 0#どのマップがクリックされたかを表す.(クリックされてない: 0,Map1がクリックされている: 1,Map2がクリックされてる: 2)
 
-        self.temp_click_node=-1#前回押したノード番号を格納する配列
+        self.Map1_click_t=self.Map1_click_unit#前回押したノード番号を格納する配列
+        self.Map2_click_t = self.Map2_click_unit  # 前回押したノード番号を格納する配列
 
 
         # ----------描画用---------- #
@@ -136,53 +142,87 @@ class TSOM2_Viewer:
     # ------------------------------ #
     # クリック時の処理
     def __onclick_fig(self, event):#eventは色々入っているクラス(position,)
-        Map1_click_node=self.Map1_click_unit#前にクリックした点を入れる
-        Map2_click_node = self.Map2_click_unit  # 前にクリックした点を入れる
-        if event.xdata is not None:
+        #いくつ押したのかを判定する関数を追加する
+        #押してない: Map1.click_unit=None かつ Map2.click_unit=None
+
+
+        #1つ押した時(Map1のクリックユニットが変わる or )
+        Map1_t_plus=self.Map1_click_unit#前にクリックした点を入れる
+        Map2_t_plus = self.Map2_click_unit  # 前にクリックした点を入れる
+
+
+        if event.xdata is not None:#クリックしたx座標がグラフの中にある時
             # クリック位置取得
             click_pos = np.random.rand(1, 2)
             click_pos[0, 0] = event.xdata
             click_pos[0, 1] = event.ydata
 
-            if event.inaxes == self.Map1.axes:#Map1の中にいるかどうか
-                # 左のマップをクリックした時
-                self.Map1_click_unit = self.__calc_arg_min_unit(self.Map1_position, click_pos)#クリックしたところといちばん近いノードがどこかを計算
+            #ここに指定してないのか、１点指定しているのか、２点指定してるのかの判定を行う関数を作る
+            if self.Map1_click_t==Map1_t_plus and self.Map2_click_t==Map2_t_plus:
+                self.click_map=0
+            elif self.Map1_click_t==Map1_t_plus and self.Map2_click_t != Map2_t_plus:
+                self.click_map=1
+            elif self.Map1_click_t != Map1_t_plus and self.Map2_click_t == Map2_t_plus:
+                self.click_map = 1
 
-                if Map1_click_node==self.Map1_click_unit:#前回とクリックした時のノード番号が同じ時は、マージナルで計算する
-                    # コンポーネント値計算
-                    self.__calc_marginal_comp(2)#Map1_click_unitを元に計算
-                    self.click_map = 1#map1にいる時(どこで使ってるのかわからんけど)
-                    # マージナルコンポーネントプレーン表示
-                    self.__draw_marginal_map1()
-                else:
-                    # コンポーネント値計算
-                    self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
-                    self.click_map = 1  # map1にいる時(どこで使ってるのかわからんけど)
-                    # コンディショナルコンポーネントプレーン表示
-                    self.__draw_conditional_map1()
-                    self.__draw_conditional_map2()
-                    self.__draw_click_point()
+            if self.click_map == 0:# map1: marginal map2: marginal
+                #各マップのマージナルコンポーネントプレーンの計算
+                self.__calc_marginal_comp(1)  # Map1_click_unitを元に計算
+                self.__calc_marginal_comp(2)  # Map1_click_unitを元に計算
 
-            elif event.inaxes == self.Map2.axes:#map2がクリックされた時
-                # 右のマップをクリックした時
-                self.Map2_click_unit = self.__calc_arg_min_unit(self.Map2_position, click_pos)
+                #marginal component planeを描画
+                self.__draw_marginal_map1()
+                self.__draw_marginal_map2()
 
-                if Map2_click_node == self.Map2_click_unit:  # 前回とクリックした時のノード番号が同じ時は、マージナルで計算する
-                    # コンポーネント値計算
-                    self.__calc_marginal_comp(1)  # Map1_click_unitを元に計算
-                    self.click_map = 2  # map1にいる時(どこで使ってるのかわからんけど)
-                    # マージナルコンポーネントプレーン表示
-                    self.__draw_marginal_map2()
-                else:
-                    # コンポーネント値計算
-                    self.__calc_conditional_comp(1)  # Map1_click_unitを元に計算
-                    self.click_map = 2  # map1にいる時(どこで使ってるのかわからんけど)
-                    # コンディショナルコンポーネントプレーン表示
-                    self.__draw_conditional_map1()
-                    self.__draw_conditional_map2()
-                    self.__draw_click_point()
+            elif self.click_map==1: ## map1: marginal map2: conditional
+                self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
+                self.__draw_marginal_map1()
+                self.__draw_click_point()
+                self.__draw_conditional_map2()
+            elif self.click_map==2: #map2をクリックした時(map1を変更する)
+                self.__calc_conditional_comp(1)  # Map1_click_unitを元に計算
+                self.__draw_conditional_map1()
+                self.__draw_marginal_map2()
 
-            else:
+            # if event.inaxes == self.Map1.axes:#Map1の中にいるかどうか
+            #     # 左のマップをクリックした時
+            #     self.Map1_click_unit = self.__calc_arg_min_unit(self.Map1_position, click_pos)#クリックしたところといちばん近いノードがどこかを計算
+            #
+            #     if Map1_click_node==self.Map1_click_unit:#前回とクリックした時のノード番号が同じ時は、マージナルで計算する
+            #         # コンポーネント値計算
+            #         self.__calc_marginal_comp(2)#Map1_click_unitを元に計算
+            #         self.click_map = 1#map1にいる時(どこで使ってるのかわからんけど)
+            #         # マージナルコンポーネントプレーン表示
+            #         self.__draw_marginal_map1()
+            #     else:
+            #         # コンポーネント値計算
+            #         self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
+            #         self.click_map = 1  # map1にいる時(どこで使ってるのかわからんけど)
+            #         # コンディショナルコンポーネントプレーン表示
+            #         #self.__draw_marginal_map1()
+            #         self.__draw_conditional_map2()
+            #         self.__draw_click_point()
+            #
+            # elif event.inaxes == self.Map2.axes:#map2がクリックされた時
+            #     # 右のマップをクリックした時
+            #     self.Map2_click_unit = self.__calc_arg_min_unit(self.Map2_position, click_pos)
+            #
+            #     if Map2_click_node == self.Map2_click_unit:  # 前回とクリックした時のノード番号が同じ時は、マージナルで計算する
+            #         # コンポーネント値計算
+            #         self.__calc_marginal_comp(1)  # Map1_click_unitを元に計算
+            #         self.click_map = 2  # map1にいる時(どこで使ってるのかわからんけど)
+            #         # マージナルコンポーネントプレーン表示
+            #         self.__draw_marginal_map2()
+            #     else:
+            #         # コンポーネント値計算
+            #         self.__calc_conditional_comp(1)  # Map1_click_unitを元に計算
+            #         self.click_map = 2  # map1にいる時(どこで使ってるのかわからんけど)
+            #         # コンディショナルコンポーネントプレーン表示
+            #         self.__draw_conditional_map1()
+            #         #self.__draw_marginal_map2()
+            #         self.__draw_click_point()
+
+            else:#クリックしたところがグラフの外はスルー
                 return
 
     # マウスオーバー時(in)の処理
@@ -203,15 +243,19 @@ class TSOM2_Viewer:
                 mouse_over_unit = self.__calc_arg_min_unit(self.Map2_position, click_pos)
                 self.__draw_mouse_over_label_map2(mouse_over_unit)#特に意味なし処理
             
-            self.__draw_click_point()
+            #self.__draw_click_point()
             self.Fig.show()
 
     # マウスオーバー時(out)の処理
     def __mouse_leave_fig(self, event):
-        self.__draw_conditional_map1()
-        self.__draw_conditional_map2()
-        self.radio.on_clicked(self.hzfunc)
-        self.__draw_click_point()
+        # if self.Map1_click_node==self.Map1_click_unit:
+        #     self.__draw_marginal_map1()
+        # elif self.Map2_click_node==self.Map2_click_unit:
+        #     self.__draw_marginal_map2()
+        # self.__draw_conditional_map1()
+        # self.__draw_conditional_map2()
+        # self.radio.on_clicked(self.hzfunc)
+        # self.__draw_click_point()
 
     # ------------------------------ #
     # --- 描画 ---------------------- #
@@ -322,6 +366,12 @@ class TSOM2_Viewer:
                        ".", color="black", ms=30, fillstyle="none")
 
         self.Fig.show()
+    def __draw_map1_click_point(self):
+        self.Map1.plot(self.Map1_position[self.Map1_click_unit, 0], self.Map1_position[self.Map1_click_unit, 1],
+                       ".", color="black", ms=30, fillstyle="none")
+
+        self.Fig.show()
+
 
     # ------------------------------ #
     # --- コンポーネントプレーン表示 --- #
