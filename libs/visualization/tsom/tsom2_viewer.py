@@ -466,10 +466,10 @@ class TSOM2_Viewer:
     
     def __calc_marginal_comp(self, map_num):
         if map_num == 1:
-            temp1 = np.mean(self.Y,axis=(1,2)) #mode1のmarginal component planeの計算
+            temp1 = np.mean(self.Y[:,:,self.Map3_click_unit],axis=1) #mode1のmarginal component planeの計算
             self.Map1_marginal_val = temp1.reshape((self.map1x_num,self.map1x_num))#np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
         else:
-            temp2 = np.mean(self.Y,axis=(0,2)) #mode2のmarginal component planeの計算
+            temp2 = np.mean(self.Y[:,:,self.Map3_click_unit],axis=0) #mode2のmarginal component planeの計算
             self.Map2_marginal_val = temp2.reshape((self.map2x_num,self.map2x_num))#np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
 
     
