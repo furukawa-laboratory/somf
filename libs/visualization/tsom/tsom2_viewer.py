@@ -196,8 +196,10 @@ class TSOM2_Viewer:
 
     def draw_map(self):
         # コンポーネントの初期表示(左下が0番目のユニットが来るように行列を上下反転している)
-        self.__draw_map1()
-        self.__draw_map2()
+        self.__draw_marginal_map1()
+        self.__draw_marginal_map2()
+        # self.__draw_map1()
+        # self.__draw_map2()
         self.radio.on_clicked(self.hzfunc)
         self.__draw_click_point()
 
@@ -301,6 +303,29 @@ class TSOM2_Viewer:
     # ------------------------------ #
     # --- コンポーネントプレーン表示 --- #
     # ------------------------------ #
+
+    def __draw_marginal_map1(self):
+        self.Map1.cla()
+        self.Map1.set_title('View 1')
+        self.__draw_label_map1()
+        self.Map1.imshow(self.Map1_marginal_val[::], interpolation='spline36',
+                         extent=[0, self.Map1_marginal_val.shape[0] - 1, -self.Map1_marginal_val.shape[1] + 1, 0], cmap="rainbow")
+        self.Map1.set_xlim(-1, self.Mapsize)
+        self.Map1.set_ylim(-self.Mapsize, 1)
+        self.Fig.show()
+
+    def __draw_marginal_map2(self):
+        self.Map2.cla()
+        self.Map2.set_title('View 2')
+        # self.Map2.set_xlabel("Aroma Map")
+        self.Map2.xaxis.set_label_coords(0.5, -0.1)
+        self.__draw_label_map2()
+        self.Map2.imshow(self.Map2_marginal_val[::], interpolation='spline36',
+                         extent=[0, self.Map2_marginal_val.shape[0] - 1, -self.Map2_marginal_val.shape[1] + 1, 0], cmap="rainbow")
+        self.Map2.set_xlim(-1, self.Mapsize)
+        self.Map2.set_ylim(-self.Mapsize, 1)
+        self.Fig.show()
+
     def __draw_map1(self):
         self.Map1.cla()
         self.Map1.set_title('View 1')
@@ -339,10 +364,10 @@ class TSOM2_Viewer:
     def __calc_marginal_comp(self, map_num):
         if map_num == 1:
             temp1 = np.sum(self.Y,axis=(1,2)) #mode1のmarginal component planeの計算
-            self.Map1_conditional_val = temp1.reshape((self.map1x_num,self.map1x_num))#np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
+            self.Map1_marginal_val = temp1.reshape((self.map1x_num,self.map1x_num))#np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
         else:
             temp2 = np.sum(self.Y,axis=(1,2)) #mode2のmarginal component planeの計算
-            self.Map2_conditional_val = temp2.reshape((self.map2x_num,self.map2x_num))#np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
+            self.Map2_marginal_val = temp2.reshape((self.map2x_num,self.map2x_num))#np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
 
     
     # ------------------------------ #
@@ -353,3 +378,7 @@ class TSOM2_Viewer:
         distance = dist.cdist(zeta, click_point)
         unit = np.argmin(distance, axis=0)
         return unit[0]
+
+
+#まず、最初にmarginalが出るようにしたい.
+#現状は、全てconditional compoent plane
