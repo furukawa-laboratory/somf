@@ -65,9 +65,14 @@ class TSOM2_Viewer:
                 dict_keys.append(str(self.button_label[i]))
             self.hzdict = dict(zip(dict_keys, values))  # e.g.Deskwork_or_studyingが与えられたら0を返す
 
-        # コンポーネントプレーン
+        # コンディショナルコンポーネントプレーン
         self.__calc_conditional_comp(1)
         self.__calc_conditional_comp(2)
+        
+        #マージナルコンポーネントプレーン
+        self.__calc_marginal_comp(1)
+        self.__calc_marginal_comp(2)
+        
         self.click_map = 0
 
 
@@ -300,8 +305,8 @@ class TSOM2_Viewer:
         self.Map1.cla()
         self.Map1.set_title('View 1')
         self.__draw_label_map1()
-        self.Map1.imshow(self.Map1_val[::], interpolation='spline36',
-                         extent=[0, self.Map1_val.shape[0] - 1, -self.Map1_val.shape[1] + 1, 0], cmap="rainbow")
+        self.Map1.imshow(self.Map1_conditional_val[::], interpolation='spline36',
+                         extent=[0, self.Map1_conditional_val.shape[0] - 1, -self.Map1_conditional_val.shape[1] + 1, 0], cmap="rainbow")
         self.Map1.set_xlim(-1, self.Mapsize)
         self.Map1.set_ylim(-self.Mapsize, 1)
         self.Fig.show()
@@ -312,8 +317,8 @@ class TSOM2_Viewer:
         # self.Map2.set_xlabel("Aroma Map")
         self.Map2.xaxis.set_label_coords(0.5, -0.1)
         self.__draw_label_map2()
-        self.Map2.imshow(self.Map2_val[::], interpolation='spline36',
-                         extent=[0, self.Map2_val.shape[0] - 1, -self.Map2_val.shape[1] + 1, 0], cmap="rainbow")
+        self.Map2.imshow(self.Map2_conditional_val[::], interpolation='spline36',
+                         extent=[0, self.Map2_conditional_val.shape[0] - 1, -self.Map2_conditional_val.shape[1] + 1, 0], cmap="rainbow")
         self.Map2.set_xlim(-1, self.Mapsize)
         self.Map2.set_ylim(-self.Mapsize, 1)
         self.Fig.show()
@@ -326,18 +331,18 @@ class TSOM2_Viewer:
     def __calc_conditional_comp(self, map_num):
         if map_num == 1:
             temp1 = self.Y[:, self.Map2_click_unit, self.Map3_click_unit]
-            self.Map1_val = temp1.reshape((self.map1x_num,self.map1x_num))#np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
+            self.Map1_conditional_val = temp1.reshape((self.map1x_num,self.map1x_num))#np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
         else:
             temp2 = self.Y[self.Map1_click_unit, :, self.Map3_click_unit]
-            self.Map2_val = temp2.reshape((self.map2x_num,self.map2x_num))#np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
+            self.Map2_conditional_val = temp2.reshape((self.map2x_num,self.map2x_num))#np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
     
     def __calc_marginal_comp(self, map_num):
         if map_num == 1:
-            temp1 = self.Y[:, self.Map2_click_unit, self.Map3_click_unit]
-            self.Map1_val = temp1.reshape((self.map1x_num,self.map1x_num))#np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
+            temp1 = np.sum(self.Y,axis=(1,2)) #mode1のmarginal component planeの計算
+            self.Map1_conditional_val = temp1.reshape((self.map1x_num,self.map1x_num))#np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
         else:
-            temp2 = self.Y[self.Map1_click_unit, :, self.Map3_click_unit]
-            self.Map2_val = temp2.reshape((self.map2x_num,self.map2x_num))#np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
+            temp2 = np.sum(self.Y,axis=(1,2)) #mode2のmarginal component planeの計算
+            self.Map2_conditional_val = temp2.reshape((self.map2x_num,self.map2x_num))#np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
 
     
     # ------------------------------ #
