@@ -224,7 +224,7 @@ class TSOM2_Viewer:
         self.__draw_marginal_map1()#map1のマージナルの結果を描画
         self.__draw_marginal_map2()#map2のマージナルの結果を描画
         self.radio.on_clicked(self.hzfunc)#ラジオボタンを押した時にhzfuncを実行(中はconditionalで描画している)
-        self.__draw_click_point()#関数.押したところをまるで表示する
+        #self.__draw_click_point()#関数.押したところをまるで表示する
 
         # クリックイベント
         self.Fig.canvas.mpl_connect('button_press_event', self.__onclick_fig)#fig内でボタンをクリックすると関数__onclick_figを実行.クリックしたところを元にconditionalを計算
