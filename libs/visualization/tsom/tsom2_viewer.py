@@ -154,7 +154,6 @@ class TSOM2_Viewer:
                     self.click_map = 1#map1にいる時(どこで使ってるのかわからんけど)
                     # マージナルコンポーネントプレーン表示
                     self.__draw_marginal_map1()
-                    self.__draw_click_point()
                 else:
                     # コンポーネント値計算
                     self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
@@ -174,7 +173,6 @@ class TSOM2_Viewer:
                     self.click_map = 2  # map1にいる時(どこで使ってるのかわからんけど)
                     # マージナルコンポーネントプレーン表示
                     self.__draw_marginal_map2()
-                    self.__draw_click_point()
                 else:
                     # コンポーネント値計算
                     self.__calc_conditional_comp(1)  # Map1_click_unitを元に計算
@@ -186,10 +184,6 @@ class TSOM2_Viewer:
 
             else:
                 return
-            # # コンポーネントプレーン表示
-            # self.__draw_conditional_map1()
-            # self.__draw_conditional_map2()
-            # self.__draw_click_point()
 
     # マウスオーバー時(in)の処理
     def __mouse_over_fig(self, event):
