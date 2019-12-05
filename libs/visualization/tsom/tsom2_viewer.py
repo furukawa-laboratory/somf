@@ -32,9 +32,13 @@ class TSOM2_Viewer:
         self.map1x_num = int(np.sqrt(self.Mode1_Num))  # マップの1辺を算出（正方形が前提）
         self.map2x_num = int(np.sqrt(self.Mode2_Num))  # マップの1辺を算出（正方形が前提）
 
-        #action1:Map1に着目したか(0:してない 1:した) action2:Map2に着目したか(0:してない 1:した)
+        #action1:Map1について前回クリックした場所との差分があるか(0:ない 1:ある)
+        # action1:Map1について前回クリックした場所との差分があるか(0:ない 1:ある)
         self.action1=0
         self.action2 = 0
+
+        #map1_t: map1についてt回目にクリックした場所のノード番号(t=0,1,...)
+        #map2_t: map2についてt回目にクリックした場所のノード番号(t=0,1,...)
         self.map1_t=0
         self.map2_t=0
 
@@ -135,9 +139,9 @@ class TSOM2_Viewer:
     # --- イベント時の処理 ----------- #
     # ------------------------------ #
     # クリック時の処理
-    def __onclick_fig(self, event):#eventは色々入っているクラス
-        if event.xdata is not None:#クリックしたx座標がグラフの中にある時
-            if event.inaxes == self.Map1.axes:  # Map1の中にいるかどうか
+    def __onclick_fig(self, event):
+        if event.xdata is not None:
+            if event.inaxes == self.Map1.axes:  # Map1内をクリックしたかどうか
                 # クリック位置取得
                 click_pos = np.random.rand(1, 2)
                 click_pos[0, 0] = event.xdata
@@ -146,14 +150,12 @@ class TSOM2_Viewer:
                 self.Map1_click_unit = self.__calc_arg_min_unit(self.Map1_position, click_pos)  # クリックしたところといちばん近いノードがどこかを計算
 
 
-                if self.map1_t-self.Map1_click_unit==0:#Map1に差分なし
-                    print("これはacrion1=0です")
+                if self.map1_t-self.Map1_click_unit==0:#前回と同じところをクリックした or Map2をクリックした
                     self.action1=0
-                elif self.map1_t -self.Map1_click_unit !=0:#Map1に差分あり
-                    print("これはacrion1=1です")
+                elif self.map1_t -self.Map1_click_unit !=0:#前回と別のところをクリックした
                     self.action1=1
 
-
+                #t回目→t+1回目
                 self.map1_t=self.Map1_click_unit
                 self.map2_t = self.Map2_click_unit
 
@@ -200,13 +202,12 @@ class TSOM2_Viewer:
 
                 self.Map2_click_unit = self.__calc_arg_min_unit(self.Map2_position,click_pos)  # クリックしたところといちばん近いノードがどこかを計算
 
-                if self.map2_t - self.Map2_click_unit == 0:  # Map2に差分なし
-                    print("これはacrion2=0です")
+                if self.map2_t - self.Map2_click_unit == 0:  #前回と同じところをクリックした or Map1をクリックした
                     self.action2 = 0
-                elif self.map2_t - self.Map2_click_unit != 0:  # Map2に差分あり
-                    print("これはacrion2=1です")
+                elif self.map2_t - self.Map2_click_unit != 0:  # #前回と別のところをクリックした
                     self.action2 = 1
 
+                # t回目→t+1回目
                 self.map1_t = self.Map1_click_unit
                 self.map2_t = self.Map2_click_unit
 
@@ -480,8 +481,3 @@ class TSOM2_Viewer:
         distance = dist.cdist(zeta, click_point)
         unit = np.argmin(distance, axis=0)
         return unit[0]
-
-
-#まず、最初にmarginalが出るようにしたい.
-#現状は、全てconditional compoent plane
-#次は、ボタンを２回押すと
