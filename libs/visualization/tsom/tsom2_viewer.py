@@ -66,8 +66,8 @@ class TSOM2_Viewer:
             self.hzdict = dict(zip(dict_keys, values))  # e.g.Deskwork_or_studyingが与えられたら0を返す
 
         # コンポーネントプレーン
-        self.__calc_component(1)
-        self.__calc_component(2)
+        self.__calc_conditional_comp(1)
+        self.__calc_conditional_comp(2)
         self.click_map = 0
 
 
@@ -118,8 +118,8 @@ class TSOM2_Viewer:
         else:
             self.count_click=self.hzdict[label]
             self.Map3_click_unit = self.hzdict[label]
-            self.__calc_component(1)
-            self.__calc_component(2)
+            self.__calc_conditional_comp(1)
+            self.__calc_conditional_comp(2)
             self.__draw_map1()
             self.__draw_map2()
             self.__draw_click_point()
@@ -138,14 +138,14 @@ class TSOM2_Viewer:
                 # 左のマップをクリックした時
                 self.Map1_click_unit = self.__calc_arg_min_unit(self.Map1_position, click_pos)
                 # コンポーネント値計算
-                self.__calc_component(2)
+                self.__calc_conditional_comp(2)
                 self.click_map = 1
 
             elif event.inaxes == self.Map2.axes:
                 # 右のマップをクリックした時
                 self.Map2_click_unit = self.__calc_arg_min_unit(self.Map2_position, click_pos)
                 # コンポーネント値計算
-                self.__calc_component(1)
+                self.__calc_conditional_comp(1)
                 self.click_map = 2
 
 
@@ -323,7 +323,15 @@ class TSOM2_Viewer:
     # ------------------------------ #
     # --- コンポーネント値の算出 ------ #
     # ------------------------------ #
-    def __calc_component(self, map_num):
+    def __calc_conditional_comp(self, map_num):
+        if map_num == 1:
+            temp1 = self.Y[:, self.Map2_click_unit, self.Map3_click_unit]
+            self.Map1_val = temp1.reshape((self.map1x_num,self.map1x_num))#np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
+        else:
+            temp2 = self.Y[self.Map1_click_unit, :, self.Map3_click_unit]
+            self.Map2_val = temp2.reshape((self.map2x_num,self.map2x_num))#np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
+    
+    def __calc_marginal_comp(self, map_num):
         if map_num == 1:
             temp1 = self.Y[:, self.Map2_click_unit, self.Map3_click_unit]
             self.Map1_val = temp1.reshape((self.map1x_num,self.map1x_num))#np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
@@ -331,6 +339,7 @@ class TSOM2_Viewer:
             temp2 = self.Y[self.Map1_click_unit, :, self.Map3_click_unit]
             self.Map2_val = temp2.reshape((self.map2x_num,self.map2x_num))#np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
 
+    
     # ------------------------------ #
     # --- 最近傍ユニット算出 ---------- #
     # ------------------------------ #
