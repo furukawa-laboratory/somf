@@ -136,7 +136,8 @@ class TSOM2_Viewer:
     # ------------------------------ #
     # クリック時の処理
     def __onclick_fig(self, event):#eventは色々入っているクラス(position,)
-        click_node=self.Map1_click_unit#前にクリックした点を入れる
+        Map1_click_node=self.Map1_click_unit#前にクリックした点を入れる
+        Map2_click_node = self.Map2_click_unit  # 前にクリックした点を入れる
         if event.xdata is not None:
             # クリック位置取得
             click_pos = np.random.rand(1, 2)
@@ -147,17 +148,14 @@ class TSOM2_Viewer:
                 # 左のマップをクリックした時
                 self.Map1_click_unit = self.__calc_arg_min_unit(self.Map1_position, click_pos)#クリックしたところといちばん近いノードがどこかを計算
 
-                if  click_node==self.Map1_click_unit:#前回とクリックした時のノード番号が同じ時は、マージナルで計算する
-                    print("aaaa")
+                if Map1_click_node==self.Map1_click_unit:#前回とクリックした時のノード番号が同じ時は、マージナルで計算する
                     # コンポーネント値計算
                     self.__calc_marginal_comp(2)#Map1_click_unitを元に計算
                     self.click_map = 1#map1にいる時(どこで使ってるのかわからんけど)
                     # マージナルコンポーネントプレーン表示
                     self.__draw_marginal_map1()
-                    #self.__draw_marginal_map2()
                     self.__draw_click_point()
                 else:
-                    print("conditional")
                     # コンポーネント値計算
                     self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
                     self.click_map = 1  # map1にいる時(どこで使ってるのかわからんけど)
@@ -166,13 +164,25 @@ class TSOM2_Viewer:
                     self.__draw_conditional_map2()
                     self.__draw_click_point()
 
-            elif event.inaxes == self.Map2.axes:
+            elif event.inaxes == self.Map2.axes:#map2がクリックされた時
                 # 右のマップをクリックした時
                 self.Map2_click_unit = self.__calc_arg_min_unit(self.Map2_position, click_pos)
-                # コンポーネント値計算
-                self.__calc_conditional_comp(1)
-                self.click_map = 2
 
+                if Map2_click_node == self.Map2_click_unit:  # 前回とクリックした時のノード番号が同じ時は、マージナルで計算する
+                    # コンポーネント値計算
+                    self.__calc_marginal_comp(1)  # Map1_click_unitを元に計算
+                    self.click_map = 2  # map1にいる時(どこで使ってるのかわからんけど)
+                    # マージナルコンポーネントプレーン表示
+                    self.__draw_marginal_map2()
+                    self.__draw_click_point()
+                else:
+                    # コンポーネント値計算
+                    self.__calc_conditional_comp(1)  # Map1_click_unitを元に計算
+                    self.click_map = 2  # map1にいる時(どこで使ってるのかわからんけど)
+                    # コンディショナルコンポーネントプレーン表示
+                    self.__draw_conditional_map1()
+                    self.__draw_conditional_map2()
+                    self.__draw_click_point()
 
             else:
                 return
