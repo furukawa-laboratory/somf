@@ -173,7 +173,7 @@ class TSOM2_Viewer:
 
                 print("t+1回目")
                 self.map1_t=self.Map1_click_unit
-                #self.map2_t = self.Map2_click_unit
+                self.map2_t = self.Map2_click_unit
                 print("map1_t: ", self.map1_t)
                 #print("map2_t: ", self.map2_t)
                 print("Map1_click_unit: ", self.Map1_click_unit)
@@ -197,26 +197,26 @@ class TSOM2_Viewer:
                     self.__draw_marginal_map1()
                     self.__draw_map1_click_point()
                     self.__draw_conditional_map2()
-                # elif self.action1==0 and self.action2==1: # map1: conditional map2: marginal
-                #     print("s2")
-                #     # 各マップのコンポーネントプレーンの計算
-                #     self.__calc_conditional_comp(1)  # Map2_click_unitを元に計算
-                #     self.__calc_marginal_comp(2)
-                #     # component planeを描画
-                #     self.__draw_marginal_map2()
-                #     self.__draw_map2_click_point()
-                #     self.__draw_conditional_map1()
-                #
-                # elif self.action1==1 and self.action2==1:# map1: conditional map2: conditional
-                #     print("s3")
-                #     # 各マップのコンポーネントプレーンの計算
-                #     self.__calc_conditional_comp(1)  # Map1_click_unitを元に計算
-                #     self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
-                #     # component planeを描画
-                #     self.__draw_conditional_map1()
-                #     self.__draw_conditional_map2()
-                #     self.__draw_map1_click_point()
-                #     self.__draw_map2_click_point()
+                elif self.action1==0 and self.action2==1: # map1: conditional map2: marginal
+                    print("s2")
+                    # 各マップのコンポーネントプレーンの計算
+                    self.__calc_conditional_comp(1)  # Map2_click_unitを元に計算
+                    self.__calc_marginal_comp(2)
+                    # component planeを描画
+                    self.__draw_marginal_map2()
+                    self.__draw_map2_click_point()
+                    self.__draw_conditional_map1()
+
+                elif self.action1==1 and self.action2==1:# map1: conditional map2: conditional
+                    print("s3")
+                    # 各マップのコンポーネントプレーンの計算
+                    self.__calc_conditional_comp(1)  # Map1_click_unitを元に計算
+                    self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
+                    # component planeを描画
+                    self.__draw_conditional_map1()
+                    self.__draw_conditional_map2()
+                    self.__draw_map1_click_point()
+                    self.__draw_map2_click_point()
             elif event.inaxes == self.Map2.axes:  # map2がクリックされた時
                 # クリック位置取得
                 click_pos = np.random.rand(1, 2)
@@ -240,36 +240,36 @@ class TSOM2_Viewer:
                 if self.map2_t - self.Map2_click_unit == 0:  # Map2に差分なし
                     print("これはacrion2=0です")
                     self.action2 = 0
-                elif self.map2_t - self.Map2_click_unit == 0:  # Map2に差分あり
+                elif self.map2_t - self.Map2_click_unit != 0:  # Map2に差分あり
                     print("これはacrion2=1です")
                     self.action2 = 1
 
                 print("t+1回目")
-                #self.map1_t = self.Map1_click_unit
+                self.map1_t = self.Map1_click_unit
                 self.map2_t = self.Map2_click_unit
                 #print("map1_t: ", self.map1_t)
                 print("map2_t: ", self.map2_t)
                 #print("Map1_click_unit: ", self.Map1_click_unit)
                 print("Map2_click_unit: ", self.Map2_click_unit)
 
-                # if self.action1 == 0 and self.action2 == 0:  # map1: marginal map2: marginal
-                #     print("s0")
-                #     # 各マップのコンポーネントプレーンの計算
-                #     self.__calc_marginal_comp(1)  # Map1_click_unitを元に計算
-                #     self.__calc_marginal_comp(2)  # Map1_click_unitを元に計算
-                #     # component planeを描画
-                #     self.__draw_marginal_map1()
-                #     self.__draw_marginal_map2()
-                #
-                # elif self.action1 == 1 and self.action2 == 0:  # map1: marginal map2: conditional
-                #     print("s1")
-                #     # 各マップのコンポーネントプレーンの計算
-                #     self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
-                #     self.__calc_marginal_comp(1)
-                #     # component planeを描画
-                #     self.__draw_marginal_map1()
-                #     self.__draw_map1_click_point()
-                #     self.__draw_conditional_map2()
+                if self.action1 == 0 and self.action2 == 0:  # map1: marginal map2: marginal
+                    print("s0")
+                    # 各マップのコンポーネントプレーンの計算
+                    self.__calc_marginal_comp(1)  # Map1_click_unitを元に計算
+                    self.__calc_marginal_comp(2)  # Map1_click_unitを元に計算
+                    # component planeを描画
+                    self.__draw_marginal_map1()
+                    self.__draw_marginal_map2()
+
+                elif self.action1 == 1 and self.action2 == 0:  # map1: marginal map2: conditional
+                    print("s1")
+                    # 各マップのコンポーネントプレーンの計算
+                    self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
+                    self.__calc_marginal_comp(1)
+                    # component planeを描画
+                    self.__draw_marginal_map1()
+                    self.__draw_map1_click_point()
+                    self.__draw_conditional_map2()
                 if self.action1 == 0 and self.action2 == 1:  # map1: conditional map2: marginal
                     print("s2")
                     # 各マップのコンポーネントプレーンの計算
@@ -290,45 +290,6 @@ class TSOM2_Viewer:
                     self.__draw_conditional_map2()
                     self.__draw_map1_click_point()
                     self.__draw_map2_click_point()
-
-            # if event.inaxes == self.Map1.axes:#Map1の中にいるかどうか
-            #     # 左のマップをクリックした時
-            #     self.Map1_click_unit = self.__calc_arg_min_unit(self.Map1_position, click_pos)#クリックしたところといちばん近いノードがどこかを計算
-            #
-            #     if Map1_click_node==self.Map1_click_unit:#前回とクリックした時のノード番号が同じ時は、マージナルで計算する
-            #         # コンポーネント値計算
-            #         self.__calc_marginal_comp(2)#Map1_click_unitを元に計算
-            #         self.click_map = 1#map1にいる時(どこで使ってるのかわからんけど)
-            #         # マージナルコンポーネントプレーン表示
-            #         self.__draw_marginal_map1()
-            #     else:
-            #         # コンポーネント値計算
-            #         self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
-            #         self.click_map = 1  # map1にいる時(どこで使ってるのかわからんけど)
-            #         # コンディショナルコンポーネントプレーン表示
-            #         #self.__draw_marginal_map1()
-            #         self.__draw_conditional_map2()
-            #         self.__draw_click_point()
-            #
-            # elif event.inaxes == self.Map2.axes:#map2がクリックされた時
-            #     # 右のマップをクリックした時
-            #     self.Map2_click_unit = self.__calc_arg_min_unit(self.Map2_position, click_pos)
-            #
-            #     if Map2_click_node == self.Map2_click_unit:  # 前回とクリックした時のノード番号が同じ時は、マージナルで計算する
-            #         # コンポーネント値計算
-            #         self.__calc_marginal_comp(1)  # Map1_click_unitを元に計算
-            #         self.click_map = 2  # map1にいる時(どこで使ってるのかわからんけど)
-            #         # マージナルコンポーネントプレーン表示
-            #         self.__draw_marginal_map2()
-            #     else:
-            #         # コンポーネント値計算
-            #         self.__calc_conditional_comp(1)  # Map1_click_unitを元に計算
-            #         self.click_map = 2  # map1にいる時(どこで使ってるのかわからんけど)
-            #         # コンディショナルコンポーネントプレーン表示
-            #         self.__draw_conditional_map1()
-            #         #self.__draw_marginal_map2()
-            #         self.__draw_click_point()
-
             else:#クリックしたところがグラフの外はスルー
                 return
 
