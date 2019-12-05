@@ -125,8 +125,8 @@ class TSOM2_Viewer:
             self.Map3_click_unit = self.hzdict[label]
             self.__calc_conditional_comp(1)
             self.__calc_conditional_comp(2)
-            self.__draw_map1()
-            self.__draw_map2()
+            self.__draw_conditional_map1()
+            self.__draw_conditional_map2()
             self.__draw_click_point()
     # ------------------------------ #
     # --- イベント時の処理 ----------- #
@@ -157,8 +157,8 @@ class TSOM2_Viewer:
             else:
                 return
             # コンポーネントプレーン表示
-            self.__draw_map1()
-            self.__draw_map2()
+            self.__draw_conditional_map1()
+            self.__draw_conditional_map2()
             self.__draw_click_point()
 
     # マウスオーバー時(in)の処理
@@ -184,8 +184,8 @@ class TSOM2_Viewer:
 
     # マウスオーバー時(out)の処理
     def __mouse_leave_fig(self, event):
-        self.__draw_map1()
-        self.__draw_map2()
+        self.__draw_conditional_map1()
+        self.__draw_conditional_map2()
         self.radio.on_clicked(self.hzfunc)
         self.__draw_click_point()
 
@@ -198,8 +198,8 @@ class TSOM2_Viewer:
         # コンポーネントの初期表示(左下が0番目のユニットが来るように行列を上下反転している)
         self.__draw_marginal_map1()
         self.__draw_marginal_map2()
-        # self.__draw_map1()
-        # self.__draw_map2()
+        # self.__draw_conditional_map1()
+        # self.__draw_conditional_map2()
         self.radio.on_clicked(self.hzfunc)
         self.__draw_click_point()
 
@@ -281,7 +281,7 @@ class TSOM2_Viewer:
         #         else:
         #             chemical_labels = chemical_labels + "\n" + self.labels2[i]
         # if len(chemical_labels) > 1:
-        #     self.__draw_map2()
+        #     self.__draw_conditional_map2()
         #     if self.Winner2[temp] % self.map2x_num < self.map2x_num / 2.0:
         #         self.Map2.text(self.Map2_position[mouse_over_unit, 0], self.Map2_position[mouse_over_unit, 1],
         #                        chemical_labels, color='black', ha='left', va='center', bbox=self.bbox_mouse)
@@ -326,7 +326,7 @@ class TSOM2_Viewer:
         self.Map2.set_ylim(-self.Mapsize, 1)
         self.Fig.show()
 
-    def __draw_map1(self):
+    def __draw_conditional_map1(self):
         self.Map1.cla()
         self.Map1.set_title('View 1')
         self.__draw_label_map1()
@@ -336,7 +336,7 @@ class TSOM2_Viewer:
         self.Map1.set_ylim(-self.Mapsize, 1)
         self.Fig.show()
 
-    def __draw_map2(self):
+    def __draw_conditional_map2(self):
         self.Map2.cla()
         self.Map2.set_title('View 2')
         # self.Map2.set_xlabel("Aroma Map")
@@ -382,3 +382,4 @@ class TSOM2_Viewer:
 
 #まず、最初にmarginalが出るようにしたい.
 #現状は、全てconditional compoent plane
+#次は、ボタンを２回押すと
