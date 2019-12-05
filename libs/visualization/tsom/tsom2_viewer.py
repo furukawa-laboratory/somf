@@ -142,14 +142,7 @@ class TSOM2_Viewer:
     # --- イベント時の処理 ----------- #
     # ------------------------------ #
     # クリック時の処理
-    def __onclick_fig(self, event):#eventは色々入っているクラス(position,)
-        #いくつ押したのかを判定する関数を追加する
-        #押してない: Map1.click_unit=None かつ Map2.click_unit=None
-
-        # 1つ押した時(Map1のクリックユニットが変わる or )
-        # self.Map1_t_plus = self.Map1_click_unit  # 前にクリックした点を入れる
-        # self.Map2_t_plus = self.Map2_click_unit  # 前にクリックした点を入れる
-
+    def __onclick_fig(self, event):#eventは色々入っているクラス
         if event.xdata is not None:#クリックしたx座標がグラフの中にある時
             if event.inaxes == self.Map1.axes:  # Map1の中にいるかどうか
                 # クリック位置取得
@@ -158,12 +151,12 @@ class TSOM2_Viewer:
                 click_pos[0, 1] = event.ydata
 
                 self.Map1_click_unit = self.__calc_arg_min_unit(self.Map1_position, click_pos)  # クリックしたところといちばん近いノードがどこかを計算
-                self.Map2_click_unit = self.__calc_arg_min_unit(self.Map2_position, click_pos)  # クリックしたところといちばん近いノードがどこかを計算
+                # self.Map2_click_unit = self.__calc_arg_min_unit(self.Map2_position, click_pos)  # クリックしたところといちばん近いノードがどこかを計算
                 print("t回目")
                 print("map1_t: ",self.map1_t)
-                print("map2_t: ", self.map2_t)
+                #print("map2_t: ", self.map2_t)
                 print("Map1_click_unit: ", self.Map1_click_unit)
-                print("Map2_click_unit: ", self.Map2_click_unit)
+                #print("Map2_click_unit: ", self.Map2_click_unit)
 
                 if self.map1_t-self.Map1_click_unit==0:#Map1に差分なし
                     print("これはacrion1=0です")
@@ -171,20 +164,20 @@ class TSOM2_Viewer:
                 elif self.map1_t -self.Map1_click_unit !=0:#Map1に差分あり
                     print("これはacrion1=1です")
                     self.action1=1
-                elif self.map2_t-self.Map2_click_unit ==0:#Map2に差分なし
-                    print("これはacrion2=0です")
-                    self.action2=0
-                elif self.map2_t-self.Map2_click_unit==0:#Map2に差分あり
-                    print("これはacrion2=1です")
-                    self.action2=1
+                # elif self.map2_t-self.Map2_click_unit ==0:#Map2に差分なし
+                #     print("これはacrion2=0です")
+                #     self.action2=0
+                # elif self.map2_t-self.Map2_click_unit==0:#Map2に差分あり
+                #     print("これはacrion2=1です")
+                #     self.action2=1
 
                 print("t+1回目")
                 self.map1_t=self.Map1_click_unit
-                self.map2_t = self.Map2_click_unit
+                #self.map2_t = self.Map2_click_unit
                 print("map1_t: ", self.map1_t)
-                print("map2_t: ", self.map2_t)
+                #print("map2_t: ", self.map2_t)
                 print("Map1_click_unit: ", self.Map1_click_unit)
-                print("Map2_click_unit: ", self.Map2_click_unit)
+                #print("Map2_click_unit: ", self.Map2_click_unit)
 
                 if self.action1==0 and self.action2==0:# map1: marginal map2: marginal
                     print("s0")
@@ -204,49 +197,47 @@ class TSOM2_Viewer:
                     self.__draw_marginal_map1()
                     self.__draw_map1_click_point()
                     self.__draw_conditional_map2()
-                elif self.action1==0 and self.action2==1: # map1: conditional map2: marginal
-                    print("s2")
-                    # 各マップのコンポーネントプレーンの計算
-                    self.__calc_conditional_comp(1)  # Map2_click_unitを元に計算
-                    self.__calc_marginal_comp(2)
-                    # component planeを描画
-                    self.__draw_marginal_map2()
-                    self.__draw_map2_click_point()
-                    self.__draw_conditional_map1()
-
-                elif self.action1==1 and self.action2==1:# map1: conditional map2: conditional
-                    print("s3")
-                    # 各マップのコンポーネントプレーンの計算
-                    self.__calc_conditional_comp(1)  # Map1_click_unitを元に計算
-                    self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
-                    # component planeを描画
-                    self.__draw_conditional_map1()
-                    self.__draw_conditional_map2()
-                    self.__draw_map1_click_point()
-                    self.__draw_map2_click_point()
+                # elif self.action1==0 and self.action2==1: # map1: conditional map2: marginal
+                #     print("s2")
+                #     # 各マップのコンポーネントプレーンの計算
+                #     self.__calc_conditional_comp(1)  # Map2_click_unitを元に計算
+                #     self.__calc_marginal_comp(2)
+                #     # component planeを描画
+                #     self.__draw_marginal_map2()
+                #     self.__draw_map2_click_point()
+                #     self.__draw_conditional_map1()
+                #
+                # elif self.action1==1 and self.action2==1:# map1: conditional map2: conditional
+                #     print("s3")
+                #     # 各マップのコンポーネントプレーンの計算
+                #     self.__calc_conditional_comp(1)  # Map1_click_unitを元に計算
+                #     self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
+                #     # component planeを描画
+                #     self.__draw_conditional_map1()
+                #     self.__draw_conditional_map2()
+                #     self.__draw_map1_click_point()
+                #     self.__draw_map2_click_point()
             elif event.inaxes == self.Map2.axes:  # map2がクリックされた時
                 # クリック位置取得
                 click_pos = np.random.rand(1, 2)
                 click_pos[0, 0] = event.xdata
                 click_pos[0, 1] = event.ydata
 
-                self.Map1_click_unit = self.__calc_arg_min_unit(self.Map1_position,
-                                                                click_pos)  # クリックしたところといちばん近いノードがどこかを計算
-                self.Map2_click_unit = self.__calc_arg_min_unit(self.Map2_position,
-                                                                click_pos)  # クリックしたところといちばん近いノードがどこかを計算
+                #self.Map1_click_unit = self.__calc_arg_min_unit(self.Map1_position,click_pos)  # クリックしたところといちばん近いノードがどこかを計算
+                self.Map2_click_unit = self.__calc_arg_min_unit(self.Map2_position,click_pos)  # クリックしたところといちばん近いノードがどこかを計算
                 print("t回目")
-                print("map1_t: ", self.map1_t)
+                #print("map1_t: ", self.map1_t)
                 print("map2_t: ", self.map2_t)
-                print("Map1_click_unit: ", self.Map1_click_unit)
+                #print("Map1_click_unit: ", self.Map1_click_unit)
                 print("Map2_click_unit: ", self.Map2_click_unit)
 
-                if self.map1_t - self.Map1_click_unit == 0:  # Map1に差分なし
-                    print("これはacrion1=0です")
-                    self.action1 = 0
-                elif self.map1_t - self.Map1_click_unit != 0:  # Map1に差分あり
-                    print("これはacrion1=1です")
-                    self.action1 = 1
-                elif self.map2_t - self.Map2_click_unit == 0:  # Map2に差分なし
+                # if self.map1_t - self.Map1_click_unit == 0:  # Map1に差分なし
+                #     print("これはacrion1=0です")
+                #     self.action1 = 0
+                # elif self.map1_t - self.Map1_click_unit != 0:  # Map1に差分あり
+                #     print("これはacrion1=1です")
+                #     self.action1 = 1
+                if self.map2_t - self.Map2_click_unit == 0:  # Map2に差分なし
                     print("これはacrion2=0です")
                     self.action2 = 0
                 elif self.map2_t - self.Map2_click_unit == 0:  # Map2に差分あり
@@ -254,32 +245,32 @@ class TSOM2_Viewer:
                     self.action2 = 1
 
                 print("t+1回目")
-                self.map1_t = self.Map1_click_unit
+                #self.map1_t = self.Map1_click_unit
                 self.map2_t = self.Map2_click_unit
-                print("map1_t: ", self.map1_t)
+                #print("map1_t: ", self.map1_t)
                 print("map2_t: ", self.map2_t)
-                print("Map1_click_unit: ", self.Map1_click_unit)
+                #print("Map1_click_unit: ", self.Map1_click_unit)
                 print("Map2_click_unit: ", self.Map2_click_unit)
 
-                if self.action1 == 0 and self.action2 == 0:  # map1: marginal map2: marginal
-                    print("s0")
-                    # 各マップのコンポーネントプレーンの計算
-                    self.__calc_marginal_comp(1)  # Map1_click_unitを元に計算
-                    self.__calc_marginal_comp(2)  # Map1_click_unitを元に計算
-                    # component planeを描画
-                    self.__draw_marginal_map1()
-                    self.__draw_marginal_map2()
-
-                elif self.action1 == 1 and self.action2 == 0:  # map1: marginal map2: conditional
-                    print("s1")
-                    # 各マップのコンポーネントプレーンの計算
-                    self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
-                    self.__calc_marginal_comp(1)
-                    # component planeを描画
-                    self.__draw_marginal_map1()
-                    self.__draw_map1_click_point()
-                    self.__draw_conditional_map2()
-                elif self.action1 == 0 and self.action2 == 1:  # map1: conditional map2: marginal
+                # if self.action1 == 0 and self.action2 == 0:  # map1: marginal map2: marginal
+                #     print("s0")
+                #     # 各マップのコンポーネントプレーンの計算
+                #     self.__calc_marginal_comp(1)  # Map1_click_unitを元に計算
+                #     self.__calc_marginal_comp(2)  # Map1_click_unitを元に計算
+                #     # component planeを描画
+                #     self.__draw_marginal_map1()
+                #     self.__draw_marginal_map2()
+                #
+                # elif self.action1 == 1 and self.action2 == 0:  # map1: marginal map2: conditional
+                #     print("s1")
+                #     # 各マップのコンポーネントプレーンの計算
+                #     self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
+                #     self.__calc_marginal_comp(1)
+                #     # component planeを描画
+                #     self.__draw_marginal_map1()
+                #     self.__draw_map1_click_point()
+                #     self.__draw_conditional_map2()
+                if self.action1 == 0 and self.action2 == 1:  # map1: conditional map2: marginal
                     print("s2")
                     # 各マップのコンポーネントプレーンの計算
                     self.__calc_conditional_comp(1)  # Map2_click_unitを元に計算
