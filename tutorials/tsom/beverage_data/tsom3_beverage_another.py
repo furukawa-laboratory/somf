@@ -17,8 +17,7 @@ if __name__ == '__main__':
     tsom3.fit(nb_epoch=250)
 
     # 結果の描画
-    comp = TSOM3_V(y=tsom3.Y, winner1=tsom.k_star2, winner2=tsom.k_star2,
-                   label1=beverage_label, label2=situation_label)
+    comp = TSOM3_V(y=tsom3.Y, winner1=tsom3.k1_star, winner2=tsom3.k2_star, winner3=tsom3.k3_star, label1=None, label2=beverage_label, label3=situation_label)
     comp.draw_map()
 
     # fig = plt.figure()
