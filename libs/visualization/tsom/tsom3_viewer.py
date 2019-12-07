@@ -8,23 +8,19 @@ from matplotlib.widgets import RadioButtons
 np.random.seed(2)
 
 class TSOM3_Viewer:
-    def __init__(self, y, winner1, winner2, winner3, fig_size=None, label1=None, label2=None, button_label=None):
+    def __init__(self, y, winner1, winner2, winner3, fig_size=None, label1=None, label2=None, label3=None, button_label=None):
         # ---------- 参照テンソルとデータ ---------- #
         self.Mode1_Num = y.shape[0]
         self.Mode2_Num = y.shape[1]
         self.Mode3_Num = y.shape[2]
-        if y.ndim == 2:
-            # 1次元の場合
-            self.Dim = 1
-            self.Y = y[:, :, np.newaxis]
-        elif y.ndim == 3:
-            # 2次元の場合
+        if y.ndim == 3:
+            # 3次元の場合
             self.Dim = y.shape[2]
             self.Y = y[:, :, :, np.newaxis]
         else:
+            # 4次元以降
             self.Dim = y.shape[3]
             self.Y = y
-
 
         # ---------- 勝者 ---------- #
         self.Winner1 = winner1
@@ -38,7 +34,7 @@ class TSOM3_Viewer:
         self.Radio_click_unit = 0  # add machida Radioのクリック位置
         self.map1x_num = int(np.sqrt(self.Mode1_Num))  # マップの1辺を算出（正方形が前提）
         self.map2x_num = int(np.sqrt(self.Mode2_Num))  # マップの1辺を算出（正方形が前提）
-
+        self.map3x_num = int(np.sqrt(self.Mode3_Num))  # マップの1辺を算出（正方形が前提）
 
         # マップ上の座標
         map1x = np.arange(self.map1x_num)
@@ -49,10 +45,15 @@ class TSOM3_Viewer:
         map2y = -np.arange(self.map2x_num)
         map2x_pos, map2y_pos = np.meshgrid(map2x, map2y)
         self.Map2_position = np.c_[map2x_pos.ravel(), map2y_pos.ravel()]  # マップ上の座標
+        map3x = np.arange(self.map3x_num)
+        map3y = -np.arange(self.map3x_num)
+        map3x_pos, map3y_pos = np.meshgrid(map3x, map3y)
+        self.Map3_position = np.c_[map3x_pos.ravel(), map3y_pos.ravel()]  # マップ上の座標
 
         #label
-        self.label1=label1
-        self.label2=label2
+        self.label1 = label1
+        self.label2 = label2
+        self.label3 = label3
         self.button_label = button_label
 
         if button_label is None:#radioボタンにラベルが与えられなかったときの処理(観測データ次元分の番号を振る)
@@ -75,6 +76,7 @@ class TSOM3_Viewer:
         # コンポーネントプレーン
         self.__calc_component(1)
         self.__calc_component(2)
+        self.__calc_component(3)
         self.click_map = 0
 
 
@@ -85,10 +87,12 @@ class TSOM3_Viewer:
         else:
             self.Fig = plt.figure(figsize=fig_size)
         plt.subplots_adjust(right=0.7)
-        self.Map1 = self.Fig.add_subplot(1, 2, 1)
+        self.Map1 = self.Fig.add_subplot(1, 3, 1)
         self.Map1.set_title('View 1')
-        self.Map2 = self.Fig.add_subplot(1, 2, 2)
+        self.Map2 = self.Fig.add_subplot(1, 3, 2)
         self.Map2.set_title('View 2')
+        self.Map3 = self.Fig.add_subplot(1, 3, 3)
+        self.Map3.set_title('View 3')
         rax = plt.axes([0.7, 0.25, 0.1, 0.5], facecolor='lightgoldenrodyellow',aspect='equal')
         if not button_label is None:
             self.radio = RadioButtons(rax, button_label)
@@ -101,14 +105,25 @@ class TSOM3_Viewer:
         self.Map1.spines["left"].set_color("none")
         self.Map1.spines["top"].set_color("none")
         self.Map1.spines["bottom"].set_color("none")
+
         self.Map2.spines["right"].set_color("none")
         self.Map2.spines["left"].set_color("none")
         self.Map2.spines["top"].set_color("none")
         self.Map2.spines["bottom"].set_color("none")
+
+        self.Map3.spines["right"].set_color("none")
+        self.Map3.spines["left"].set_color("none")
+        self.Map3.spines["top"].set_color("none")
+        self.Map3.spines["bottom"].set_color("none")
+
         self.Map1.tick_params(labelbottom='off', color='white')
         self.Map1.tick_params(labelleft='off')
+
         self.Map2.tick_params(labelbottom='off', color='white')
         self.Map2.tick_params(labelleft='off')
+
+        self.Map3.tick_params(labelbottom='off', color='white')
+        self.Map3.tick_params(labelleft='off')
 
         # textboxのプロパティ
         self.bbox_labels = dict(fc="gray", ec="black", lw=2, alpha=0.5)
@@ -117,6 +132,7 @@ class TSOM3_Viewer:
         # 勝者が被った場合にラベルが重ならないようにするためのノイズ
         self.noise_map1 = (np.random.rand(self.Winner1.shape[0], 2) - 0.5)
         self.noise_map2 = (np.random.rand(self.Winner2.shape[0], 2) - 0.5)
+        self.noise_map3 = (np.random.rand(self.Winner3.shape[0], 2) - 0.5)
 
     def hzfunc(self, label):#radioボタンを押した時の処理
 
@@ -127,8 +143,10 @@ class TSOM3_Viewer:
             self.Radio_click_unit = self.hzdict[label]
             self.__calc_component(1)
             self.__calc_component(2)
+            self.__calc_component(3)
             self.__draw_map1()
             self.__draw_map2()
+            self.__draw_map3()
             self.__draw_click_point()
     # ------------------------------ #
     # --- イベント時の処理 ----------- #
@@ -142,25 +160,35 @@ class TSOM3_Viewer:
             click_pos[0, 1] = event.ydata
 
             if event.inaxes == self.Map1.axes:
-                # 左のマップをクリックした時
+                # マップ１をクリック
                 self.Map1_click_unit = self.__calc_arg_min_unit(self.Map1_position, click_pos)
                 # コンポーネント値計算
                 self.__calc_component(2)
+                self.__calc_component(3)
                 self.click_map = 1
 
             elif event.inaxes == self.Map2.axes:
-                # 右のマップをクリックした時
+                # マップ2をクリックした時
                 self.Map2_click_unit = self.__calc_arg_min_unit(self.Map2_position, click_pos)
                 # コンポーネント値計算
                 self.__calc_component(1)
+                self.__calc_component(3)
                 self.click_map = 2
 
+            elif event.inaxes == self.Map3.axes:
+                # マップ３をクリックした時
+                self.Map3_click_unit = self.__calc_arg_min_unit(self.Map3_position, click_pos)
+                # コンポーネント値計算
+                self.__calc_component(2)
+                self.__calc_component(3)
+                self.click_map = 3
 
             else:
                 return
             # コンポーネントプレーン表示
             self.__draw_map1()
             self.__draw_map2()
+            self.__draw_map3()
             self.__draw_click_point()
 
     # マウスオーバー時(in)の処理
@@ -188,6 +216,7 @@ class TSOM3_Viewer:
     def __mouse_leave_fig(self, event):
         self.__draw_map1()
         self.__draw_map2()
+        self.__draw_map3()
         self.radio.on_clicked(self.hzfunc)
         self.__draw_click_point()
 
@@ -200,6 +229,7 @@ class TSOM3_Viewer:
         # コンポーネントの初期表示(左下が0番目のユニットが来るように行列を上下反転している)
         self.__draw_map1()
         self.__draw_map2()
+        self.__draw_map3()
         self.radio.on_clicked(self.hzfunc)
         self.__draw_click_point()
 
@@ -214,7 +244,7 @@ class TSOM3_Viewer:
     # ------------------------------ #
     # --- ラベルの描画 --------------- #
     # ------------------------------ #
-    # 左のマップ
+    # マップ１
     def __draw_label_map1(self):
         epsilon = 0.02 * (self.Map1_position.max() - self.Map1_position.min())
         if not self.label1 is None:#ラベルを与えばそのラベルを出力,そうでないなら出力しない
@@ -227,7 +257,7 @@ class TSOM3_Viewer:
                           c="white",linewidths=1,edgecolors="black")
         self.Fig.show()
 
-    # 右のマップ
+    # マップ２
     def __draw_label_map2(self):
         epsilon = 0.02 * (self.Map2_position.max() - self.Map2_position.min())
         if not self.label2 is None:  # ラベルを与えばそのラベルを出力,そうでないなら出力しない
@@ -240,6 +270,18 @@ class TSOM3_Viewer:
                           c="white", linewidths=1, edgecolors="black")
         self.Fig.show()
 
+    # マップ３
+    def __draw_label_map3(self):
+        epsilon = 0.02 * (self.Map3_position.max() - self.Map3_position.min())
+        if not self.label3 is None:  # ラベルを与えばそのラベルを出力,そうでないなら出力しない
+            for i in range(self.Winner3.shape[0]):
+                self.Map3.text(self.Map3_position[self.Winner3[i], 0] + epsilon * self.noise_map3[i, 0],
+                           self.Map3_position[self.Winner3[i], 1] + epsilon * self.noise_map3[i, 1],
+                           self.label3[i], ha='center', va='bottom', color='black')
+        self.Map3.scatter(self.Map3_position[self.Winner3[:], 0] + epsilon * self.noise_map3[:, 0],
+                          self.Map3_position[self.Winner3[:], 1] + epsilon * self.noise_map3[:, 1],
+                          c="white", linewidths=1, edgecolors="black")
+        self.Fig.show()
 
     # ------------------------------ #
     # --- ラベルの描画(マウスオーバ時) - #
@@ -297,7 +339,8 @@ class TSOM3_Viewer:
                        ".", color="black", ms=30, fillstyle="none")
         self.Map2.plot(self.Map2_position[self.Map2_click_unit, 0], self.Map2_position[self.Map2_click_unit, 1],
                        ".", color="black", ms=30, fillstyle="none")
-
+        self.Map3.plot(self.Map3_position[self.Map3_click_unit, 0], self.Map3_position[self.Map3_click_unit, 1],
+                       ".", color="black", ms=30, fillstyle="none")
         self.Fig.show()
 
     # ------------------------------ #
@@ -316,13 +359,21 @@ class TSOM3_Viewer:
     def __draw_map2(self):
         self.Map2.cla()
         self.Map2.set_title('View 2')
-        # self.Map2.set_xlabel("Aroma Map")
-        self.Map2.xaxis.set_label_coords(0.5, -0.1)
         self.__draw_label_map2()
         self.Map2.imshow(self.Map2_val[::], interpolation='spline36',
                          extent=[0, self.Map2_val.shape[0] - 1, -self.Map2_val.shape[1] + 1, 0], cmap="rainbow")
         self.Map2.set_xlim(-1, self.Mapsize)
         self.Map2.set_ylim(-self.Mapsize, 1)
+        self.Fig.show()
+
+    def __draw_map3(self):
+        self.Map3.cla()
+        self.Map3.set_title('View 3')
+        self.__draw_label_map3()
+        self.Map3.imshow(self.Map3_val[::], interpolation='spline36',
+                         extent=[0, self.Map3_val.shape[0] - 1, -self.Map3_val.shape[1] + 1, 0], cmap="rainbow")
+        self.Map3.set_xlim(-1, self.Mapsize)
+        self.Map3.set_ylim(-self.Mapsize, 1)
         self.Fig.show()
 
 
@@ -332,11 +383,14 @@ class TSOM3_Viewer:
     # ------------------------------ #
     def __calc_component(self, map_num):
         if map_num == 1:
-            temp1 = self.Y[:, self.Map2_click_unit, self.Radio_click_unit]
+            temp1 = self.Y[:, self.Map2_click_unit, self.Map3_click_unit, self.Radio_click_unit]
             self.Map1_val = temp1.reshape((self.map1x_num,self.map1x_num))#np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
-        else:
-            temp2 = self.Y[self.Map1_click_unit, :, self.Radio_click_unit]
+        if map_num == 2:
+            temp2 = self.Y[self.Map1_click_unit, :, self.Map3_click_unit, self.Radio_click_unit]
             self.Map2_val = temp2.reshape((self.map2x_num,self.map2x_num))#np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
+        else:
+            temp3 = self.Y[self.Map1_click_unit, self.Map2_click_unit, :, self.Radio_click_unit]
+            self.Map3_val = temp3.reshape((self.map3x_num,self.map3x_num))#np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
 
     # ------------------------------ #
     # --- 最近傍ユニット算出 ---------- #
