@@ -13,17 +13,18 @@ if __name__ == '__main__':
     situation_label = data_set[2]
 
     np.random.seed(1)
-    latent_dim = np.array([2, 2])
+    latent_dim = np.array([2, 2, 2])
     Z1init = np.random.rand(X.shape[0], latent_dim[0])
     Z2init = np.random.rand(X.shape[1], latent_dim[1])
-    init = [Z1init, Z2init]
+    Z3init = np.random.rand(X.shape[2], latent_dim[2])
+    init = [Z1init, Z2init, Z3init]
 
-    tsom3 = TSOM3(X, latent_dim=2, resolution=5, SIGMA_MAX=2.0, SIGMA_MIN=0.2,
-                  TAU=(50, 50, 50), init="random")
+    tsom3 = TSOM3(X, latent_dim=2, resolution=7, SIGMA_MAX=2.0, SIGMA_MIN=0.2,
+                  TAU=(50, 50, 50), init='random')
     tsom3.fit(nb_epoch=250)
 
     # 結果の描画
-    comp = TSOM3_V(y=tsom3.Y, winner1=tsom3.k1_star, winner2=tsom3.k2_star, winner3=tsom3.k3_star, label1=None, label2=beverage_label, label3=situation_label, init=init)
+    comp = TSOM3_V(y=tsom3.Y, winner1=tsom3.k1_star, winner2=tsom3.k2_star, winner3=tsom3.k3_star, label1=None, label2=beverage_label, label3=situation_label)
     comp.draw_map()
 
     # fig = plt.figure()
