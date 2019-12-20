@@ -7,7 +7,7 @@ from ...tools.calc_grad_norm_of_ks import calc_grad_norm_of_ks as calc_grad_norm
 
 
 class Grad_Norm:
-    def __init__(self, X=None, Z=None, sigma=0.2, resolution=100,
+    def __init__(self, X=None, Z=None, sigma=None, resolution=None,
                  labels=None, fig_size=[6, 6], title_text='Grad_norm', cmap_type='jet',
                  interpolation_method='spline36', repeat=False, interval=40):
         # インプットが無効だった時のエラー処理
