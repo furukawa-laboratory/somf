@@ -29,7 +29,7 @@ class Unsupervised_Kernel_Regression_pytorch(object):
         if isinstance(init, str) and init in 'random':
             self.Z = np.random.normal(0, 1.0, (self.nb_samples, self.nb_components)) * bandwidth_gaussian_kernel * 0.5
         elif isinstance(init, torch.Tensor) and init.shape == (self.nb_samples, self.nb_components):
-            self.Z = init.clone().detach().requires_grad_(True)
+            self.Z = init
         else:
             raise ValueError("invalid init: {}".format(init))
 
@@ -65,19 +65,14 @@ class Unsupervised_Kernel_Regression_pytorch(object):
             Y = (R @ self.X).clone().detach().requires_grad_(True)
             Error = Y - self.X
             obj_func = torch.sum(Error**2) / self.nb_samples + self.lambda_ * torch.sum(self.Z**2)
-            print(obj_func.detach().numpy())
             obj_func.backward()
             with torch.no_grad():
                 self.Z = self.Z - eta * self.Z.grad
-                # self.Z -= eta * self.Z.grad / self.nb_samples
+                if self.is_compact:
+                    self.Z = torch.clamp(self.Z, -1.0, 1.0)
+                else:
+                    self.Z = self.Z - self.Z.mean(0)
             self.Z.requires_grad = True
-
-            if self.is_compact:
-                self.Z = torch.clamp(self.Z, -1.0, 1.0).clone().detach().requires_grad_(True)
-            else:
-                # self.Z -= self.Z.mean(axis=0)
-                # self.Z -= torch.mean(self.Z)
-                assert 'Not Implemented Error'
 
             if self.is_save_hisotry:
                 self.history['z'][epoch] = self.Z

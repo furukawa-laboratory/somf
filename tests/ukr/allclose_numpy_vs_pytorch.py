@@ -25,7 +25,7 @@ class TestUKR(unittest.TestCase):
         nb_epoch = 1
 
         # ukr parameter
-        is_compact = False
+        is_compact = True
         is_save_history = True
         lambda_ = 0.0
         eta = 8.0
@@ -42,7 +42,7 @@ class TestUKR(unittest.TestCase):
 
         ukr_pytorch = UKR_pytorch(torch.from_numpy(X), nb_components=n_components, bandwidth_gaussian_kernel=bandwidth_gaussian_kernel,
                 is_compact=is_compact, is_save_history=is_save_history, lambda_=lambda_,
-                init=torch.from_numpy(Zinit).clone().detach().requires_grad_(True))
+                init=torch.tensor(Zinit, requires_grad=True, dtype=torch.float64))
         ukr_pytorch.fit(nb_epoch=nb_epoch, eta=eta)
         z_pytorch = ukr_pytorch.history['z'][0].detach().numpy()
         y_pytorch = ukr_pytorch.history['y'][0].detach().numpy()
