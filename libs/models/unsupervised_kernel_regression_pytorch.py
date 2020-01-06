@@ -62,7 +62,7 @@ class Unsupervised_Kernel_Regression_pytorch(object):
             GInv = 1 / G
             R = H * GInv
 
-            Y = (R @ self.X).clone().detach().requires_grad_(True)
+            Y = torch.mm(R,self.X)
             Error = Y - self.X
             obj_func = torch.sum(Error**2) / self.nb_samples + self.lambda_ * torch.sum(self.Z**2)
             obj_func.backward()
