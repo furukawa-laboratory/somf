@@ -26,7 +26,7 @@ class TestUKR(unittest.TestCase):
 
         is_compact_list = [True, False]
         is_save_history = True
-        lambda_ = 0.0
+        lambda_list = [0.0, 0.005]
         eta = 8.0
 
         # initialize Z
@@ -34,22 +34,23 @@ class TestUKR(unittest.TestCase):
 
         for bandwidth_gaussian_kernel in bandwidth_gaussian_kernel_list:
             for is_compact in is_compact_list:
-                ukr = UKR(X, n_components=n_components, bandwidth_gaussian_kernel=bandwidth_gaussian_kernel,
-                          is_compact=is_compact, is_save_history=is_save_history, lambda_=lambda_, init=Zinit)
-                ukr.fit(nb_epoch=nb_epoch, eta=eta)
-                all_z = ukr.history['z']
-                all_obj_func = ukr.history['obj_func']
+                for lambda_ in lambda_list:
+                    ukr = UKR(X, n_components=n_components, bandwidth_gaussian_kernel=bandwidth_gaussian_kernel,
+                              is_compact=is_compact, is_save_history=is_save_history, lambda_=lambda_, init=Zinit)
+                    ukr.fit(nb_epoch=nb_epoch, eta=eta)
+                    all_z = ukr.history['z']
+                    all_obj_func = ukr.history['obj_func']
 
-                ukr_pytorch = UKR_pytorch(torch.from_numpy(X),
-                                          nb_components=n_components,
-                                          bandwidth_gaussian_kernel=bandwidth_gaussian_kernel,
-                                          is_compact=is_compact, is_save_history=is_save_history, lambda_=lambda_,
-                                          init=torch.tensor(Zinit, requires_grad=True, dtype=torch.float64))
-                ukr_pytorch.fit(nb_epoch=nb_epoch, eta=eta)
-                all_z_pytorch = ukr_pytorch.history['z'].detach().numpy()
-                all_obj_func_pytorch = ukr_pytorch.history['obj_func'].detach().numpy()
-                np.testing.assert_allclose(all_z, all_z_pytorch)
-                np.testing.assert_allclose(all_obj_func,all_obj_func_pytorch)
+                    ukr_pytorch = UKR_pytorch(torch.from_numpy(X),
+                                              nb_components=n_components,
+                                              bandwidth_gaussian_kernel=bandwidth_gaussian_kernel,
+                                              is_compact=is_compact, is_save_history=is_save_history, lambda_=lambda_,
+                                              init=torch.tensor(Zinit, requires_grad=True, dtype=torch.float64))
+                    ukr_pytorch.fit(nb_epoch=nb_epoch, eta=eta)
+                    all_z_pytorch = ukr_pytorch.history['z'].detach().numpy()
+                    all_obj_func_pytorch = ukr_pytorch.history['obj_func'].detach().numpy()
+                    np.testing.assert_allclose(all_z, all_z_pytorch)
+                    np.testing.assert_allclose(all_obj_func,all_obj_func_pytorch)
 
 
 if __name__ == "__main__":
