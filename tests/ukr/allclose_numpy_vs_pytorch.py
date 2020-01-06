@@ -6,7 +6,7 @@ import torch
 from libs.datasets.artificial.kura import create_data
 
 from libs.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as UKR
-from libs.models.unsupervised_kernel_regression_pytorch import Unsupervised_Kernel_Regression_pytorch as UKR_pytorch
+from tests.ukr.model.unsupervised_kernel_regression_pytorch import Unsupervised_Kernel_Regression_pytorch as UKR_pytorch
 
 
 class TestUKR(unittest.TestCase):
