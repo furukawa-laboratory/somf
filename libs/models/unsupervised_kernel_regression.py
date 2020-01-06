@@ -83,8 +83,6 @@ class UnsupervisedKernelRegression(object):
 
             if self.is_save_hisotry:
                 self.history['z'][epoch] = self.Z
-                self.history['y'][epoch] = Y
-                self.history['zvar'][epoch] = np.mean(np.square(self.Z - self.Z.mean(axis=0)),axis=0)
                 self.history['obj_func'][epoch] = obj_func
 
 
