@@ -38,6 +38,7 @@ class TestUKR(unittest.TestCase):
                           is_compact=is_compact, is_save_history=is_save_history, lambda_=lambda_, init=Zinit)
                 ukr.fit(nb_epoch=nb_epoch, eta=eta)
                 all_z = ukr.history['z']
+                all_obj_func = ukr.history['obj_func']
 
                 ukr_pytorch = UKR_pytorch(torch.from_numpy(X),
                                           nb_components=n_components,
@@ -46,7 +47,9 @@ class TestUKR(unittest.TestCase):
                                           init=torch.tensor(Zinit, requires_grad=True, dtype=torch.float64))
                 ukr_pytorch.fit(nb_epoch=nb_epoch, eta=eta)
                 all_z_pytorch = ukr_pytorch.history['z'].detach().numpy()
+                all_obj_func_pytorch = ukr_pytorch.history['obj_func'].detach().numpy()
                 np.testing.assert_allclose(all_z, all_z_pytorch)
+                np.testing.assert_allclose(all_obj_func,all_obj_func_pytorch)
 
 
 if __name__ == "__main__":
