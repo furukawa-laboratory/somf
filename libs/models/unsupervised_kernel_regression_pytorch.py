@@ -53,23 +53,23 @@ class Unsupervised_Kernel_Regression_pytorch(object):
             bar = range(nb_epoch)
 
         for epoch in bar:
-            DistZ = torch.sum((self.Z[:, None, :] - self.Z[None, :, :])**2, axis=2)
+            DistZ = torch.sum((self.Z[:, None, :] - self.Z[None, :, :])**2, dim=2)
             H = torch.exp(-0.5 * self.precision * DistZ)
             if self.is_loocv:
                 # H -= np.identity(H.shape[0])
                 assert 'Not Implemented Error'
-            G = torch.sum(H, axis=1, keepdim=True)
+            G = torch.sum(H, dim=1, keepdim=True)
             GInv = 1 / G
             R = H * GInv
 
             Y = (R @ self.X).clone().detach().requires_grad_(True)
             Error = Y - self.X
             obj_func = torch.sum(Error**2) / self.nb_samples + self.lambda_ * torch.sum(self.Z**2)
-            # print(obj_func.detach().numpy())
+            print(obj_func.detach().numpy())
             obj_func.backward()
             with torch.no_grad():
                 self.Z = self.Z - eta * self.Z.grad
-                # self.Z -= eta * self.Z.grad
+                # self.Z -= eta * self.Z.grad / self.nb_samples
             self.Z.requires_grad = True
 
             if self.is_compact:
