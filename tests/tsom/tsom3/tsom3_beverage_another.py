@@ -19,9 +19,14 @@ if __name__ == '__main__':
     Z3init = np.random.rand(X.shape[2], latent_dim[2])
     init = [Z1init, Z2init, Z3init]
 
-    tsom3 = TSOM3(X, latent_dim=2, resolution=7, SIGMA_MAX=2.0, SIGMA_MIN=0.2,
+    tsom3 = TSOM3(X, latent_dim=2, resolution=10, SIGMA_MAX=2.0, SIGMA_MIN=0.2,
                   TAU=(50, 50, 50), init='random')
     tsom3.fit(nb_epoch=250)
+
+    # np.save('beverage_Y.npy', tsom3.Y)
+    # np.save('beverage_k1.npy', tsom3.k1_star)
+    # np.save('beverage_k2.npy', tsom3.k2_star)
+    # np.save('beverage_k3.npy', tsom3.k3_star)
 
     # 結果の描画
     comp = TSOM3_V(y=tsom3.Y, winner1=tsom3.k1_star, winner2=tsom3.k2_star, winner3=tsom3.k3_star, label1=None, label2=beverage_label, label3=situation_label)
