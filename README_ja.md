@@ -19,6 +19,7 @@ SOMはニューラルネットワークの一種で、高次元データに対�
 - [テンソルSOM](https://www.sciencedirect.com/science/article/pii/S0893608016000149)（テンソルデータに対応したSOM）
    - tensorflow ver
    - numpy ver
+- Unsupervised Kernel Regression
 - Kernel smoothing(Nadaraya-Watson estimater)
 
 ## 可視化ツール
