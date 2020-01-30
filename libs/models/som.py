@@ -88,17 +88,17 @@ class SOM:
         if self.metric is "sqeuclidean":  # ユークリッド距離を使った勝者決定
             # 勝者ノードの計算H
             Dist = dist.cdist(self.X, self.Y)  # NxKの距離行列を計算
-            bmus = Dist.argmin(axis=1)
+            self.bmus = Dist.argmin(axis=1)
             # Nx1の勝者ノード番号をまとめた列ベクトルを計算
             # argmin(axis=1)を用いて各行で最小値を探しそのインデックスを返す
-            self.Z = self.Zeta[bmus, :]  # 勝者ノード番号から勝者ノードを求める
+            self.Z = self.Zeta[self.bmus, :]  # 勝者ノード番号から勝者ノードを求める
         elif self.metric is "KLdivergence":  # KL情報量を使った勝者決定
             Dist = np.sum(self.X[:, np.newaxis, :] * np.log(self.Y)[np.newaxis, :, :], axis=2)  # N*K行列
             # 勝者番号の決定
-            bmus = np.argmax(Dist, axis=1)
+            self.bmus = np.argmax(Dist, axis=1)
             # Nx1の勝者ノード番号をまとめた列ベクトルを計算
             # argmin(axis=1)を用いて各行で最小値を探しそのインデックスを返す
-            self.Z = self.Zeta[bmus, :]  # 勝者ノード番号から勝者ノードを求める
+            self.Z = self.Zeta[self.bmus, :]  # 勝者ノード番号から勝者ノードを求める
 
     def update_mapping(self, Y):
         self.Y = Y
