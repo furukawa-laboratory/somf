@@ -100,6 +100,9 @@ class SOM:
             # argmin(axis=1)を用いて各行で最小値を探しそのインデックスを返す
             self.Z = self.Zeta[bmus, :]  # 勝者ノード番号から勝者ノードを求める
 
+    def update_mapping(self, Y):
+        self.Y = Y
+
     def fit(self, nb_epoch=100, verbose=True):
 
         self.history['z'] = np.zeros((nb_epoch, self.N, self.L))
