@@ -17,8 +17,6 @@ class SOM:
         self.D = X.shape[1]
         self.L = latent_dim
 
-        self.UpdateFromY = True
-
         self.history = {}
 
         if isinstance(init, str) and init == 'PCA':
@@ -41,9 +39,6 @@ class SOM:
 
         if isinstance(init, str) and init == 'random':
             self.Z = np.random.rand(self.N, latent_dim) * 2.0 - 1.0
-        elif isinstance(init, str) and init == 'random_y':
-            self.Y = np.random.rand(self.K, self.D) * 2.0 - 1.0
-            self.UpdateFromY = False
         elif isinstance(init, str) and init == 'random_bmu':
             init_bmus = np.random.randint(0, self.Zeta.shape[0] - 1, self.N)
             self.Z = self.Zeta[init_bmus,:]
@@ -115,14 +110,9 @@ class SOM:
             bar = range(nb_epoch)
 
         for epoch in bar:
-            if self.UpdateFromY:
-                self._cooperative_process(epoch)   # 協調過程
-                self._adaptive_process()           # 適合過程
-                self._competitive_process()        # 競合過程
-            else:
-                self._competitive_process()        # 競合過程
-                self._cooperative_process(epoch)   # 協調過程
-                self._adaptive_process()           # 適合過程
+            self._cooperative_process(epoch)   # 協調過程
+            self._adaptive_process()           # 適合過程
+            self._competitive_process()        # 競合過程
 
             self.history['z'][epoch] = self.Z
             self.history['y'][epoch] = self.Y
