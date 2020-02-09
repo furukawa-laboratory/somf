@@ -7,7 +7,7 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
-MODULEDIR     = ../libs
+MODULEDIR     = ../libs/
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -23,7 +23,7 @@ sphinx-apidoc:
 .PHONY: html
 # html:
 html: sphinx-apidoc # これを追加
-	$(SPHINXBUILD) -b html . $(BUILDDIR)/html
+	$(SPHINXBUILD) -b html $(SOURCEDIR) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 # # Catch-all target: route all unknown targets to Sphinx using the new
