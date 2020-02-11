@@ -16,6 +16,6 @@ def create_zeta(zeta_min, zeta_max, latent_dim, resolution, include_min_max=True
 
     Zeta = np.dstack(Zeta).reshape(-1, latent_dim)
     if return_step:
-        return Zeta,step
+        return Zeta, step
     else:
         return Zeta
