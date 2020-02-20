@@ -1,0 +1,377 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>libs.models.tsom3 &mdash; somf 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> somf
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/libs.models.html">libs.models package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/libs.datasets.artificial.html">libs.datasets.artificial package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">somf</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>libs.models.tsom3</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for libs.models.tsom3</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">libs.tools.create_zeta</span> <span class="kn">import</span> <span class="n">create_zeta</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">distance</span> <span class="k">as</span> <span class="n">distance</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+
+<div class="viewcode-block" id="TSOM3"><a class="viewcode-back" href="../../../modules/libs.models.html#libs.models.tsom3.TSOM3">[docs]</a><span class="k">class</span> <span class="nc">TSOM3</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">latent_dim</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">SIGMA_MAX</span><span class="p">,</span> <span class="n">SIGMA_MIN</span><span class="p">,</span> <span class="n">TAU</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">):</span>
+
+        <span class="c1"># 入力データXについて</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">N1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">N2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">N3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">observed_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">N1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">N2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">N3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">observed_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid X: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">X must be 3d or 4d ndarray&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+
+        <span class="c1"># 最大近傍半径(SIGMAX)の設定</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">SIGMA_MAX</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">float</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SIGMA1_MAX</span> <span class="o">=</span> <span class="n">SIGMA_MAX</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SIGMA2_MAX</span> <span class="o">=</span> <span class="n">SIGMA_MAX</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SIGMA3_MAX</span> <span class="o">=</span> <span class="n">SIGMA_MAX</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">SIGMA_MAX</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SIGMA1_MAX</span> <span class="o">=</span> <span class="n">SIGMA_MAX</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SIGMA2_MAX</span> <span class="o">=</span> <span class="n">SIGMA_MAX</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SIGMA3_MAX</span> <span class="o">=</span> <span class="n">SIGMA_MAX</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid SIGMA_MAX: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SIGMA_MAX</span><span class="p">))</span>
+
+        <span class="c1"># 最小近傍半径(SIGMA_MIN)の設定</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">SIGMA_MIN</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">float</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SIGMA1_MIN</span> <span class="o">=</span> <span class="n">SIGMA_MIN</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SIGMA2_MIN</span> <span class="o">=</span> <span class="n">SIGMA_MIN</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SIGMA3_MIN</span> <span class="o">=</span> <span class="n">SIGMA_MIN</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">SIGMA_MIN</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SIGMA1_MIN</span> <span class="o">=</span> <span class="n">SIGMA_MIN</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SIGMA2_MIN</span> <span class="o">=</span> <span class="n">SIGMA_MIN</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SIGMA3_MIN</span> <span class="o">=</span> <span class="n">SIGMA_MIN</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid SIGMA_MIN: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SIGMA_MIN</span><span class="p">))</span>
+
+        <span class="c1"># 時定数(TAU)の設定</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">TAU</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">TAU1</span> <span class="o">=</span> <span class="n">TAU</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">TAU2</span> <span class="o">=</span> <span class="n">TAU</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">TAU3</span> <span class="o">=</span> <span class="n">TAU</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">TAU</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">TAU1</span> <span class="o">=</span> <span class="n">TAU</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">TAU2</span> <span class="o">=</span> <span class="n">TAU</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">TAU3</span> <span class="o">=</span> <span class="n">TAU</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid TAU: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">TAU</span><span class="p">))</span>
+
+        <span class="c1"># resolutionの設定</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="n">resolution1</span> <span class="o">=</span> <span class="n">resolution</span>
+            <span class="n">resolution2</span> <span class="o">=</span> <span class="n">resolution</span>
+            <span class="n">resolution3</span> <span class="o">=</span> <span class="n">resolution</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">resolution1</span> <span class="o">=</span> <span class="n">resolution</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">resolution2</span> <span class="o">=</span> <span class="n">resolution</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">resolution3</span> <span class="o">=</span> <span class="n">resolution</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid resolution: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">resolution</span><span class="p">))</span>
+
+        <span class="c1"># 潜在空間の設定</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">latent_dim</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>  <span class="c1"># latent_dimがintであればどちらのモードも潜在空間の次元は同じ</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim1</span> <span class="o">=</span> <span class="n">latent_dim</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim2</span> <span class="o">=</span> <span class="n">latent_dim</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim3</span> <span class="o">=</span> <span class="n">latent_dim</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">latent_dim</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim1</span> <span class="o">=</span> <span class="n">latent_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim2</span> <span class="o">=</span> <span class="n">latent_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim3</span> <span class="o">=</span> <span class="n">latent_dim</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid latent_dim: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">latent_dim</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Zeta1</span> <span class="o">=</span> <span class="n">create_zeta</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">latent_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_dim1</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution1</span><span class="p">,</span> <span class="n">include_min_max</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Zeta2</span> <span class="o">=</span> <span class="n">create_zeta</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">latent_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_dim2</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution2</span><span class="p">,</span> <span class="n">include_min_max</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Zeta3</span> <span class="o">=</span> <span class="n">create_zeta</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">latent_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">latent_dim3</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution3</span><span class="p">,</span> <span class="n">include_min_max</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># K1とK2は潜在空間の設定が終わった後がいいよね</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">K1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Zeta1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">K2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Zeta2</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">K3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Zeta3</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># 勝者ノードの初期化</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Z1</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Z2</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Z3</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">init</span> <span class="ow">in</span> <span class="s1">&#39;random&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Z1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim1</span><span class="p">)</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="mf">1.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Z2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim2</span><span class="p">)</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="mf">1.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Z3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim3</span><span class="p">)</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="mf">1.0</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">init</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">init</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">init</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim1</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Z1</span> <span class="o">=</span> <span class="n">init</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid inits[0]: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">init</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">init</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">init</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim2</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Z2</span> <span class="o">=</span> <span class="n">init</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid inits[1]: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">init</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">init</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">init</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim3</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Z3</span> <span class="o">=</span> <span class="n">init</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid inits[2]: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">init</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid inits: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">init</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="TSOM3.fit"><a class="viewcode-back" href="../../../modules/libs.models.html#libs.models.tsom3.TSOM3.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nb_epoch</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nb_epoch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observed_dim</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;z1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nb_epoch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;z2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nb_epoch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim2</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;z3&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nb_epoch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim3</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;sigma1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_epoch</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;sigma2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_epoch</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;sigma3&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nb_epoch</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nb_epoch</span><span class="p">)):</span>
+            <span class="c1"># 学習量の決定</span>
+            <span class="c1"># sigma1 = self.SIGMA1_MIN + (self.SIGMA1_MAX - self.SIGMA1_MIN) * np.exp(-epoch / self.TAU1)</span>
+            <span class="n">sigma1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SIGMA1_MIN</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SIGMA1_MAX</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">TAU1</span><span class="p">)))</span>
+            <span class="n">distance1</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Zeta1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z1</span><span class="p">,</span> <span class="s1">&#39;sqeuclidean&#39;</span><span class="p">)</span>  <span class="c1"># 距離行列をつくるDはK1*N1行列</span>
+            <span class="n">H1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">distance1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">(</span><span class="n">sigma1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>  <span class="c1"># かっこに気を付ける</span>
+            <span class="n">G1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">H1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Gは行ごとの和をとったベクトル K1*1</span>
+            <span class="n">R1</span> <span class="o">=</span> <span class="p">(</span><span class="n">H1</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">G1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># 行列の計算なので.Tで転置を行う K1*N1</span>
+
+            <span class="c1"># sigma2 = self.SIGMA2_MIN + (self.SIGMA2_MAX - self.SIGMA2_MIN) * np.exp(-epoch / self.TAU2)</span>
+            <span class="n">sigma2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SIGMA2_MIN</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SIGMA2_MAX</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">TAU2</span><span class="p">)))</span>
+            <span class="n">distance2</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Zeta2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z2</span><span class="p">,</span> <span class="s1">&#39;sqeuclidean&#39;</span><span class="p">)</span>  <span class="c1"># 距離行列をつくるDはK2*N2行列</span>
+            <span class="n">H2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">distance2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">(</span><span class="n">sigma2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>  <span class="c1"># かっこに気を付ける</span>
+            <span class="n">G2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">H2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Gは行ごとの和をとったベクトル K2*1</span>
+            <span class="n">R2</span> <span class="o">=</span> <span class="p">(</span><span class="n">H2</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">G2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># 行列の計算なので.Tで転置を行う K2*N2</span>
+
+            <span class="n">sigma3</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SIGMA3_MIN</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SIGMA3_MAX</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">TAU3</span><span class="p">)))</span>
+            <span class="n">distance3</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">cdist</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Zeta3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z3</span><span class="p">,</span> <span class="s1">&#39;sqeuclidean&#39;</span><span class="p">)</span>  <span class="c1"># 距離行列をつくるDはK3*N3行列</span>
+            <span class="c1"># print(distance3.shape)</span>
+            <span class="n">H3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">distance3</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">(</span><span class="n">sigma3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>  <span class="c1"># かっこに気を付ける</span>
+            <span class="n">G3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">H3</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Gは行ごとの和をとったベクトル K3*1</span>
+            <span class="n">R3</span> <span class="o">=</span> <span class="p">(</span><span class="n">H3</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">G3</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># 行列の計算なので.Tで転置を行う K3*N3</span>
+
+            <span class="c1"># １次モデル，２次モデルの決定</span>
+            <span class="c1"># データ: i,j,k</span>
+            <span class="c1"># ノード: l,m,n</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">U1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;mj,nk,ijkd-&gt;imnd&#39;</span><span class="p">,</span> <span class="n">R2</span><span class="p">,</span> <span class="n">R3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>  <span class="c1"># N1*K1*K2*D</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">U2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;li,nk,ijkd-&gt;ljnd&#39;</span><span class="p">,</span> <span class="n">R1</span><span class="p">,</span> <span class="n">R3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>  <span class="c1"># K1*N2*K3*D</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">U3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;li,mj,ijkd-&gt;lmkd&#39;</span><span class="p">,</span> <span class="n">R1</span><span class="p">,</span> <span class="n">R2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>  <span class="c1"># K1*K2*N3</span>
+            <span class="c1"># １次モデルを使って2次モデルを更新</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;li,imnd-&gt;lmnd&#39;</span><span class="p">,</span> <span class="n">R1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">U1</span><span class="p">)</span>  <span class="c1"># K1*K2*K3*D</span>
+            <span class="c1"># self.Y = np.einsum(&#39;li,mj,nk,ijkd-&gt;lmnd&#39;, R1, R2,R3,self.X)  # K1*K2*K3*D</span>
+
+            <span class="c1"># 勝者決定</span>
+            <span class="c1"># モード1</span>
+            <span class="n">Dist1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">U1</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:])</span>  <span class="c1"># N1*K1*K2*K3*D</span>
+            <span class="n">Dist1_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Dist1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>  <span class="c1"># N1*K1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k1_star</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">Dist1_sum</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># N1*1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Z1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Zeta1</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">k1_star</span><span class="p">,</span> <span class="p">:]</span>
+
+            <span class="c1"># モード2</span>
+            <span class="n">Dist2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">U2</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:])</span>  <span class="c1"># K1*N2*K2*K3*D</span>
+            <span class="n">Dist2_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Dist2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>  <span class="c1"># N2*K2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k2_star</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">Dist2_sum</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Z2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Zeta2</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">k2_star</span><span class="p">,</span> <span class="p">:]</span>
+
+            <span class="c1"># モード3</span>
+            <span class="n">Dist3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">U3</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>  <span class="c1"># K1*K2*N3*K3*D</span>
+            <span class="n">Dist3_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Dist3</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>  <span class="c1"># N3*K3</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k3_star</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">Dist3_sum</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># N3*1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Z3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Zeta3</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">k3_star</span><span class="p">,</span> <span class="p">:]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">][</span><span class="n">epoch</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;z1&#39;</span><span class="p">][</span><span class="n">epoch</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;z2&#39;</span><span class="p">][</span><span class="n">epoch</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;z3&#39;</span><span class="p">][</span><span class="n">epoch</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z3</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;sigma1&#39;</span><span class="p">][</span><span class="n">epoch</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigma1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;sigma2&#39;</span><span class="p">][</span><span class="n">epoch</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigma2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;sigma3&#39;</span><span class="p">][</span><span class="n">epoch</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigma3</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, furukawa-laboratory
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

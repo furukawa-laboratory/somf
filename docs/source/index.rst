@@ -10,7 +10,8 @@ Welcome to somf's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   modules/*
+   modules/libs.models
+   modules/libs.datasets.artificial
 
 
 Indices and tables

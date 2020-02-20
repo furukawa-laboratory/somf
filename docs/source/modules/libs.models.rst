@@ -3,7 +3,7 @@ libs.models package
 
 .. automodule:: libs.models
    :members:
-   :undoc-members:
+   :undo
    :show-inheritance:
 
 Submodules
