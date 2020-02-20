@@ -9,32 +9,33 @@ class SOM:
     """Self-Organizing Map (SOM).
 
     SOM is the one of dimensionality reduction method.
+
     Parameters
     -------
-        X:array-like, shape (number of samples, number of features)
-            Training data.
-        latent_dim: int
-            Number of dimension of latent space. Only support 1 or 2.
-        resolution: int
-            Number of zeta which is representative points on latent space per one dimension.
-        sigma_max: float
-            Maximum value of neighborhood radius, sigma.
-        sigma_min: float
-            Minimum value of neighborhood radius, sigma.
-        tau: int
-            Control speed of decreasing sigma, neighborhood rasius.
-        init: str or array-like
-            How to decide init value of latent variable.
-            If ``init == 'PCA'``, it dicided by Principal Component Analysis.
-            If ``init == 'random'``, random float values is assigned to latent variables directly.
-            If ``init == 'random_bmu'``, random integer values os assigned to array of index of
-            representative points corresponding latent variables.
-            If init is array which have correct shape, it is used to initial value.
-        metric: str
-            How to measure data and mapping when latent variables are estimated.
-            ``metric == 'sqeuclidean'`` is used if data is numerical vector.
-            ``metric == 'KLdivergence'`` is used if data is parameter of categorical distribution.
-            The sum must be 1.0
+    X:array-like, shape (number of samples, number of features)
+        Training data.
+    latent_dim: int
+        Number of dimension of latent space. Only support 1 or 2.
+    resolution: int
+        Number of zeta which is representative points on latent space per one dimension.
+    sigma_max: float
+        Maximum value of neighborhood radius, sigma.
+    sigma_min: float
+        Minimum value of neighborhood radius, sigma.
+    tau: int
+        Control speed of decreasing sigma, neighborhood radius.
+    init: str or array-like
+        How to decide init value of latent variable.
+        If ``init == 'PCA'``, it decided by Principal Component Analysis.
+        If ``init == 'random'``, random float values is assigned to latent variables directly.
+        If ``init == 'random_bmu'``, random integer values os assigned to array of index of
+        representative points corresponding latent variables.
+        If init is array which have correct shape, it is used to initial value.
+    metric: str
+        How to measure data and mapping when latent variables are estimated.
+        ``metric == 'sqeuclidean'`` is used if data is numerical vector.
+        ``metric == 'KLdivergence'`` is used if data is parameter of categorical distribution.
+        The sum must be 1.0
     """
     def __init__(self, X, latent_dim, resolution, sigma_max, sigma_min, tau, init='random',metric="sqeuclidean"):
         self.X = X
