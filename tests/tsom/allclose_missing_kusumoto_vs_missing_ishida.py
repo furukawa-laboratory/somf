@@ -26,7 +26,7 @@ class TestTSOM_missing(unittest.TestCase):
         sigma_min = [0.4, 0.2]
         tau = [50, 60]
         model_list = ['direct','indirect']
-        gamma_list = [None, np.random.choice([0,1],size=(nb_samples1,nb_samples2))]
+        gamma_list = [None, np.random.choice([0,1],size=X.shape)]
 
         ## prepare init
         Z1init = np.random.rand(nb_samples1, latent_dim[0])
