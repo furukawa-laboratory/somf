@@ -156,32 +156,33 @@
     <span class="sd">&quot;&quot;&quot;Self-Organizing Map (SOM).</span>
 
 <span class="sd">    SOM is the one of dimensionality reduction method.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    -------</span>
-<span class="sd">        X:array-like, shape (number of samples, number of features)</span>
-<span class="sd">            Training data.</span>
-<span class="sd">        latent_dim: int</span>
-<span class="sd">            Number of dimension of latent space. Only support 1 or 2.</span>
-<span class="sd">        resolution: int</span>
-<span class="sd">            Number of zeta which is representative points on latent space per one dimension.</span>
-<span class="sd">        sigma_max: float</span>
-<span class="sd">            Maximum value of neighborhood radius, sigma.</span>
-<span class="sd">        sigma_min: float</span>
-<span class="sd">            Minimum value of neighborhood radius, sigma.</span>
-<span class="sd">        tau: int</span>
-<span class="sd">            Control speed of decreasing sigma, neighborhood rasius.</span>
-<span class="sd">        init: str or array-like</span>
-<span class="sd">            How to decide init value of latent variable.</span>
-<span class="sd">            If ``init == &#39;PCA&#39;``, it dicided by Principal Component Analysis.</span>
-<span class="sd">            If ``init == &#39;random&#39;``, random float values is assigned to latent variables directly.</span>
-<span class="sd">            If ``init == &#39;random_bmu&#39;``, random integer values os assigned to array of index of</span>
-<span class="sd">            representative points corresponding latent variables.</span>
-<span class="sd">            If init is array which have correct shape, it is used to initial value.</span>
-<span class="sd">        metric: str</span>
-<span class="sd">            How to measure data and mapping when latent variables are estimated.</span>
-<span class="sd">            ``metric == &#39;sqeuclidean&#39;`` is used if data is numerical vector.</span>
-<span class="sd">            ``metric == &#39;KLdivergence&#39;`` is used if data is parameter of categorical distribution.</span>
-<span class="sd">            The sum must be 1.0</span>
+<span class="sd">    X:array-like, shape (number of samples, number of features)</span>
+<span class="sd">        Training data.</span>
+<span class="sd">    latent_dim: int</span>
+<span class="sd">        Number of dimension of latent space. Only support 1 or 2.</span>
+<span class="sd">    resolution: int</span>
+<span class="sd">        Number of zeta which is representative points on latent space per one dimension.</span>
+<span class="sd">    sigma_max: float</span>
+<span class="sd">        Maximum value of neighborhood radius, sigma.</span>
+<span class="sd">    sigma_min: float</span>
+<span class="sd">        Minimum value of neighborhood radius, sigma.</span>
+<span class="sd">    tau: int</span>
+<span class="sd">        Control speed of decreasing sigma, neighborhood rasius.</span>
+<span class="sd">    init: str or array-like</span>
+<span class="sd">        How to decide init value of latent variable.</span>
+<span class="sd">        If ``init == &#39;PCA&#39;``, it dicided by Principal Component Analysis.</span>
+<span class="sd">        If ``init == &#39;random&#39;``, random float values is assigned to latent variables directly.</span>
+<span class="sd">        If ``init == &#39;random_bmu&#39;``, random integer values os assigned to array of index of</span>
+<span class="sd">        representative points corresponding latent variables.</span>
+<span class="sd">        If init is array which have correct shape, it is used to initial value.</span>
+<span class="sd">    metric: str</span>
+<span class="sd">        How to measure data and mapping when latent variables are estimated.</span>
+<span class="sd">        ``metric == &#39;sqeuclidean&#39;`` is used if data is numerical vector.</span>
+<span class="sd">        ``metric == &#39;KLdivergence&#39;`` is used if data is parameter of categorical distribution.</span>
+<span class="sd">        The sum must be 1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">latent_dim</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">sigma_max</span><span class="p">,</span> <span class="n">sigma_min</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">,</span><span class="n">metric</span><span class="o">=</span><span class="s2">&quot;sqeuclidean&quot;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>

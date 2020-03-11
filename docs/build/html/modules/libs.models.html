@@ -248,33 +248,27 @@
 <em class="property">class </em><code class="sig-prename descclassname">libs.models.som.</code><code class="sig-name descname">SOM</code><span class="sig-paren">(</span><em class="sig-param">X</em>, <em class="sig-param">latent_dim</em>, <em class="sig-param">resolution</em>, <em class="sig-param">sigma_max</em>, <em class="sig-param">sigma_min</em>, <em class="sig-param">tau</em>, <em class="sig-param">init='random'</em>, <em class="sig-param">metric='sqeuclidean'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/libs/models/som.html#SOM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#libs.models.som.SOM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Self-Organizing Map (SOM).</p>
-<p>SOM is the one of dimensionality reduction method.
-:param X: Training data.
-:type X: array-like, shape (number of samples, number of features)
-:param latent_dim: Number of dimension of latent space. Only support 1 or 2.
-:type latent_dim: int
-:param resolution: Number of zeta which is representative points on latent space per one dimension.
-:type resolution: int
-:param sigma_max: Maximum value of neighborhood radius, sigma.
-:type sigma_max: float
-:param sigma_min: Minimum value of neighborhood radius, sigma.
-:type sigma_min: float
-:param tau: Control speed of decreasing sigma, neighborhood rasius.
-:type tau: int
-:param init: How to decide init value of latent variable.</p>
-<blockquote>
-<div><p>If <code class="docutils literal notranslate"><span class="pre">init</span> <span class="pre">==</span> <span class="pre">'PCA'</span></code>, it dicided by Principal Component Analysis.
+<p>SOM is the one of dimensionality reduction method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>array-like</em><em>, </em><em>shape</em><em> (</em><em>number of samples</em><em>, </em><em>number of features</em><em>)</em>) – Training data.</p></li>
+<li><p><strong>latent_dim</strong> (<em>int</em>) – Number of dimension of latent space. Only support 1 or 2.</p></li>
+<li><p><strong>resolution</strong> (<em>int</em>) – Number of zeta which is representative points on latent space per one dimension.</p></li>
+<li><p><strong>sigma_max</strong> (<em>float</em>) – Maximum value of neighborhood radius, sigma.</p></li>
+<li><p><strong>sigma_min</strong> (<em>float</em>) – Minimum value of neighborhood radius, sigma.</p></li>
+<li><p><strong>tau</strong> (<em>int</em>) – Control speed of decreasing sigma, neighborhood rasius.</p></li>
+<li><p><strong>init</strong> (<em>str</em><em> or </em><em>array-like</em>) – How to decide init value of latent variable.
+If <code class="docutils literal notranslate"><span class="pre">init</span> <span class="pre">==</span> <span class="pre">'PCA'</span></code>, it dicided by Principal Component Analysis.
 If <code class="docutils literal notranslate"><span class="pre">init</span> <span class="pre">==</span> <span class="pre">'random'</span></code>, random float values is assigned to latent variables directly.
 If <code class="docutils literal notranslate"><span class="pre">init</span> <span class="pre">==</span> <span class="pre">'random_bmu'</span></code>, random integer values os assigned to array of index of
 representative points corresponding latent variables.
-If init is array which have correct shape, it is used to initial value.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>metric</strong> (<em>str</em>) – How to measure data and mapping when latent variables are estimated.
+If init is array which have correct shape, it is used to initial value.</p></li>
+<li><p><strong>metric</strong> (<em>str</em>) – How to measure data and mapping when latent variables are estimated.
 <code class="docutils literal notranslate"><span class="pre">metric</span> <span class="pre">==</span> <span class="pre">'sqeuclidean'</span></code> is used if data is numerical vector.
 <code class="docutils literal notranslate"><span class="pre">metric</span> <span class="pre">==</span> <span class="pre">'KLdivergence'</span></code> is used if data is parameter of categorical distribution.
-The sum must be 1.0</p>
+The sum must be 1.0</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="method">
