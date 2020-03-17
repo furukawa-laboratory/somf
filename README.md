@@ -13,14 +13,16 @@ SOM is a type of neural network, and is a widely used algorithm for visualizatio
 # Currently published code
 
 ## Algorithms
-- SOM（batch type）
+- Self-Organizing Map（batch type）
    - tensorflow ver
    - numpy ver
 - [CCA-SOM](https://www.jstage.jst.go.jp/article/jsoft/30/2/30_525/_article/-char/ja)（SOM corresponded with multi-view data）
-- [tensor-SOM](https://www.sciencedirect.com/science/article/pii/S0893608016000149)(SOM corresponded with tensor data, [Demo](http://www.brain.kyutech.ac.jp/~furukawa/tsom-e/))
+- [Tensor-SOM](https://www.sciencedirect.com/science/article/pii/S0893608016000149)(SOM corresponded with tensor data, [Demo](http://www.brain.kyutech.ac.jp/~furukawa/tsom-e/))
    - tensorflow ver
    - numpy ver
-- Kernel smoothing(Nadaraya-Watson estimater)
+- [Tensor Plus SOM](https://link.springer.com/article/10.1007/s11063-017-9643-1)(Combination of TSOM and SOM for multi-group analysis)
+- Unsupervised Kernel Regression
+- Kernel smoothing (Nadaraya-Watson estimater)
 
 ## Visualization tools
 - Grad_norm for SOM

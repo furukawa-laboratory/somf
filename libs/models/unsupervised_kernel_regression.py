@@ -72,7 +72,7 @@ class UnsupervisedKernelRegression(object):
             A = self.precision * R * np.einsum('nd,nid->ni', Y - self.X, DeltaYX)
             dFdZ = -2.0 * np.sum((A + A.T)[:, :, None] * Delta, axis=1) / self.n_samples
 
-            dFdZ -= self.lambda_ * self.Z
+            dFdZ -= 2.0 * self.lambda_ * self.Z
 
             self.Z += eta * dFdZ
             if self.is_compact:
@@ -83,8 +83,6 @@ class UnsupervisedKernelRegression(object):
 
             if self.is_save_hisotry:
                 self.history['z'][epoch] = self.Z
-                self.history['y'][epoch] = Y
-                self.history['zvar'][epoch] = np.mean(np.square(self.Z - self.Z.mean(axis=0)),axis=0)
                 self.history['obj_func'][epoch] = obj_func
 
 
