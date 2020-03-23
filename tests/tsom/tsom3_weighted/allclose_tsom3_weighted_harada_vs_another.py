@@ -23,17 +23,17 @@ class TestTSOM3(unittest.TestCase):
 
         # set learning parameter
         nb_epoch = 60
-        latent_dim = [2, 2,2]
-        resolution = [5, 5,5]
-        sigma_max = [2.0, 2.0,2.0]
-        sigma_min = [0.2, 0.2,0.2]
-        tau = [50, 50,50]
+        latent_dim = [2, 2, 2]
+        resolution = [5, 5, 5]
+        sigma_max = [2.0, 2.0, 2.0]
+        sigma_min = [0.2, 0.2, 0.2]
+        tau = [50, 50, 50]
 
         ## prepare init
         Z1init = np.random.rand(X.shape[0], latent_dim[0])
         Z2init = np.random.rand(X.shape[1], latent_dim[1])
         Z3init = np.random.rand(X.shape[2], latent_dim[2])
-        init = [Z1init, Z2init,Z3init]
+        init = [Z1init, Z2init, Z3init]
 
         # generate tsom instance
         tsom3_harada = wTSOM3(X, latent_dim=latent_dim, resolution=resolution,
