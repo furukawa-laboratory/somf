@@ -36,6 +36,11 @@ class TSOM3_Viewer:
         self.map2x_num = int(np.sqrt(self.Mode2_Num))  # マップの1辺を算出（正方形が前提）
         self.map3x_num = int(np.sqrt(self.Mode3_Num))  # マップの1辺を算出（正方形が前提）
 
+        # -----------マップ管理用フラグ-------------
+        self.map1_select_flag = 1
+        self.map2_select_flag = 1
+        self.map3_select_flag = 1
+
         # マップ上の座標
         map1x = np.arange(self.map1x_num)
         map1y = -np.arange(self.map1x_num)
@@ -78,7 +83,6 @@ class TSOM3_Viewer:
         self.__calc_component(2)
         self.__calc_component(3)
         self.click_map = 0
-
 
         # ----------描画用---------- #
         self.Mapsize = np.sqrt(y.shape[0])
@@ -139,7 +143,7 @@ class TSOM3_Viewer:
     def hzfunc(self, label):#radioボタンを押した時の処理
 
         if self.count_click==self.hzdict[label]:
-         return
+            return
         else:
             self.count_click=self.hzdict[label]
             self.Radio_click_unit = self.hzdict[label]
@@ -155,13 +159,15 @@ class TSOM3_Viewer:
     # ------------------------------ #
     # クリック時の処理
     def __onclick_fig(self, event):
-        if event.xdata is not None:
+        #左クリックされたとき
+        if event.button == 1:
             # クリック位置取得
             click_pos = np.random.rand(1, 2)
             click_pos[0, 0] = event.xdata
             click_pos[0, 1] = event.ydata
 
             if event.inaxes == self.Map1.axes:
+                self.map1_select_flag = 1
                 # マップ１をクリック
                 self.Map1_click_unit = self.__calc_arg_min_unit(self.Map1_position, click_pos)
                 # コンポーネント値計算
@@ -170,6 +176,7 @@ class TSOM3_Viewer:
                 self.click_map = 1
 
             elif event.inaxes == self.Map2.axes:
+                self.map2_select_flag = 1
                 # マップ2をクリックした時
                 self.Map2_click_unit = self.__calc_arg_min_unit(self.Map2_position, click_pos)
                 # コンポーネント値計算
@@ -178,11 +185,54 @@ class TSOM3_Viewer:
                 self.click_map = 2
 
             elif event.inaxes == self.Map3.axes:
+                self.map3_select_flag = 1
                 # マップ３をクリックした時
                 self.Map3_click_unit = self.__calc_arg_min_unit(self.Map3_position, click_pos)
                 # コンポーネント値計算
+                self.__calc_component(1)
+                self.__calc_component(2)
+                self.click_map = 3
+
+            else:
+                return
+            # コンポーネントプレーン表示
+            self.__draw_map1()
+            self.__draw_map2()
+            self.__draw_map3()
+            self.__draw_click_point()
+
+        #右クリックされたとき
+        if event.button == 3:
+            # クリック位置取得
+            click_pos = np.random.rand(1, 2)
+            click_pos[0, 0] = event.xdata
+            click_pos[0, 1] = event.ydata
+
+            if event.inaxes == self.Map1.axes:
+                self.map1_select_flag = 0
+                # マップ１をクリック
+                self.Map1_click_unit = self.__calc_arg_min_unit(self.Map1_position, click_pos)
+                # コンポーネント値計算
                 self.__calc_component(2)
                 self.__calc_component(3)
+                self.click_map = 1
+
+            elif event.inaxes == self.Map2.axes:
+                self.map2_select_flag = 0
+                # マップ2をクリックした時
+                self.Map2_click_unit = self.__calc_arg_min_unit(self.Map2_position, click_pos)
+                # コンポーネント値計算
+                self.__calc_component(1)
+                self.__calc_component(3)
+                self.click_map = 2
+
+            elif event.inaxes == self.Map3.axes:
+                self.map3_select_flag = 0
+                # マップ３をクリックした時
+                self.Map3_click_unit = self.__calc_arg_min_unit(self.Map3_position, click_pos)
+                # コンポーネント値計算
+                self.__calc_component(1)
+                self.__calc_component(2)
                 self.click_map = 3
 
             else:
@@ -337,13 +387,46 @@ class TSOM3_Viewer:
     # --- クリック位置の描画 ---------- #
     # ------------------------------ #
     def __draw_click_point(self):
-        self.Map1.plot(self.Map1_position[self.Map1_click_unit, 0], self.Map1_position[self.Map1_click_unit, 1],
-                       ".", color="black", ms=30, fillstyle="none")
-        self.Map2.plot(self.Map2_position[self.Map2_click_unit, 0], self.Map2_position[self.Map2_click_unit, 1],
-                       ".", color="black", ms=30, fillstyle="none")
-        self.Map3.plot(self.Map3_position[self.Map3_click_unit, 0], self.Map3_position[self.Map3_click_unit, 1],
-                       ".", color="black", ms=30, fillstyle="none")
-        self.Fig.show()
+        if self.map1_select_flag == 1 and self.map2_select_flag == 1 and self.map3_select_flag == 1:
+            self.Map1.plot(self.Map1_position[self.Map1_click_unit, 0], self.Map1_position[self.Map1_click_unit, 1],
+                           ".", color="black", ms=30, fillstyle="none")
+            self.Map2.plot(self.Map2_position[self.Map2_click_unit, 0], self.Map2_position[self.Map2_click_unit, 1],
+                           ".", color="black", ms=30, fillstyle="none")
+            self.Map3.plot(self.Map3_position[self.Map3_click_unit, 0], self.Map3_position[self.Map3_click_unit, 1],
+                           ".", color="black", ms=30, fillstyle="none")
+            self.Fig.show()
+        elif self.map1_select_flag == 0 and self.map2_select_flag == 1 and self.map3_select_flag == 1:
+            self.Map2.plot(self.Map2_position[self.Map2_click_unit, 0], self.Map2_position[self.Map2_click_unit, 1],
+                           ".", color="black", ms=30, fillstyle="none")
+            self.Map3.plot(self.Map3_position[self.Map3_click_unit, 0], self.Map3_position[self.Map3_click_unit, 1],
+                           ".", color="black", ms=30, fillstyle="none")
+            self.Fig.show()
+        elif self.map1_select_flag == 1 and self.map2_select_flag == 0 and self.map3_select_flag == 1:
+            self.Map1.plot(self.Map1_position[self.Map1_click_unit, 0], self.Map1_position[self.Map1_click_unit, 1],
+                           ".", color="black", ms=30, fillstyle="none")
+            self.Map3.plot(self.Map3_position[self.Map3_click_unit, 0], self.Map3_position[self.Map3_click_unit, 1],
+                           ".", color="black", ms=30, fillstyle="none")
+            self.Fig.show()
+        elif self.map1_select_flag == 1 and self.map2_select_flag == 1 and self.map3_select_flag == 0:
+            self.Map1.plot(self.Map1_position[self.Map1_click_unit, 0], self.Map1_position[self.Map1_click_unit, 1],
+                           ".", color="black", ms=30, fillstyle="none")
+            self.Map2.plot(self.Map2_position[self.Map2_click_unit, 0], self.Map2_position[self.Map2_click_unit, 1],
+                           ".", color="black", ms=30, fillstyle="none")
+            self.Fig.show()
+        elif self.map1_select_flag == 0 and self.map2_select_flag == 0 and self.map3_select_flag == 1:
+            self.Map3.plot(self.Map3_position[self.Map3_click_unit, 0], self.Map3_position[self.Map3_click_unit, 1],
+                           ".", color="black", ms=30, fillstyle="none")
+            self.Fig.show()
+        elif self.map1_select_flag == 0 and self.map2_select_flag == 1 and self.map3_select_flag == 0:
+            self.Map2.plot(self.Map2_position[self.Map2_click_unit, 0], self.Map2_position[self.Map2_click_unit, 1],
+                           ".", color="black", ms=30, fillstyle="none")
+            self.Fig.show()
+        elif self.map1_select_flag == 1 and self.map2_select_flag == 0 and self.map3_select_flag == 0:
+            self.Map1.plot(self.Map1_position[self.Map1_click_unit, 0], self.Map1_position[self.Map1_click_unit, 1],
+                           ".", color="black", ms=30, fillstyle="none")
+            self.Fig.show()
+        elif self.map1_select_flag == 0 and self.map2_select_flag == 0 and self.map3_select_flag == 0:
+            self.Fig.show()
 
     # ------------------------------ #
     # --- コンポーネントプレーン表示 --- #
@@ -385,14 +468,69 @@ class TSOM3_Viewer:
     # ------------------------------ #
     def __calc_component(self, map_num):
         if map_num == 1:
-            temp1 = self.Y[:, self.Map2_click_unit, self.Map3_click_unit, self.Radio_click_unit]
-            self.Map1_val = temp1.reshape((self.map1x_num,self.map1x_num))#np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
+            # conditional
+            if self.map2_select_flag == 1 and self.map3_select_flag == 1:
+                temp1 = self.Y[:, self.Map2_click_unit, self.Map3_click_unit, self.Radio_click_unit]
+                self.Map1_val = temp1.reshape((self.map1x_num, self.map1x_num))
+                #np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
+            # marginal
+            elif self.map2_select_flag == 1 and self.map3_select_flag == 0:
+                temp1 = np.mean(self.Y[:, :, :, self.Radio_click_unit], axis=2)[:, self.Map2_click_unit]
+                self.Map1_val = temp1.reshape((self.map1x_num, self.map1x_num))
+                # np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
+            # marginal
+            elif self.map2_select_flag == 0 and self.map3_select_flag == 1:
+                temp1 = np.mean(self.Y[:, :, :, self.Radio_click_unit], axis=1)[:, self.Map3_click_unit]
+                self.Map1_val = temp1.reshape((self.map1x_num, self.map1x_num))
+            # marginal
+            elif self.map2_select_flag == 0 and self.map3_select_flag == 0:
+                temp1 = np.mean(self.Y[:, :, :, self.Radio_click_unit], axis=(1,2))
+                self.Map1_val = temp1.reshape((self.map1x_num, self.map1x_num))
         if map_num == 2:
-            temp2 = self.Y[self.Map1_click_unit, :, self.Map3_click_unit, self.Radio_click_unit]
-            self.Map2_val = temp2.reshape((self.map2x_num,self.map2x_num))#np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
+            # conditional
+            if self.map1_select_flag == 1 and self.map3_select_flag == 1:
+                temp2 = self.Y[self.Map1_click_unit, :, self.Map3_click_unit, self.Radio_click_unit]
+                self.Map2_val = temp2.reshape((self.map2x_num, self.map2x_num))
+                #np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
+            # marginal
+            elif self.map1_select_flag == 1 and self.map3_select_flag == 0:
+                temp2 = np.mean(self.Y[:, :, :, self.Radio_click_unit], axis=2)[self.Map1_click_unit, :]
+                self.Map2_val = temp2.reshape((self.map2x_num, self.map2x_num))
+            # marginal
+            elif self.map1_select_flag == 0 and self.map3_select_flag == 1:
+                temp2 = np.mean(self.Y[:, :, :, self.Radio_click_unit], axis=0)[:, self.Map3_click_unit]
+                self.Map2_val = temp2.reshape((self.map2x_num, self.map2x_num))
+            # marginal
+            elif self.map1_select_flag == 0 and self.map3_select_flag == 0:
+                temp2 = np.mean(self.Y[:, :, :, self.Radio_click_unit], axis=(0, 2))
+                self.Map2_val = temp2.reshape((self.map2x_num, self.map2x_num))
         else:
-            temp3 = self.Y[self.Map1_click_unit, self.Map2_click_unit, :, self.Radio_click_unit]
-            self.Map3_val = temp3.reshape((self.map3x_num,self.map3x_num))#np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
+            # conditional
+            if self.map1_select_flag == 1 and self.map2_select_flag == 1:
+                temp3 = self.Y[self.Map1_click_unit, self.Map2_click_unit, :, self.Radio_click_unit]
+                self.Map3_val = temp3.reshape((self.map3x_num, self.map3x_num))
+                #np.sqrt(np.sum(temp2 * temp2, axis=1)).reshape([self.map2x_num, self.map2x_num])
+            # marginal
+            elif self.map1_select_flag == 1 and self.map2_select_flag == 0:
+                temp3 = np.mean(self.Y[:, :, :, self.Radio_click_unit], axis=1)[self.Map1_click_unit, :]
+                self.Map3_val = temp3.reshape((self.map3x_num, self.map3x_num))
+            # marginal
+            elif self.map1_select_flag == 0 and self.map2_select_flag == 1:
+                temp3 = np.mean(self.Y[:, :, :, self.Radio_click_unit], axis=0)[self.Map2_click_unit, :]
+                self.Map3_val = temp3.reshape((self.map3x_num, self.map3x_num))
+            # marginal
+            elif self.map1_select_flag == 0 and self.map2_select_flag == 0:
+                temp3 = np.mean(self.Y[:, :, :, self.Radio_click_unit], axis=(0, 1))
+                self.Map3_val = temp3.reshape((self.map3x_num, self.map3x_num))
+
+        # if map_num == 1:
+        #     temp1 = np.mean(self.Y[:, :, self.Radio_click_unit], axis=1)  # mode1のmarginal component planeの計算
+        #     self.Map1_marginal_val = temp1.reshape((self.map1x_num,
+        #                                             self.map1x_num))  # np.sqrt(np.sum(temp1 * temp1, axis=1)).reshape([self.map1x_num, self.map1x_num])
+        # else:
+        #     temp2 = np.mean(self.Y[:, :, self.Radio_click_unit], axis=0)  # mode2のmarginal component planeの計算
+        #     self.Map2_marginal_val = temp2.reshape((self.map2x_num,
+        #                                             self.map2x_num))  # np.sqrt
 
     # ------------------------------ #
     # --- 最近傍ユニット算出 ---------- #
