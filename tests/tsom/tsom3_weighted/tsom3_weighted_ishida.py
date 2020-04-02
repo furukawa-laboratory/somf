@@ -3,7 +3,7 @@ from libs.tools.create_zeta import create_zeta
 from scipy.spatial import distance as distance
 from tqdm import tqdm
 
-class wTSOM3():
+class wTSOM3_ishida():
     def __init__(self, X, latent_dim, resolution, SIGMA_MAX, SIGMA_MIN, TAU, gamma='nonweight', init='random'):
 
         # 入力データXについて
@@ -137,69 +137,65 @@ class wTSOM3():
         self.history['sigma2'] = np.zeros(nb_epoch)
         self.history['sigma3'] = np.zeros(nb_epoch)
 
-        #近傍関数の設計
-        epoch=nb_epoch
-        sigma1 = max(self.SIGMA1_MIN, self.SIGMA1_MAX * (1 - (epoch / self.TAU1)))
-        Dist1=distance.cdist(self.Zeta1,self.Z1,metric="sqeuclidean")
-        H1=np.exp(-0.5*Dist1/(2 * pow(sigma1, 2)))#K1*N1
+        for epoch in tqdm(np.arange(nb_epoch)):
+            #近傍関数の設計
+            sigma1 = max(self.SIGMA1_MIN, self.SIGMA1_MAX * (1 - (epoch / self.TAU1)))
+            Dist1=distance.cdist(self.Zeta1,self.Z1,metric="sqeuclidean")
+            H1=np.exp(-0.5*Dist1/(2 * pow(sigma1, 2)))#K1*N1
 
-        sigma2 = max(self.SIGMA2_MIN, self.SIGMA2_MAX * (1 - (epoch / self.TAU2)))
-        Dist2 = distance.cdist(self.Zeta2, self.Z2, metric="sqeuclidean")
-        H2 = np.exp(-0.5 * Dist2/ (2 * pow(sigma2, 2)))#K2*N2
-        sigma3 = max(self.SIGMA3_MIN, self.SIGMA3_MAX * (1 - (epoch / self.TAU3)))
-        Dist3 = distance.cdist(self.Zeta3, self.Z3, metric="sqeuclidean")
-        H3 = np.exp(-0.5 * Dist3/(2 * pow(sigma3, 2)))#K3*N3
+            sigma2 = max(self.SIGMA2_MIN, self.SIGMA2_MAX * (1 - (epoch / self.TAU2)))
+            Dist2 = distance.cdist(self.Zeta2, self.Z2, metric="sqeuclidean")
+            H2 = np.exp(-0.5 * Dist2/ (2 * pow(sigma2, 2)))#K2*N2
+            sigma3 = max(self.SIGMA3_MIN, self.SIGMA3_MAX * (1 - (epoch / self.TAU3)))
+            Dist3 = distance.cdist(self.Zeta3, self.Z3, metric="sqeuclidean")
+            H3 = np.exp(-0.5 * Dist3/(2 * pow(sigma3, 2)))#K3*N3
 
-        #写像の更新
-        gammaH2H3=self.gamma[np.newaxis, np.newaxis, :, :, :] * H2[:, np.newaxis, np.newaxis, :, np.newaxis] * H3[np.newaxis, :,
-                                                                                                     np.newaxis,
-                                                                                                     np.newaxis, :]#K2*K3*N1*N2*N3
-        gammaH1H3=self.gamma[np.newaxis, np.newaxis, :, :, :] * H1[:, np.newaxis,:,np.newaxis, np.newaxis] * H3[np.newaxis,
-                                                                                                          :, np.newaxis,
-                                                                                                          np.newaxis,
-                                                                                                          :] # K1*K3*N1*N2*N3
-        gammaH1H2=self.gamma[np.newaxis, np.newaxis, :, :, :] * H1[:, np.newaxis,:,np.newaxis, np.newaxis] * H2[np.newaxis,
-                                                                                                          :, np.newaxis,
-                                                                                                          :,
-                                                                                                          np.newaxis]  # K1*K2*K3*N1*N2*N3
+            #写像の更新
+            gammaH2H3=self.gamma[np.newaxis, np.newaxis, :, :, :] * H2[:, np.newaxis, np.newaxis, :, np.newaxis] * H3[np.newaxis, :,
+                                                                                                         np.newaxis,
+                                                                                                         np.newaxis, :]#K2*K3*N1*N2*N3
+            gammaH1H3=self.gamma[np.newaxis, np.newaxis, :, :, :] * H1[:, np.newaxis,:,np.newaxis, np.newaxis] * H3[np.newaxis,
+                                                                                                              :, np.newaxis,
+                                                                                                              np.newaxis,
+                                                                                                              :] # K1*K3*N1*N2*N3
+            gammaH1H2=self.gamma[np.newaxis, np.newaxis, :, :, :] * H1[:, np.newaxis,:,np.newaxis, np.newaxis] * H2[np.newaxis,
+                                                                                                              :, np.newaxis,
+                                                                                                              :,
+                                                                                                              np.newaxis]  # K1*K2*K3*N1*N2*N3
 
-        G1=np.sum(gammaH2H3,axis=(3,4))#K2*K3*N1
-        G2 = np.sum(gammaH1H3,axis=(2,4))#K1*K3*N2
-        G3 = np.sum(gammaH1H2,axis=(2,3))#K1*K2*N3
-        #一次モデルの作成
-        U1=np.sum(H2[:, np.newaxis, np.newaxis, :, np.newaxis,np.newaxis]*H3[np.newaxis, :,np.newaxis,np.newaxis, :,np.newaxis]
-                   *(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis, :, :, :,:],axis=(3,4))/G1[:,:,:,np.newaxis]#K2*K3*N1
-        U2 = np.sum(H1[:,np.newaxis,:,np.newaxis,np.newaxis,np.newaxis]*H3[np.newaxis,:,np.newaxis,np.newaxis,:,np.newaxis]
-                    *(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis, :, :, :,:], axis=(2, 4))/G2[:,:,:,np.newaxis]  # K1*K3*N2
-        U3 = np.sum(H1[:,np.newaxis,:,np.newaxis,np.newaxis,np.newaxis]*H2[np.newaxis,:,np.newaxis,:,np.newaxis,np.newaxis]*(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis, :, :, :,:], axis=(2, 3)) / G3[:,:,:,np.newaxis]  # K1*K2*N3
+            G1=np.sum(gammaH2H3,axis=(3,4))#K2*K3*N1
+            G2 = np.sum(gammaH1H3,axis=(2,4))#K1*K3*N2
+            G3 = np.sum(gammaH1H2,axis=(2,3))#K1*K2*N3
+            #一次モデルの作成
+            U1=np.sum(H2[:, np.newaxis, np.newaxis, :, np.newaxis,np.newaxis]*H3[np.newaxis, :,np.newaxis,np.newaxis, :,np.newaxis]
+                       *(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis, :, :, :,:],axis=(3,4))/G1[:,:,:,np.newaxis]#K2*K3*N1
+            U2 = np.sum(H1[:,np.newaxis,:,np.newaxis,np.newaxis,np.newaxis]*H3[np.newaxis,:,np.newaxis,np.newaxis,:,np.newaxis]
+                        *(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis, :, :, :,:], axis=(2, 4))/G2[:,:,:,np.newaxis]  # K1*K3*N2
+            U3 = np.sum(H1[:,np.newaxis,:,np.newaxis,np.newaxis,np.newaxis]*H2[np.newaxis,:,np.newaxis,:,np.newaxis,np.newaxis]*(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis, :, :, :,:], axis=(2, 3)) / G3[:,:,:,np.newaxis]  # K1*K2*N3
 
-        #２次モデルの更新
-        Y=np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis]*(G1[:,:,:,np.newaxis]*U1)[np.newaxis,:,:,:,:],axis=3)\
-          /np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis]*G1[np.newaxis,:,:,:,np.newaxis],axis=3)
+            #２次モデルの更新
+            self.Y=np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis]*(G1[:,:,:,np.newaxis]*U1)[np.newaxis,:,:,:,:],axis=3)\
+              /np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis]*G1[np.newaxis,:,:,:,np.newaxis],axis=3)
+            #print(self.Y.shape)
+            #勝者決定
+            compDist1=np.square(U1[np.newaxis,:,:,:,:]-self.Y[:,:,:,np.newaxis,:])#K1*K2*K3*N1*D
+            k_star1=np.argmin(np.sum(compDist1,axis=(1,2,4)),axis=0)
 
-        #勝者決定
-        compDist1=np.square(U1[np.newaxis,:,:,:,:]-Y[:,:,:,np.newaxis,:])#K1*K2*K3*N1*D
-        k_star1=np.argmin(np.sum(compDist1,axis=(1,2,4)),axis=0)
+            compDist2 = np.square(U2[ :,np.newaxis, :, :, :] - self.Y[:, :, :, np.newaxis,:])  # K1*K2*K3*N2*D
+            k_star2= np.argmin(np.sum(compDist2, axis=(0, 2, 4)), axis=0)
+            #print(k_star2.shape)
 
-        compDist2 = np.square(U2[ :,np.newaxis, :, :, :] - Y[:, :, :, np.newaxis,:])  # K1*K2*K3*N2*D
-        k_star2= np.argmin(np.sum(compDist2, axis=(0, 2, 4)), axis=0)
-        print(k_star2.shape)
+            compDist3 = np.square(U3[:, :,np.newaxis, :, :] - self.Y[:, :, :, np.newaxis, :])  # K1*K2*K3*N3*D
+            k_star3 = np.argmin(np.sum(compDist3, axis=(0, 1, 4)), axis=0)
+            #print(k_star3.shape)
 
-        compDist3 = np.square(U3[:, :,np.newaxis, :, :] - Y[:, :, :, np.newaxis, :])  # K1*K2*K3*N3*D
-        k_star3 = np.argmin(np.sum(compDist3, axis=(0, 1, 4)), axis=0)
-
-        print(k_star3.shape)
-
-        
-        # for epoch in tqdm(np.arange(nb_epoch)):
-
-            # self.history['y'][epoch, :, :, :, :] = self.Y
-            # self.history['z1'][epoch, :] = self.Z1
-            # self.history['z2'][epoch, :] = self.Z2
-            # self.history['z3'][epoch, :] = self.Z3
-            # self.history['sigma1'][epoch] = sigma1
-            # self.history['sigma2'][epoch] = sigma2
-            # self.history['sigma3'][epoch] = sigma3
+            self.history['y'][epoch, :, :, :, :] = self.Y
+            self.history['z1'][epoch, :] = self.Z1
+            self.history['z2'][epoch, :] = self.Z2
+            self.history['z3'][epoch, :] = self.Z3
+            self.history['sigma1'][epoch] = sigma1
+            self.history['sigma2'][epoch] = sigma2
+            self.history['sigma3'][epoch] = sigma3
 
 
 if __name__ == "__main__":
@@ -211,6 +207,6 @@ if __name__ == "__main__":
     #print(X.shape)
 
 
-    tsom3=wTSOM3(X=X,latent_dim=2,resolution=(1,2,3),SIGMA_MAX=1.0,SIGMA_MIN=0.1,TAU=25,gamma="nonweight")
+    tsom3=wTSOM3(X=X,latent_dim=2,resolution=(10,12,13),SIGMA_MAX=1.0,SIGMA_MIN=0.1,TAU=25,gamma="nonweight")
 
-    tsom3.fit(nb_epoch=1)
+    tsom3.fit(nb_epoch=100)
