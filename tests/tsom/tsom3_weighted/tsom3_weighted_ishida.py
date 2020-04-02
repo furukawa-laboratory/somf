@@ -212,6 +212,7 @@ class wTSOM3():
         print(G4_tilde.shape)
         print(np.allclose(G4,G4_tilde))
 
+        
         #print(np.allclose(Y,Y2))
         #print(np.allclose(Y, Yharada))
         # for epoch in tqdm(np.arange(nb_epoch)):
