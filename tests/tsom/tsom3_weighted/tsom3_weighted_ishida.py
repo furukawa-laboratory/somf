@@ -212,16 +212,16 @@ class wTSOM3():
         #print(G4_tilde.shape)
         #print(np.allclose(G4,G4_tilde))
 
-        Y_tilde=np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis,np.newaxis,np.newaxis]
-                 *H2[np.newaxis,:,np.newaxis,np.newaxis,:,np.newaxis,np.newaxis]
-                 *H3[np.newaxis,np.newaxis,:,np.newaxis,np.newaxis,:,np.newaxis]
-                 *(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis,np.newaxis, :, :, :,:],axis=(3,4,5))
+        # Y_tilde=np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis,np.newaxis,np.newaxis]
+        #          *H2[np.newaxis,:,np.newaxis,np.newaxis,:,np.newaxis,np.newaxis]
+        #          *H3[np.newaxis,np.newaxis,:,np.newaxis,np.newaxis,:,np.newaxis]
+        #          *(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis,np.newaxis, :, :, :,:],axis=(3,4,5))
+        #
+        # U_tilde=np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis]*(G1[:,:,:,np.newaxis]*U1)[np.newaxis,:,:,:,:],axis=3)
+        #
+        # print(np.allclose(Y_tilde,U_tilde))
 
-        U_tilde=np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis]*(G1[:,:,:,np.newaxis]*U1)[np.newaxis,:,:,:,:],axis=3)
-
-        print(np.allclose(Y_tilde,U_tilde))
-
-        #print(np.allclose(Y,Y2))
+        print(np.allclose(Y,Y2))
         #print(np.allclose(Y, Yharada))
         # for epoch in tqdm(np.arange(nb_epoch)):
 
