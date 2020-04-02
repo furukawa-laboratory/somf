@@ -138,17 +138,37 @@ class wTSOM3():
         self.history['sigma3'] = np.zeros(nb_epoch)
 
         #近傍関数の設計
-        H1=np.zeros((self.N1,self.K1))
-        H1=distance.cdist(self.Zeta1,self.Z1,metric="sqeuclidean")
+        epoch=nb_epoch
+        sigma1 = max(self.SIGMA1_MIN, self.SIGMA1_MAX * (1 - (epoch / self.TAU1)))
+        Dist1=distance.cdist(self.Zeta1,self.Z1,metric="sqeuclidean")
+        H1=np.exp(-0.5*Dist1/(2 * pow(sigma1, 2)))#K1*N1
+
+        sigma2 = max(self.SIGMA2_MIN, self.SIGMA2_MAX * (1 - (epoch / self.TAU2)))
+        Dist2 = distance.cdist(self.Zeta2, self.Z2, metric="sqeuclidean")
+        H2 = np.exp(-0.5 * Dist2/ (2 * pow(sigma2, 2)))#K2*N2
+        sigma3 = max(self.SIGMA3_MIN, self.SIGMA3_MAX * (1 - (epoch / self.TAU3)))
+        Dist3 = distance.cdist(self.Zeta3, self.Z3, metric="sqeuclidean")
+        H3 = np.exp(-0.5 * Dist3/(2 * pow(sigma3, 2)))#K3*N3
+
         print(H1.shape)
-
-
+        print(H2.shape)
+        print(H3.shape)
         #写像の更新
+        G1=self.gamma[np.newaxis,np.newaxis,:,:,:]*H2[:,np.newaxis,np.newaxis,:,np.newaxis]*H3[np.newaxis,:,np.newaxis,np.newaxis,:] #K2*K3*N1*N2*N3
 
 
+        G2 = self.gamma[np.newaxis, np.newaxis, :, :, :] * H1[:, np.newaxis,:,np.newaxis, np.newaxis] * H3[np.newaxis,
+                                                                                                          :, np.newaxis,
+                                                                                                          np.newaxis,
+                                                                                                          :]  # K1*K3*N1*N2*N3
+        G3 = self.gamma[np.newaxis, np.newaxis, :, :, :] * H2[:, np.newaxis,np.newaxis,:, np.newaxis] * H3[np.newaxis,
+                                                                                                          :, np.newaxis,
+                                                                                                          np.newaxis,
+                                                                                                          :]  # K2*K3*N1*N2*N3
 
-
-
+        print(G1.shape)
+        print(G2.shape)
+        print(G3.shape)
 
         # for epoch in tqdm(np.arange(nb_epoch)):
 
@@ -170,4 +190,6 @@ if __name__ == "__main__":
     print(X.shape)
 
 
-    tsom3=wTSOM3(X=X,latent_dim=2,resolution=10,SIGMA_MAX=1.0,SIGMA_MIN=0.1,TAU=25,gamma="nonweight")
+    tsom3=wTSOM3(X=X,latent_dim=2,resolution=(10,11,12),SIGMA_MAX=1.0,SIGMA_MIN=0.1,TAU=25,gamma="nonweight")
+
+    tsom3.fit(nb_epoch=1)
