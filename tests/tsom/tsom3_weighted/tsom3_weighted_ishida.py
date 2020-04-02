@@ -137,8 +137,21 @@ class wTSOM3():
         self.history['sigma2'] = np.zeros(nb_epoch)
         self.history['sigma3'] = np.zeros(nb_epoch)
 
-        for epoch in tqdm(np.arange(nb_epoch)):
-            
+        #近傍関数の設計
+        H1=np.zeros((self.N1,self.K1))
+        H1=distance.cdist(self.Zeta1,self.Z1,metric="sqeuclidean")
+        print(H1.shape)
+
+
+        #写像の更新
+
+
+
+
+
+
+        # for epoch in tqdm(np.arange(nb_epoch)):
+
             # self.history['y'][epoch, :, :, :, :] = self.Y
             # self.history['z1'][epoch, :] = self.Z1
             # self.history['z2'][epoch, :] = self.Z2
@@ -146,3 +159,15 @@ class wTSOM3():
             # self.history['sigma1'][epoch] = sigma1
             # self.history['sigma2'][epoch] = sigma2
             # self.history['sigma3'][epoch] = sigma3
+
+
+if __name__ == "__main__":
+    N1 = 10
+    N2 = 12
+    N3 = 14
+    D = 1
+    X = np.random.rand(N1, N2, N3, D)
+    print(X.shape)
+
+
+    tsom3=wTSOM3(X=X,latent_dim=2,resolution=10,SIGMA_MAX=1.0,SIGMA_MIN=0.1,TAU=25,gamma="nonweight")
