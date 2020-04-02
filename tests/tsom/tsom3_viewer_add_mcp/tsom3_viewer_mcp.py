@@ -8,7 +8,7 @@ from matplotlib.widgets import RadioButtons
 np.random.seed(2)
 
 class TSOM3_Viewer:
-    def __init__(self, y, winner1, winner2, winner3, fig_size=None, label1=None, label2=None, label3=None, button_label=None):
+    def __init__(self, y, winner1, winner2, winner3, fig_size=None, label1=None, label2=None, label3=None, button_label=None, view1_title=None, view2_title=None, view3_title=None):
         # ---------- 参照テンソルとデータ ---------- #
         self.Mode1_Num = y.shape[0]
         self.Mode2_Num = y.shape[1]
@@ -55,11 +55,23 @@ class TSOM3_Viewer:
         map3x_pos, map3y_pos = np.meshgrid(map3x, map3y)
         self.Map3_position = np.c_[map3x_pos.ravel(), map3y_pos.ravel()]  # マップ上の座標
 
-        #label
+        # label
         self.label1 = label1
         self.label2 = label2
         self.label3 = label3
         self.button_label = button_label
+
+        # title
+        self.view1_title = view1_title
+        if self.view1_title is None:
+            self.view1_title = 'View 1'
+        self.view2_title = view2_title
+        if self.view2_title is None:
+            self.view2_title = 'View 2'
+        self.view3_title = view3_title
+        if self.view3_title is None:
+            self.view3_title = 'View 3'
+
 
         if button_label is None:#radioボタンにラベルが与えられなかったときの処理(観測データ次元分の番号を振る)
             self.button_label=np.arange(self.Dim)
@@ -94,11 +106,11 @@ class TSOM3_Viewer:
         plt.subplots_adjust(right=0.9)#0.7
         plt.subplots_adjust(wspace=0)
         self.Map1 = self.Fig.add_subplot(1, 3, 1)
-        self.Map1.set_title('View 1')
+        self.Map1.set_title(self.view1_title)
         self.Map2 = self.Fig.add_subplot(1, 3, 2)
-        self.Map2.set_title('View 2')
+        self.Map2.set_title(self.view2_title)
         self.Map3 = self.Fig.add_subplot(1, 3, 3)
-        self.Map3.set_title('View 3')
+        self.Map3.set_title(self.view3_title)
         rax = plt.axes([0.9, 0.25, 0.1, 0.5], facecolor='lightgoldenrodyellow',aspect='equal')
         if not button_label is None:
             self.radio = RadioButtons(rax, button_label)
@@ -433,7 +445,7 @@ class TSOM3_Viewer:
     # ------------------------------ #
     def __draw_map1(self):
         self.Map1.cla()
-        self.Map1.set_title('View 1')
+        self.Map1.set_title(self.view1_title)
         self.__draw_label_map1()
         self.Map1.imshow(self.Map1_val[::], interpolation='spline36',
                          extent=[0, self.Map1_val.shape[0] - 1, -self.Map1_val.shape[1] + 1, 0], cmap="bwr")
@@ -443,7 +455,7 @@ class TSOM3_Viewer:
 
     def __draw_map2(self):
         self.Map2.cla()
-        self.Map2.set_title('View 2')
+        self.Map2.set_title(self.view2_title)
         self.__draw_label_map2()
         self.Map2.imshow(self.Map2_val[::], interpolation='spline36',
                          extent=[0, self.Map2_val.shape[0] - 1, -self.Map2_val.shape[1] + 1, 0], cmap="bwr")
@@ -453,7 +465,7 @@ class TSOM3_Viewer:
 
     def __draw_map3(self):
         self.Map3.cla()
-        self.Map3.set_title('View 3')
+        self.Map3.set_title(self.view3_title)
         self.__draw_label_map3()
         self.Map3.imshow(self.Map3_val[::], interpolation='spline36',
                          extent=[0, self.Map3_val.shape[0] - 1, -self.Map3_val.shape[1] + 1, 0], cmap="bwr")
