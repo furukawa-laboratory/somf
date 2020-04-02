@@ -176,6 +176,20 @@ class wTSOM3():
         #２次モデルの更新
         Y=np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis]*(G1[:,:,:,np.newaxis]*U1)[np.newaxis,:,:,:,:],axis=3)\
           /np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis]*G1[np.newaxis,:,:,:,np.newaxis],axis=3)
+
+        #勝者決定
+        compDist1=np.square(U1[np.newaxis,:,:,:,:]-Y[:,:,:,np.newaxis,:])#K1*K2*K3*N1*D
+        k_star1=np.argmin(np.sum(compDist1,axis=(1,2,4)),axis=0)
+
+        compDist2 = np.square(U2[ :,np.newaxis, :, :, :] - Y[:, :, :, np.newaxis,:])  # K1*K2*K3*N2*D
+        k_star2= np.argmin(np.sum(compDist2, axis=(0, 2, 4)), axis=0)
+        print(k_star2.shape)
+
+        compDist3 = np.square(U3[:, :,np.newaxis, :, :] - Y[:, :, :, np.newaxis, :])  # K1*K2*K3*N3*D
+        k_star3 = np.argmin(np.sum(compDist3, axis=(0, 1, 4)), axis=0)
+
+        print(k_star3.shape)
+
         
         # for epoch in tqdm(np.arange(nb_epoch)):
 
