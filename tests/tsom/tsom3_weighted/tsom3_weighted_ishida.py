@@ -164,26 +164,36 @@ class wTSOM3():
         gammaH1H2=self.gamma[np.newaxis, np.newaxis, :, :, :] * H1[:, np.newaxis,:,np.newaxis, np.newaxis] * H2[np.newaxis,
                                                                                                           :, np.newaxis,
                                                                                                           :,
-                                                                                                          np.newaxis]  # K1*K2*N1*N2*N3
+                                                                                                          np.newaxis]  # K1*K2*K3*N1*N2*N3
+
+        gammaH1H2H3=self.gamma[np.newaxis, np.newaxis,np.newaxis, :, :, :] \
+                    * H1[:, np.newaxis,np.newaxis,:,np.newaxis, np.newaxis] * H2[np.newaxis,:, np.newaxis,np.newaxis,:,np.newaxis] \
+                    * H3[np.newaxis,np.newaxis, :,np.newaxis,np.newaxis, :]#K1*K2*K3*N1*N2*N3
+
         G1=np.sum(gammaH2H3,axis=(3,4))#K2*K3*N1
         G2 = np.sum(gammaH1H3,axis=(2,4))#K1*K3*N2
         G3 = np.sum(gammaH1H2,axis=(2,3))#K1*K2*N3
+        G4=np.sum(gammaH1H2H3,axis=(3,4,5))#K1*K2*K3
         print(G1.shape)
         print(G2.shape)
         print(G3.shape)
+        print(G4.shape)
 
+        #a=H2[:, np.newaxis, np.newaxis, :, np.newaxis,np.newaxis]*H3[np.newaxis, :,np.newaxis,np.newaxis, :,np.newaxis]*self.gamma[:, :, :, np.newaxis] * X[np.newaxis, np.newaxis, :, :, :,:]
+        #print(a.shape)
         #一次モデルの作成
-        #gammaH2H3=self.gamma[np.newaxis, np.newaxis, :, :, :]*H2[:, np.newaxis,np.newaxis,:, np.newaxis]*H3[np.newaxis,:,np.newaxis,np.newaxis,:]*X[np.newaxis, np.newaxis, :, :, :]#K2*K3*N1*N2*N3
-
-        U1=np.sum(gammaH2H3,axis=(3,4))/G1#K2*K3*N1
-        U2 = np.sum(gammaH1H3, axis=(2, 4))/G2  # K1*K3*N2
-        U3 = np.sum(gammaH1H2, axis=(2, 3)) / G3  # K1*K2*N3
+        U1=np.sum(H2[:, np.newaxis, np.newaxis, :, np.newaxis,np.newaxis]*H3[np.newaxis, :,np.newaxis,np.newaxis, :,np.newaxis]
+                   *(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis, :, :, :,:],axis=(3,4))/G1[:,:,:,np.newaxis]#K2*K3*N1
+        #U2 = np.sum(gammaH1H3*X[np.newaxis, np.newaxis, :, :, :], axis=(2, 4))/G2  # K1*K3*N2
+        #U3 = np.sum(gammaH1H2*X[np.newaxis, np.newaxis, :, :, :], axis=(2, 3)) / G3  # K1*K2*N3
 
         print(U1.shape)
-        print(U2.shape)
-        print(U3.shape)
+        #print(U2.shape)
+        #print(U3.shape)
 
-        
+        #２次モデルの更新
+        Y=np.sum(gammaH1H2H3)
+
         # for epoch in tqdm(np.arange(nb_epoch)):
 
             # self.history['y'][epoch, :, :, :, :] = self.Y
@@ -196,14 +206,14 @@ class wTSOM3():
 
 
 if __name__ == "__main__":
-    N1 = 10
+    N1 = 11
     N2 = 12
-    N3 = 14
+    N3 = 13
     D = 1
     X = np.random.rand(N1, N2, N3, D)
     print(X.shape)
 
 
-    tsom3=wTSOM3(X=X,latent_dim=2,resolution=(10,11,12),SIGMA_MAX=1.0,SIGMA_MIN=0.1,TAU=25,gamma="nonweight")
+    tsom3=wTSOM3(X=X,latent_dim=2,resolution=(1,2,3),SIGMA_MAX=1.0,SIGMA_MIN=0.1,TAU=25,gamma="nonweight")
 
     tsom3.fit(nb_epoch=1)
