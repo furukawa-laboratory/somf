@@ -193,11 +193,11 @@ class wTSOM3():
         # print(U3.shape)
 
         #２次モデルの更新
-        Y=np.sum(H1[:,np.newaxis,np.newaxis:,np.newaxis,np.newaxis,np.newaxis]
+        Y=np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis,np.newaxis,np.newaxis]
                  *H2[np.newaxis,:,np.newaxis,np.newaxis,:,np.newaxis,np.newaxis]
                  *H3[np.newaxis,np.newaxis,:,np.newaxis,np.newaxis,:,np.newaxis]
-                 *(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis, :, :, :,:])/G4[:,:,:,np.newaxis]#K1*K2*K3
-        #print(Y.shape)
+                 *(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis,np.newaxis, :, :, :,:],axis=(3,4,5))/G4[:,:,:,np.newaxis]#K1*K2*K3
+        print(Y.shape)
 
         # a=H1[:, np.newaxis, np.newaxis, :, np.newaxis] * (G1[:,:,:,np.newaxis] * U1)[np.newaxis, :, :, :, :]
         # print(a.shape)
@@ -208,11 +208,19 @@ class wTSOM3():
         #Yharada=np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis]*U1[np.newaxis,:,:,:,:],axis=4)/np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis],axis=3)
 
         #print(Y2.shape)
-        G4_tilde=np.sum(H1[:, np.newaxis, np.newaxis, :] * G1,axis=3)
-        print(G4_tilde.shape)
-        print(np.allclose(G4,G4_tilde))
+        #G4_tilde=np.sum(H1[:, np.newaxis, np.newaxis, :] * G1,axis=3)
+        #print(G4_tilde.shape)
+        #print(np.allclose(G4,G4_tilde))
 
-        
+        Y_tilde=np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis,np.newaxis,np.newaxis]
+                 *H2[np.newaxis,:,np.newaxis,np.newaxis,:,np.newaxis,np.newaxis]
+                 *H3[np.newaxis,np.newaxis,:,np.newaxis,np.newaxis,:,np.newaxis]
+                 *(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis,np.newaxis, :, :, :,:],axis=(3,4,5))
+
+        U_tilde=np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis]*(G1[:,:,:,np.newaxis]*U1)[np.newaxis,:,:,:,:],axis=3)
+
+        print(np.allclose(Y_tilde,U_tilde))
+
         #print(np.allclose(Y,Y2))
         #print(np.allclose(Y, Yharada))
         # for epoch in tqdm(np.arange(nb_epoch)):
@@ -232,7 +240,7 @@ if __name__ == "__main__":
     N3 = 13
     D = 1
     X = np.random.rand(N1, N2, N3, D)
-    print(X.shape)
+    #print(X.shape)
 
 
     tsom3=wTSOM3(X=X,latent_dim=2,resolution=(1,2,3),SIGMA_MAX=1.0,SIGMA_MIN=0.1,TAU=25,gamma="nonweight")
