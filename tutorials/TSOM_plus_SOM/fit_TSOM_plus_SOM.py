@@ -27,10 +27,12 @@ for i in range(int(group_num / 2)):
     input_data[int(2 * i), :, :] = group1
     input_data[int(2 * i + 1), :, :] = group2
 
+#観測データの描画
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1, projection="3d")
 for i in range(group_num):
-    ax.scatter(input_data[i, :, 0], input_data[i, :, 1], input_data[i, :, 2])
+    ax.scatter(input_data[i, :, 0], input_data[i, :, 1], input_data[i, :, 2],label="group"+str(i+1))
+    plt.legend(bbox_to_anchor=(1, 1), loc='upper right', borderaxespad=0, fontsize=10)
 plt.show()
 input_data = input_data.reshape(-1, 3)
 
