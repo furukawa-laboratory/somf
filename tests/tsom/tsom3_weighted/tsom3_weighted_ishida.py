@@ -184,15 +184,16 @@ class wTSOM3():
         #一次モデルの作成
         U1=np.sum(H2[:, np.newaxis, np.newaxis, :, np.newaxis,np.newaxis]*H3[np.newaxis, :,np.newaxis,np.newaxis, :,np.newaxis]
                    *(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis, :, :, :,:],axis=(3,4))/G1[:,:,:,np.newaxis]#K2*K3*N1
-        #U2 = np.sum(gammaH1H3*X[np.newaxis, np.newaxis, :, :, :], axis=(2, 4))/G2  # K1*K3*N2
-        #U3 = np.sum(gammaH1H2*X[np.newaxis, np.newaxis, :, :, :], axis=(2, 3)) / G3  # K1*K2*N3
+        U2 = np.sum(H1[:,np.newaxis,:,np.newaxis,np.newaxis,np.newaxis]*H3[np.newaxis,:,np.newaxis,np.newaxis,:,np.newaxis]
+                    *(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis, :, :, :,:], axis=(2, 4))/G2[:,:,:,np.newaxis]  # K1*K3*N2
+        U3 = np.sum(H1[:,np.newaxis,:,np.newaxis,np.newaxis,np.newaxis]*H2[np.newaxis,:,np.newaxis,:,np.newaxis,np.newaxis]*(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis, :, :, :,:], axis=(2, 3)) / G3[:,:,:,np.newaxis]  # K1*K2*N3
 
         print(U1.shape)
-        #print(U2.shape)
-        #print(U3.shape)
+        print(U2.shape)
+        print(U3.shape)
 
         #２次モデルの更新
-        Y=np.sum(gammaH1H2H3)
+        #Y=np.sum(gammaH1H2H3)
 
         # for epoch in tqdm(np.arange(nb_epoch)):
 
