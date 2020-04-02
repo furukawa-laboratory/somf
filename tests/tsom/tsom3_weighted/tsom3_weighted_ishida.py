@@ -174,10 +174,10 @@ class wTSOM3():
         G2 = np.sum(gammaH1H3,axis=(2,4))#K1*K3*N2
         G3 = np.sum(gammaH1H2,axis=(2,3))#K1*K2*N3
         G4=np.sum(gammaH1H2H3,axis=(3,4,5))#K1*K2*K3
-        print(G1.shape)
-        print(G2.shape)
-        print(G3.shape)
-        print(G4.shape)
+        # print(G1.shape)
+        # print(G2.shape)
+        # print(G3.shape)
+        # print(G4.shape)
 
         #a=H2[:, np.newaxis, np.newaxis, :, np.newaxis,np.newaxis]*H3[np.newaxis, :,np.newaxis,np.newaxis, :,np.newaxis]*self.gamma[:, :, :, np.newaxis] * X[np.newaxis, np.newaxis, :, :, :,:]
         #print(a.shape)
@@ -188,13 +188,32 @@ class wTSOM3():
                     *(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis, :, :, :,:], axis=(2, 4))/G2[:,:,:,np.newaxis]  # K1*K3*N2
         U3 = np.sum(H1[:,np.newaxis,:,np.newaxis,np.newaxis,np.newaxis]*H2[np.newaxis,:,np.newaxis,:,np.newaxis,np.newaxis]*(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis, :, :, :,:], axis=(2, 3)) / G3[:,:,:,np.newaxis]  # K1*K2*N3
 
-        print(U1.shape)
-        print(U2.shape)
-        print(U3.shape)
+        # print(U1.shape)
+        # print(U2.shape)
+        # print(U3.shape)
 
         #２次モデルの更新
-        #Y=np.sum(gammaH1H2H3)
+        Y=np.sum(H1[:,np.newaxis,np.newaxis:,np.newaxis,np.newaxis,np.newaxis]
+                 *H2[np.newaxis,:,np.newaxis,np.newaxis,:,np.newaxis,np.newaxis]
+                 *H3[np.newaxis,np.newaxis,:,np.newaxis,np.newaxis,:,np.newaxis]
+                 *(self.gamma[:,:,:,np.newaxis]*X)[np.newaxis, np.newaxis, :, :, :,:])/G4[:,:,:,np.newaxis]#K1*K2*K3
+        #print(Y.shape)
 
+        # a=H1[:, np.newaxis, np.newaxis, :, np.newaxis] * (G1[:,:,:,np.newaxis] * U1)[np.newaxis, :, :, :, :]
+        # print(a.shape)
+        # b=np.sum(H1[:, np.newaxis, np.newaxis, :] * G1[np.newaxis, :, :, :],axis=3)
+        # print(b.shape)
+        Y2=np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis]*(G1[:,:,:,np.newaxis]*U1)[np.newaxis,:,:,:,:],axis=3)/np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis]*G1[np.newaxis,:,:,:,np.newaxis],axis=3)
+
+        #Yharada=np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis]*U1[np.newaxis,:,:,:,:],axis=4)/np.sum(H1[:,np.newaxis,np.newaxis,:,np.newaxis],axis=3)
+
+        #print(Y2.shape)
+        G4_tilde=np.sum(H1[:, np.newaxis, np.newaxis, :] * G1,axis=3)
+        print(G4_tilde.shape)
+        print(np.allclose(G4,G4_tilde))
+
+        #print(np.allclose(Y,Y2))
+        #print(np.allclose(Y, Yharada))
         # for epoch in tqdm(np.arange(nb_epoch)):
 
             # self.history['y'][epoch, :, :, :, :] = self.Y
