@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 from libs.models.tsom3 import TSOM3
 from tests.tsom.tsom3_weighted.tsom3_weighted import wTSOM3
-# from tests.tsom.tsom3_weighted.tsom3_weighted_another import wTSOM3_another
+from tests.tsom.tsom3_weighted.tsom3_weighted_ishida import wTSOM3_ishida
 
 
 class TestTSOM3(unittest.TestCase):
@@ -40,18 +40,18 @@ class TestTSOM3(unittest.TestCase):
                            SIGMA_MAX=sigma_max, SIGMA_MIN=sigma_min, TAU=tau,
                            init=init)
 
-        tsom3_another = TSOM3(X, latent_dim=latent_dim, resolution=resolution,
+        tsom3_ishida = wTSOM3_ishida(X, latent_dim=latent_dim, resolution=resolution,
                                       SIGMA_MAX=sigma_max, SIGMA_MIN=sigma_min, TAU=tau,
                                       init=init)
         # learn
         tsom3_harada.fit(nb_epoch=nb_epoch)
 
 
-        tsom3_another.fit(nb_epoch=nb_epoch)
+        tsom3_ishida.fit(nb_epoch=nb_epoch)
 
 
         # test
-        np.testing.assert_allclose(tsom3_harada.history['y'], tsom3_another.history['y'])
+        np.testing.assert_allclose(tsom3_harada.history['y'], tsom3_ishida.history['y'])
 
 
 
