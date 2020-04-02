@@ -175,9 +175,15 @@ class wTSOM3():
         #一次モデルの作成
         #gammaH2H3=self.gamma[np.newaxis, np.newaxis, :, :, :]*H2[:, np.newaxis,np.newaxis,:, np.newaxis]*H3[np.newaxis,:,np.newaxis,np.newaxis,:]*X[np.newaxis, np.newaxis, :, :, :]#K2*K3*N1*N2*N3
 
-        U1=np.sum(gammaH2H3,axis=(3,4))#K2*K3*N1
-        print(U1.shape)
+        U1=np.sum(gammaH2H3,axis=(3,4))/G1#K2*K3*N1
+        U2 = np.sum(gammaH1H3, axis=(2, 4))/G2  # K1*K3*N2
+        U3 = np.sum(gammaH1H2, axis=(2, 3)) / G3  # K1*K2*N3
 
+        print(U1.shape)
+        print(U2.shape)
+        print(U3.shape)
+
+        
         # for epoch in tqdm(np.arange(nb_epoch)):
 
             # self.history['y'][epoch, :, :, :, :] = self.Y
