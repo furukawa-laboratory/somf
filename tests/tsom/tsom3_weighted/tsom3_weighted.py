@@ -185,7 +185,10 @@ class wTSOM3():
                 :] * H2[None, :, :, None, None], axis=1) / G3[:, :, :, None]  # K1*K2*N3
             # self.U3 = np.einsum('ijk,il,jm,ijkd->lmkd',self.gamma,H1,H2,self.X)/G3[:,:,:,None]
             # １次モデルを使って2次モデルを更新
-            self.Y = np.sum(H1[:, :, None, None, None] * self.U1[:, None, :, :, :], axis=0) / np.sum(H1, axis=0)[:, None, None, None]  # K1*K2*K3*D
+            self.Y = np.sum(H1[:, :, None, None, None] * (G1[:, :, :, None] * self.U1)[:, None, :, :, :],
+                            axis=0) / np.sum(H1[:, :, None, None] * G1[:, None, :, :], axis=0)[:, :, :, None] # K1*K2*K3*D
+            # self.Y = np.sum((H1[:, :, None, None] * G1[:, None, :, :])[:, :, :, :, None] * self.U1[:, None, :, :, :],
+            #                 axis=0) / np.sum(H1[:, :, None, None] * G1[:, None, :, :], axis=0)[:, :, :, None]  # K1*K2*K3*D
             # self.Y = np.sum(np.sum(
             #     np.sum((self.gamma[:, :, :, None] * self.X)[:, None, :, :, :] * H1[:, :, None, None, None], axis=0)[:,
             #     :, None, :, :] * H2[None, :, :, None, None], axis=1)[:, :, :, None, :] * H3[None, None, :, :, None],

@@ -51,7 +51,7 @@ class TestTSOM3(unittest.TestCase):
 
 
         # test
-        np.testing.assert_allclose(tsom3_harada.history['y'], tsom3_ishida.history['y'])
+        np.testing.assert_allclose(tsom3_harada.history['y'], tsom3_ishida.history['y'], rtol=1e-4, atol=0)
 
 
 
