@@ -22,7 +22,7 @@ class TestTSOM3(unittest.TestCase):
         X = np.random.normal(0, 1, (nb_samples1, nb_samples2, nb_samples3, nb_observed_dim))
 
         # set learning parameter
-        nb_epoch = 60
+        nb_epoch = 3
         latent_dim = [2, 2, 2]
         resolution = [5, 5, 5]
         sigma_max = [2.0, 2.0, 2.0]
@@ -51,6 +51,14 @@ class TestTSOM3(unittest.TestCase):
 
 
         # test
+        # np.testing.assert_allclose(tsom3_harada.H1, tsom3_ishida.H1, rtol=1e-4, atol=0)
+        print("h1", np.allclose(tsom3_harada.H1, tsom3_ishida.H1))
+        print("h2", np.allclose(tsom3_harada.H2, tsom3_ishida.H2))
+        print("h3", np.allclose(tsom3_harada.H3, tsom3_ishida.H3))
+        print("k1", np.allclose(tsom3_harada.k_star1, tsom3_ishida.k_star1))
+        print("k2", np.allclose(tsom3_harada.k_star2, tsom3_ishida.k_star2))
+        print("k3", np.allclose(tsom3_harada.k_star3, tsom3_ishida.k_star3))
+
         np.testing.assert_allclose(tsom3_harada.history['y'], tsom3_ishida.history['y'], rtol=1e-4, atol=0)
 
 
