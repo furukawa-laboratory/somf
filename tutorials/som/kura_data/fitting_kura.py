@@ -12,7 +12,7 @@ if __name__ == '__main__':
     TAU = 50
     latent_dim = 2
 
-    x_sigma = 0.1
+    noise_std = 0.1 # standard deviation of noise added to data
 
     nb_samples = 500
     seed = 1
@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     np.random.seed(seed)
     X = create_data(nb_samples)
-    X += np.random.normal(0,0.1,X.shape)
+    X += np.random.normal(0,noise_std,X.shape) # add gaussian noise
 
     som = SOM(X, latent_dim=latent_dim, resolution=resolution, sigma_max=SIGMA_MAX, sigma_min=SIGMA_MIN, tau=TAU)
 
