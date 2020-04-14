@@ -22,7 +22,7 @@ nb_observed_dim=4
 X = np.random.normal(0, 1, (nb_samples1, nb_samples2, nb_samples3, nb_observed_dim))
 
 # set learning parameter
-nb_epoch = 6
+nb_epoch = 20
 latent_dim = [2, 2, 2]
 resolution = [5, 5, 5]
 sigma_max = [2.0, 2.0, 2.0]
