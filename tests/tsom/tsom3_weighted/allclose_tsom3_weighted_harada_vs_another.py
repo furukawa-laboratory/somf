@@ -37,16 +37,13 @@ init = [Z1init, Z2init, Z3init]
 
 # generate tsom instance
 tsom3_harada = wTSOM3(X, latent_dim=latent_dim, resolution=resolution,
-   SIGMA_MAX=sigma_max, SIGMA_MIN=sigma_min, TAU=tau,
-   init=init)
+SIGMA_MAX=sigma_max, SIGMA_MIN=sigma_min, TAU=tau, init=init)
 
 tsom3_ishida = wTSOM3_ishida(X, latent_dim=latent_dim, resolution=resolution,
-  SIGMA_MAX=sigma_max, SIGMA_MIN=sigma_min, TAU=tau,
-  init=init)
+SIGMA_MAX=sigma_max, SIGMA_MIN=sigma_min, TAU=tau, init=init)
 
 # learn
 tsom3_harada.fit(nb_epoch=nb_epoch)
-
 
 tsom3_ishida.fit(nb_epoch=nb_epoch)
 
@@ -63,8 +60,9 @@ print("k3", np.allclose(tsom3_harada.k_star3, tsom3_ishida.k_star3))
 # print("u2", np.allclose(tsom3_harada.U2, tsom3_ishida.U2))
 # print("u3", np.allclose(tsom3_harada.U3, tsom3_ishida.U3))
 print("y", np.allclose(tsom3_harada.Y, tsom3_ishida.Y))
+print("yhist", np.allclose(tsom3_harada.history['y'], tsom3_ishida.history['y'], rtol=1e-4, atol=0))
 
-# np.testing.assert_allclose(tsom3_harada.history['y'], tsom3_ishida.history['y'], rtol=1e-4, atol=0)
+np.testing.assert_allclose(tsom3_harada.history['y'], tsom3_ishida.history['y'], rtol=1e-4, atol=0)
 
 
 

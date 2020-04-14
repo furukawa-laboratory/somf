@@ -203,15 +203,18 @@ class wTSOM3_ishida():
 
             #勝者決定
             compDist1 = np.square(U1[np.newaxis, :, :, :, :] - self.Y[:, :, :, np.newaxis, :])#K1*K2*K3*N1*D
-            k_star1 = np.argmin(np.sum(compDist1, axis=(1, 2, 4)), axis=0)
+            # k_star1 = np.argmin(np.sum(compDist1, axis=(1, 2, 4)), axis=0) # original
+            k_star1 = np.argmin(np.sum(G1[None, :, :, :, None] * compDist1, axis=(1, 2, 4)), axis=0)
             self.Z1 = self.Zeta1[k_star1, :]
 
             compDist2 = np.square(U2[:, np.newaxis, :, :, :] - self.Y[:, :, :, np.newaxis, :])  # K1*K2*K3*N2*D
-            k_star2 = np.argmin(np.sum(compDist2, axis=(0, 2, 4)), axis=0)
+            # k_star2 = np.argmin(np.sum(compDist2, axis=(0, 2, 4)), axis=0) # original
+            k_star2 = np.argmin(np.sum(G2[:, None, :, :, None] * compDist2, axis=(0, 2, 4)), axis=0)
             self.Z2 = self.Zeta2[k_star2, :]
 
             compDist3 = np.square(U3[:, :, np.newaxis, :, :] - self.Y[:, :, :, np.newaxis, :])  # K1*K2*K3*N3*D
-            k_star3 = np.argmin(np.sum(compDist3, axis=(0, 1, 4)), axis=0)
+            # k_star3 = np.argmin(np.sum(compDist3, axis=(0, 1, 4)), axis=0) # original
+            k_star3 = np.argmin(np.sum(G3[:, :, None, :, None] * compDist3, axis=(0, 1, 4)), axis=0)
             self.Z3 = self.Zeta3[k_star3, :]
 
             self.k_star1 = k_star1
