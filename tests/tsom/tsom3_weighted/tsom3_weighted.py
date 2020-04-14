@@ -155,74 +155,68 @@ class wTSOM3():
             # 学習量の決定
             sigma1 = max(self.SIGMA1_MIN, self.SIGMA1_MAX * (1 - (epoch / self.TAU1)))
             distance1 = distance.cdist(self.Zeta1, self.Z1, 'sqeuclidean')  # 距離行列をつくるDはK1*N1行列
-            H1 = np.exp(-0.5*distance1 / (2 * pow(sigma1, 2)))  # かっこに気を付ける
-            self.H1 = np.exp(-0.5*distance1 / (2 * pow(sigma1, 2)))
+            H1 = np.exp(-distance1 / (2 * pow(sigma1, 2)))  # かっこに気を付ける
+            self.H1 = np.exp(-distance1 / (2 * pow(sigma1, 2)))
 
             sigma2 = max(self.SIGMA2_MIN, self.SIGMA2_MAX * (1 - (epoch / self.TAU2)))
             distance2 = distance.cdist(self.Zeta2, self.Z2, 'sqeuclidean')  # 距離行列をつくるDはK2*N2行列
-            H2 = np.exp(-0.5*distance2 / (2 * pow(sigma2, 2)))  # かっこに気を付ける
-            self.H2 = np.exp(-0.5*distance2 / (2 * pow(sigma2, 2)))
+            H2 = np.exp(-distance2 / (2 * pow(sigma2, 2)))  # かっこに気を付ける
+            self.H2 = np.exp(-distance2 / (2 * pow(sigma2, 2)))
 
             sigma3 = max(self.SIGMA3_MIN, self.SIGMA3_MAX * (1 - (epoch / self.TAU3)))
             distance3 = distance.cdist(self.Zeta3, self.Z3, 'sqeuclidean')  # 距離行列をつくるDはK3*N3行列
-            H3 = np.exp(-0.5*distance3 / (2 * pow(sigma3, 2)))  # かっこに気を付ける
-            self.H3 = np.exp(-0.5*distance3 / (2 * pow(sigma3, 2)))
+            H3 = np.exp(-distance3 / (2 * pow(sigma3, 2)))  # かっこに気を付ける
+            self.H3 = np.exp(-distance3 / (2 * pow(sigma3, 2)))
 
             G1 = np.sum(
-                np.sum(self.gamma[:, None, :, :] * H2[None, :, :, None], axis=2)[:, :, None, :] * H3[None, None, :, :],
-                axis=3)  # Gは行ごとの重みと掛け合わせて和をとったテンソル n1*k2*k3
-            # G1 = np.einsum('ijk,jm,kn->imn',self.gamma,H2,H3)
+                self.gamma[:, None, :, None, :] * H2[None, :, :, None, None] * H3[None, None, None, :, :],
+                axis=(2, 4))  # Gは行ごとの重みと掛け合わせて和をとったテンソル n1*k2*k3
+            # G1 = np.einsum('ijk,mj,nk->imn',self.gamma,H2,H3)
             G2 = np.sum(
-                np.sum(self.gamma[None, :, :, :] * H1[:, :, None, None], axis=1)[:, :, None, :] * H3[None, None, :, :],
-                axis=3)  # Gは行ごとの重みと掛け合わせて和をとったテンソル k1*n2*k3
-            # G2 = np.einsum('ijk,il,kn->ljn',self.gamma,H1,H3)
+                self.gamma[None, :, :, None, :] * H1[:, :, None, None, None] * H3[None, None, None, :, :],
+                axis=(1, 4))  # Gは行ごとの重みと掛け合わせて和をとったテンソル k1*n2*k3
+            # G2 = np.einsum('ijk,li,nk->ljn',self.gamma,H1,H3)
             G3 = np.sum(
-                np.sum(self.gamma[None, :, :, :] * H1[:, :, None, None], axis=1)[:, None, :, :] * H2[None, :, :, None],
-                axis=2)  # Gは行ごとの重みと掛け合わせて和をとったテンソル k1*k2*n3
-            # G3 = np.einsum('ijk,il,jm->lmk',self.gamma,H1,H2)
-            # G4 = np.einsum('ijk,il,jm,kn->lmn',self.gamma,H1,H2,H3)
+                self.gamma[None, :, None, :, :] * H1[:, :, None, None, None] * H2[None, None, :, :, None],
+                axis=(1, 3))  # Gは行ごとの重みと掛け合わせて和をとったテンソル k1*k2*n3
+            # G3 = np.einsum('ijk,li,mj->lmk',self.gamma,H1,H2)
+            # G4 = np.einsum('ijk,li,mj,nk->lmn',self.gamma,H1,H2,H3)
 
             # １次モデル，２次モデルの決定
             # データ: i,j,k
             # ノード: l,m,n
             self.U1 = np.sum(
-                H2[None, :, :, None, None] * np.sum(H3[None, None, :, :, None] * (self.gamma[:, :, :, None] * self.X
-                )[:, :, None, :, :], axis=3)[:, None, :, :, :], axis=2) / G1[:, :, :, None]  # N1*K2*K3*D
-            # self.U1 = np.einsum('ijk,jm,kn,ijkd->imnd',self.gamma,H2,H3,self.X)/G1[:,:,:,None]
+                H2[None, :, :, None, None, None] * H3[None, None, None, :, :, None] * (self.gamma[:, :, :, None] * self.X)[:, None, :, None, :, :]
+                , axis=(2, 4)) / G1[:, :, :, None]  # N1*K2*K3*D
+            # self.U1 = np.einsum('ijk,mj,nk,ijkd->imnd',self.gamma,H2,H3,self.X)/G1[:,:,:,None]
             self.U2 = np.sum(
-                H1[:, :, None, None, None] * np.sum(H3[None, None, :, :, None] * (self.gamma[:, :, :, None] * self.X
-                )[:, :, None, :, :], axis=3)[None, :, :, :, :], axis=1) / G2[:, :, :, None]  # K1*N2*K3*D
-            # self.U2 = np.einsum('ijk,il,kn,ijkd->ljnd',self.gamma,H1,H3,self.X)/G2[:,:,:,None]
+                H1[:, :, None, None, None, None] * H3[None, None, None, :, :, None] * (self.gamma[:, :, :, None] * self.X)[None, :, :, None, :, :]
+                , axis=(1, 4)) / G2[:, :, :, None]  # K1*N2*K3*D
+            # self.U2 = np.einsum('ijk,li,nk,ijkd->ljnd',self.gamma,H1,H3,self.X)/G2[:,:,:,None]
             self.U3 = np.sum(
-                H1[:, :, None, None, None] * np.sum(H2[None, :, :, None, None] * (self.gamma[:, :, :, None] * self.X
-                )[:, None, :, :, :], axis=2)[None, :, :, :, :], axis=1) / G3[:, :, :, None]  # K1*K2*N3
-            # self.U3 = np.einsum('ijk,il,jm,ijkd->lmkd',self.gamma,H1,H2,self.X)/G3[:,:,:,None]
+                H1[:, :, None, None, None, None] * H2[None, None, :, :, None, None] * (self.gamma[:, :, :, None] * self.X)[None, :, None, :, :, :]
+                , axis=(1, 3)) / G3[:, :, :, None]  # K1*K2*N3
+            # self.U3 = np.einsum('ijk,li,mj,ijkd->lmkd',self.gamma,H1,H2,self.X)/G3[:,:,:,None]
             # １次モデルを使って2次モデルを更新
             self.Y = np.sum(H1[:, :, None, None, None] * (G1[:, :, :, None] * self.U1)[None, :, :, :, :],
                             axis=1) / np.sum(H1[:, :, None, None] * G1[None, :, :, :], axis=1)[:, :, :, None] # K1*K2*K3*D
-            # self.Y = np.sum((H1[:, :, None, None] * G1[:, None, :, :])[:, :, :, :, None] * self.U1[:, None, :, :, :],
-            #                 axis=0) / np.sum(H1[:, :, None, None] * G1[:, None, :, :], axis=0)[:, :, :, None]  # K1*K2*K3*D
-            # self.Y = np.sum(np.sum(
-            #     np.sum((self.gamma[:, :, :, None] * self.X)[:, None, :, :, :] * H1[:, :, None, None, None], axis=0)[:,
-            #     :, None, :, :] * H2[None, :, :, None, None], axis=1)[:, :, :, None, :] * H3[None, None, :, :, None],
-            #                 axis=2) / G4[:, :, :, None]
-            # self.Y = np.einsum('ijk,il,jm,kn,ijkd->lmnd',self.gamma,H1,H2,H3,self.X)  # K1*K2*K3*D
+            # self.Y = np.einsum('ijk,li,mj,nk,ijkd->lmnd',self.gamma,H1,H2,H3,self.X)/G4[:,:,:,None]  # K1*K2*K3*D
 
             # 勝者決定
             # モード1
-            Dist1 = np.square(self.U1[None, :, :, :, :] - self.Y[:, None, :, :, :])  # N1*K1*K2*K3*D
+            Dist1 = np.square(self.U1[None, :, :, :, :] - self.Y[:, None, :, :, :])  # K1*N1*K2*K3*D
             Dist1_sum = np.sum(G1[None, :, :, :, None] * Dist1, axis=(2, 3, 4))  # K1*N1
             self.k_star1 = np.argmin(Dist1_sum, axis=0)  # N1*1
             self.Z1 = self.Zeta1[self.k_star1, :]
 
             # モード2
-            Dist2 = np.square(self.U2[:, None, :, :, :] - self.Y[:, :, None, :, :])  # K1*N2*K2*K3*D
+            Dist2 = np.square(self.U2[:, None, :, :, :] - self.Y[:, :, None, :, :])  # K1*K2*N2*K3*D
             Dist2_sum = np.sum(G2[:, None, :, :, None] * Dist2, axis=(0, 3, 4))  # K2*N2
             self.k_star2 = np.argmin(Dist2_sum, axis=0)
             self.Z2 = self.Zeta2[self.k_star2, :]
 
             # モード3
-            Dist3 = np.square(self.U3[:, :, None, :, :] - self.Y[:, :, :, None, :])  # K1*K2*N3*K3*D
+            Dist3 = np.square(self.U3[:, :, None, :, :] - self.Y[:, :, :, None, :])  # K1*K2*K3*N3*D
             Dist3_sum = np.sum(G3[:, :, None, :, None] * Dist3, axis=(0, 1, 4))  # K3*N3
             self.k_star3 = np.argmin(Dist3_sum, axis=0)  # N3*1
             self.Z3 = self.Zeta3[self.k_star3, :]

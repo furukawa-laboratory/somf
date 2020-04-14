@@ -1,6 +1,7 @@
 
 import numpy as np
 from tsom3_weighted import wTSOM3
+from tsom3_weighted_ishida import wTSOM3_ishida
 from libs.models.tsom3 import TSOM3
 
 X = np.loadtxt('datatsom.txt')
@@ -14,13 +15,18 @@ Z2init = np.random.rand(X.shape[1], latent_dim[1])
 Z3init = np.random.rand(X.shape[2], latent_dim[2])
 init = [Z1init, Z2init, Z3init]
 
-wtsom3 = wTSOM3(X, latent_dim=2, resolution=5, SIGMA_MAX=2.0, SIGMA_MIN=0.2, TAU=50, init=init)
-wtsom3.fit(10)
+wtsom3harada = wTSOM3(X, latent_dim=2, resolution=5, SIGMA_MAX=2.0, SIGMA_MIN=0.2, TAU=50, init=init)
+wtsom3harada.fit(10)
+
+wtsom3ishida = wTSOM3_ishida(X, latent_dim=2, resolution=5, SIGMA_MAX=2.0, SIGMA_MIN=0.2, TAU=50, init=init)
+wtsom3ishida.fit(10)
 
 tsom3 = TSOM3(X, latent_dim=2, resolution=5, SIGMA_MAX=2.0, SIGMA_MIN=0.2, TAU=50, init=init)
 tsom3.fit(10)
 
-print(np.allclose(wtsom3.history['y'], tsom3.history['y']))
+print(np.allclose(wtsom3harada.history['y'], tsom3.history['y']))
+print(np.allclose(wtsom3ishida.history['y'], tsom3.history['y']))
+print(np.allclose(wtsom3harada.history['y'], wtsom3ishida.history['y']))
 
 # np.save('tsom3_Y.npy',tsom3.Y)
 # np.save('tsom3_k1.npy',tsom3.k1_star)
