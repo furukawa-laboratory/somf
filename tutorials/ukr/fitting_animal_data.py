@@ -1,39 +1,27 @@
 import numpy as np
 
-import sys
-sys.path.append('../../')
-
-from libs.models.som import SOM
-from libs.visualization.som.Grad_norm import Grad_Norm
+from libs.models.unsupervised_kernel_regression import UnsupervisedKernelRegression as UKR
 from libs.datasets.artificial import animal
 
-
 if __name__ == '__main__':
-    nb_epoch = 50
-    resolution = 10
-    sigma_max = 2.2
-    sigma_min = 0.3
-    tau = 50
-    latent_dim = 2
-    seed = 1
+    n_components = 2
+    bandwidth = 0.5
+    lambda_ = 0.0
+    is_compact = True
+    is_save_history = True
 
-    title="animal map"
-    umat_resolution = 100 #U-matrix表示の解像度
+    nb_epoch = 100
+    eta = 5.0
+
+    resolution = 100
 
     X, labels = animal.load_data()
 
+    seed = 13
     np.random.seed(seed)
 
-    som = SOM(X, latent_dim=latent_dim, resolution=resolution, sigma_max=sigma_max, sigma_min=sigma_min, tau=tau)
-    som.fit(nb_epoch=nb_epoch)
+    ukr = UKR(X, n_components=n_components, bandwidth_gaussian_kernel=bandwidth,
+              is_compact=is_compact, is_save_history=is_save_history, lambda_=lambda_)
+    ukr.fit(nb_epoch=nb_epoch, eta=eta)
 
-    Z = som.Z
-    sigma = som.history['sigma'][-1]
-
-    som_umatrix = Grad_Norm(X=X,
-                            Z=Z,
-                            sigma=sigma,
-                            labels=labels,
-                            title_text=title,
-                            resolution=umat_resolution)
-    som_umatrix.draw_umatrix()
+    ukr.visualize(resolution=resolution)
