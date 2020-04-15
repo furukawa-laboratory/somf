@@ -27,11 +27,7 @@ class UnsupervisedKernelRegression(object):
 
         self.lambda_ = lambda_
 
-
-
         self._done_fit = False
-
-
 
     def fit(self, nb_epoch=100, verbose=True, eta=0.5, expand_epoch=None):
 
@@ -46,12 +42,10 @@ class UnsupervisedKernelRegression(object):
             self.history['zvar'] = np.zeros((nb_epoch, self.n_components))
             self.history['obj_func'] = np.zeros(nb_epoch)
 
-
         if verbose:
             bar = tqdm(range(nb_epoch))
         else:
             bar = range(nb_epoch)
-
 
         for epoch in bar:
             Delta = self.Z[:, None, :] - self.Z[None, :, :]
@@ -65,7 +59,7 @@ class UnsupervisedKernelRegression(object):
             R = H * GInv
 
             Y = R @ self.X
-            DeltaYX = Y[:,None,:] - self.X[None, :, :]
+            DeltaYX = Y[:, None, :] - self.X[None, :, :]
             Error = Y - self.X
             obj_func = np.sum(np.square(Error)) / self.n_samples + self.lambda_ * np.sum(np.square(self.Z))
 
@@ -76,16 +70,13 @@ class UnsupervisedKernelRegression(object):
 
             self.Z += eta * dFdZ
             if self.is_compact:
-                self.Z = np.clip(self.Z,-1.0,1.0)
+                self.Z = np.clip(self.Z, -1.0, 1.0)
             else:
                 self.Z -= self.Z.mean(axis=0)
-
 
             if self.is_save_hisotry:
                 self.history['z'][epoch] = self.Z
                 self.history['obj_func'][epoch] = obj_func
-
-
 
         self._done_fit = True
         return self.history
@@ -134,8 +125,8 @@ class UnsupervisedKernelRegression(object):
 
         # initialize Znew, using latent variables of observed data
         Dist_Xnew_X = dist.cdist(Xnew, self.X)
-        BMS = np.argmin(Dist_Xnew_X, axis=1) # calculate Best Matching Sample
-        Znew = self.Z[BMS,:] # initialize Znew
+        BMS = np.argmin(Dist_Xnew_X, axis=1)  # calculate Best Matching Sample
+        Znew = self.Z[BMS, :]  # initialize Znew
 
         if verbose:
             bar = tqdm(range(nb_epoch_trans))
@@ -144,25 +135,25 @@ class UnsupervisedKernelRegression(object):
 
         for epoch in bar:
             # calculate gradient
-            Delta = self.Z[None,:,:] - Znew[:,None,:]                   # shape = (Nnew,N,L)
-            Dist_Znew_Z = dist.cdist(Znew,self.Z,"sqeuclidean")         # shape = (Nnew,N)
-            H = np.exp(-0.5 * self.precision * Dist_Znew_Z)                              # shape = (Nnew,N)
-            G = np.sum(H,axis=1)[:,None]                                # shape = (Nnew,1)
-            Ginv = np.reciprocal(G)                                     # shape = (Nnew,1)
-            R = H * Ginv                                                # shape = (Nnew,N)
-            F = R @ self.X                                              # shape = (Nnew,D)
+            Delta = self.Z[None, :, :] - Znew[:, None, :]  # shape = (Nnew,N,L)
+            Dist_Znew_Z = dist.cdist(Znew, self.Z, "sqeuclidean")  # shape = (Nnew,N)
+            H = np.exp(-0.5 * self.precision * Dist_Znew_Z)  # shape = (Nnew,N)
+            G = np.sum(H, axis=1)[:, None]  # shape = (Nnew,1)
+            Ginv = np.reciprocal(G)  # shape = (Nnew,1)
+            R = H * Ginv  # shape = (Nnew,N)
+            F = R @ self.X  # shape = (Nnew,D)
 
-            Delta_bar = np.einsum("kn,knl->kl",R,Delta)                 # (Nnew,N)times(Nnew,N,L)=(Nnew,L)
+            Delta_bar = np.einsum("kn,knl->kl", R, Delta)  # (Nnew,N)times(Nnew,N,L)=(Nnew,L)
             # Delta_bar = np.sum(R[:,:,None] * Delta, axis=1)           # same calculate
-            dRdZ = self.precision * R[:, :, None] * (Delta - Delta_bar[:, None, :])          # shape = (Nnew,N,L)
+            dRdZ = self.precision * R[:, :, None] * (Delta - Delta_bar[:, None, :])  # shape = (Nnew,N,L)
 
-            dFdZ = np.einsum("nd,knl->kdl",self.X,dRdZ)                 # shape = (Nnew,D,L)
+            dFdZ = np.einsum("nd,knl->kdl", self.X, dRdZ)  # shape = (Nnew,D,L)
             # dFdZ = np.sum(self.X[None,:,:,None]*dRdZ[:,:,None,:],axis=1)  # same calculate
-            dEdZ = 2.0 * np.einsum("kd,kdl->kl",F-Xnew,dFdZ) # shape (Nnew, L)
+            dEdZ = 2.0 * np.einsum("kd,kdl->kl", F - Xnew, dFdZ)  # shape (Nnew, L)
             # update latent variables
             Znew -= eta_trans * dEdZ
             if self.is_compact:
-                Znew = np.clip(Znew,-1.0,1.0)
+                Znew = np.clip(Znew, -1.0, 1.0)
             if constrained:
                 Znew = np.clip(Znew, self.Z.min(axis=0), self.Z.max(axis=0))
 
@@ -171,19 +162,84 @@ class UnsupervisedKernelRegression(object):
     def inverse_transform(self, Znew):
         if not self._done_fit:
             raise ValueError("fit is not done")
-        if Znew.shape[1]!=self.n_components:
+        if Znew.shape[1] != self.n_components:
             raise ValueError("Znew dimension must be {}".format(self.n_components))
 
-        Dist_Znew_Z = dist.cdist(Znew,self.Z,"sqeuclidean")         # shape = (Nnew,N)
-        H = np.exp(-0.5 * self.precision * Dist_Znew_Z)                              # shape = (Nnew,N)
-        G = np.sum(H,axis=1)[:,None]                                # shape = (Nnew,1)
-        Ginv = np.reciprocal(G)                                     # shape = (Nnew,1)
-        R = H * Ginv                                                # shape = (Nnew,N)
-        F = R @ self.X                                              # shape = (Nnew,D)
+        Dist_Znew_Z = dist.cdist(Znew, self.Z, "sqeuclidean")  # shape = (Nnew,N)
+        H = np.exp(-0.5 * self.precision * Dist_Znew_Z)  # shape = (Nnew,N)
+        G = np.sum(H, axis=1)[:, None]  # shape = (Nnew,1)
+        Ginv = np.reciprocal(G)  # shape = (Nnew,1)
+        R = H * Ginv  # shape = (Nnew,N)
+        F = R @ self.X  # shape = (Nnew,D)
 
         return F
 
+    def visualize(self, resolution=100, label_data=None, label_feature=None, fig_size=None):
+        # invalid check
+        if self.n_components != 2:
+            raise ValueError('Now support only n_components = 2')
 
+        # import necessary library to draw
+        import matplotlib
+        matplotlib.use('TkAgg')
+        import matplotlib.pyplot as plt
+        from matplotlib.widgets import RadioButtons
+
+        # ---------------------------------- #
+        # -----initialize variables--------- #
+        # ---------------------------------- #
+
+        self.latent_space_click_unit = 0  # index of the clicked representative point
+
+        # invalid check
+        if label_data is None:
+            self.label_data = np.arange(self.n_samples)
+        elif isinstance(label_data, list):
+            self.label_data = label_data
+        elif isinstance(label_data, np.ndarray):
+            if np.squeeze(label_data).ndim == 1:
+                self.label_data = np.squeeze(label_data)
+            else:
+                raise ValueError('label_data must be 1d array')
+        else:
+            raise ValueError('label_data must be 1d array or list')
+
+        if label_feature is None:
+            self.label_feature = np.arange(self.n_dimensions)
+        elif isinstance(label_feature, list):
+            self.label_feature = label_feature
+        elif isinstance(label_feature, np.ndarray):
+            if np.squeeze(label_feature).ndim == 1:
+                self.label_feature = np.squeeze(label_feature)
+            else:
+                raise ValueError('label_feature must be 1d array')
+        else:
+            raise ValueError('label_feature must be 1d array or list')
+
+        if fig_size is None:
+            self.fig = plt.figure(figsize=(15, 6))
+        else:
+            self.fig = plt.figure(figsize=fig_size)
+        self.ax_latent_space = self.fig.add_subplot(1, 2, 1)
+        self.ax_latent_space.set_title('Latent space')
+        self.ax_hist = self.fig.add_subplot(1, 2, 2)
+        self.ax_hist.set_title('Mean of mapping')
+
+        # ---------------------------------- #
+        # -------------draw map------------- #
+        # ---------------------------------- #
+
+        self.__draw_latent_space()
+        self.__draw_hist()
+
+        # connect figure and method defining action when latent space is clicked
+        self.fig.canvas.mpl_connect('button_press_event', self.__onclick_fig)
+        plt.show()
+
+    def __draw_latent_space(self):
+        self.ax_latent_space.scatter(self.Z[:,0],self.Z[:,1])
+    def __onclick_fig(self,event):
+        pass
 
 
 def create_zeta(zeta_min, zeta_max, latent_dim, resolution):
