@@ -220,7 +220,7 @@ class UnsupervisedKernelRegression(object):
             self.fig = plt.figure(figsize=(15, 6))
         else:
             self.fig = plt.figure(figsize=fig_size)
-        self.ax_latent_space = self.fig.add_subplot(1, 2, 1)
+        self.ax_latent_space = self.fig.add_subplot(1, 2, 1, aspect='equal')
         self.ax_latent_space.set_title('Latent space')
         self.ax_hist = self.fig.add_subplot(1, 2, 2)
         self.ax_hist.set_title('Mean of mapping')
@@ -238,6 +238,10 @@ class UnsupervisedKernelRegression(object):
 
     def __draw_latent_space(self):
         self.ax_latent_space.scatter(self.Z[:,0],self.Z[:,1])
+        self.fig.show()
+
+    def __draw_hist(self):
+        pass
     def __onclick_fig(self,event):
         pass
 
