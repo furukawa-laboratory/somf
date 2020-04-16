@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 import scipy.spatial.distance as dist
 from matplotlib.widgets import RadioButtons
 
+#color bar
+import mpl_toolkits.axes_grid1
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 np.random.seed(2)
 
 class TSOM3_Viewer:
@@ -103,7 +107,7 @@ class TSOM3_Viewer:
         else:
             self.Fig = plt.figure(figsize=fig_size)
         plt.subplots_adjust(left=0)#added property
-        plt.subplots_adjust(right=0.9)#0.7
+        plt.subplots_adjust(right=0.85)#0.7
         plt.subplots_adjust(wspace=0)
         self.Map1 = self.Fig.add_subplot(1, 3, 1)
         self.Map1.set_title(self.view1_title)
@@ -111,7 +115,7 @@ class TSOM3_Viewer:
         self.Map2.set_title(self.view2_title)
         self.Map3 = self.Fig.add_subplot(1, 3, 3)
         self.Map3.set_title(self.view3_title)
-        rax = plt.axes([0.9, 0.25, 0.1, 0.5], facecolor='lightgoldenrodyellow',aspect='equal')
+        rax = plt.axes([0.92, 0.25, 0.1, 0.5], facecolor='lightgoldenrodyellow',aspect='equal')
         if not button_label is None:
             self.radio = RadioButtons(rax, button_label)
         else:
@@ -119,7 +123,7 @@ class TSOM3_Viewer:
         self.count_click = None
 
         # 絶対と相対の切り替え用
-        rax2 = plt.axes([0.9, 0.50, 0.1, 0.75], facecolor='lightgoldenrodyellow', aspect='equal')
+        rax2 = plt.axes([0.92, 0.50, 0.1, 0.75], facecolor='lightgoldenrodyellow', aspect='equal')
         self.radio2 = RadioButtons(rax2, ["relatively", "absolutely"])
         self.count_click2 = None
 
@@ -172,7 +176,7 @@ class TSOM3_Viewer:
             self.__draw_click_point()
 
     def colorfunc(self, label):
-        colordict = {'abs': 0, 'rel': 1}
+        colordict = {'relatively': 0, 'absolutely': 1}
         self.Radio_click_unit2 = colordict[label]
 
     # ------------------------------ #
@@ -306,6 +310,10 @@ class TSOM3_Viewer:
         # self.radio.on_clicked(self.hzfunc)
         self.radio2.on_clicked(self.colorfunc)
         self.__draw_click_point()
+
+        # divider = mpl_toolkits.axes_grid1.make_axes_locatable(self.Map3)
+        # cax = divider.append_axes('right', '5%', pad='3%')
+        # self.Fig.colorbar(self.cmap3, cax=cax)
 
         # クリックイベント
         self.Fig.canvas.mpl_connect('button_press_event', self.__onclick_fig)
@@ -458,12 +466,9 @@ class TSOM3_Viewer:
         self.Map1.set_title(self.view1_title)
         self.__draw_label_map1()
         if self.Radio_click_unit2 == 0:
-            print("abs")
             self.Map1.imshow(self.Map1_val[::], interpolation='spline36',
                          extent=[0, self.Map1_val.shape[0] - 1, -self.Map1_val.shape[1] + 1, 0], cmap="bwr")
         else:
-            print("rel")
-            print(np.max(self.Map1_val))
             self.Map1.imshow(self.Map1_val[::], interpolation='spline36', vmin=np.min(self.Y), vmax=np.max(self.Y),
                              extent=[0, self.Map1_val.shape[0] - 1, -self.Map1_val.shape[1] + 1, 0], cmap="bwr")
         # print(self.Map1_val/np.max(self.Map1_val))
@@ -492,9 +497,13 @@ class TSOM3_Viewer:
         if self.Radio_click_unit2 == 0:
             self.Map3.imshow(self.Map3_val[::], interpolation='spline36',
                          extent=[0, self.Map3_val.shape[0] - 1, -self.Map3_val.shape[1] + 1, 0], cmap="bwr")
+            # self.cmap3 = self.Map3.imshow(self.Map3_val[::], interpolation='spline36',
+            #              extent=[0, self.Map3_val.shape[0] - 1, -self.Map3_val.shape[1] + 1, 0], cmap="bwr")
         else:
             self.Map3.imshow(self.Map3_val[::], interpolation='spline36', vmin=np.min(self.Y), vmax=np.max(self.Y),
                              extent=[0, self.Map3_val.shape[0] - 1, -self.Map3_val.shape[1] + 1, 0], cmap="bwr")
+            # self.cmap3 = self.Map3.imshow(self.Map3_val[::], interpolation='spline36', vmin=np.min(self.Y), vmax=np.max(self.Y),
+            #                  extent=[0, self.Map3_val.shape[0] - 1, -self.Map3_val.shape[1] + 1, 0], cmap="bwr")
         self.Map3.set_xlim(-1, self.Mapsize)
         self.Map3.set_ylim(-self.Mapsize, 1)
         self.Fig.show()
