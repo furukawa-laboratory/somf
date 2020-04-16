@@ -32,6 +32,7 @@ class TSOM3_Viewer:
         self.Map2_click_unit = 0  # Map2のクリック位置
         self.Map3_click_unit = 0  # Map3のクリック位置
         self.Radio_click_unit = 0  # add machida Radioのクリック位置
+        self.Radio_click_unit2 = 0  # add select abs or rel
         self.map1x_num = int(np.sqrt(self.Mode1_Num))  # マップの1辺を算出（正方形が前提）
         self.map2x_num = int(np.sqrt(self.Mode2_Num))  # マップの1辺を算出（正方形が前提）
         self.map3x_num = int(np.sqrt(self.Mode3_Num))  # マップの1辺を算出（正方形が前提）
@@ -81,7 +82,6 @@ class TSOM3_Viewer:
             for i in np.arange(self.Dim):
                 dict_keys.append(str(self.button_label[i]))
             self.hzdict = dict(zip(dict_keys, values))  # e.g.Deskwork_or_studyingが与えられたら0を返す
-
         else:
             values = np.arange(self.Dim)
             # radioボタンにラベルをはる際に辞書を作成
@@ -116,7 +116,12 @@ class TSOM3_Viewer:
             self.radio = RadioButtons(rax, button_label)
         else:
             self.radio = RadioButtons(rax, np.arange(self.Dim))
-        self.count_click=None
+        self.count_click = None
+
+        # 絶対と相対の切り替え用
+        rax2 = plt.axes([0.9, 0.50, 0.1, 0.75], facecolor='lightgoldenrodyellow', aspect='equal')
+        self.radio2 = RadioButtons(rax2, ["relatively", "absolutely"])
+        self.count_click2 = None
 
         # 枠線と目盛りの消去
         self.Map1.spines["right"].set_color("none")
@@ -152,12 +157,11 @@ class TSOM3_Viewer:
         self.noise_map2 = (np.random.rand(self.Winner2.shape[0], 2) - 0.5)
         self.noise_map3 = (np.random.rand(self.Winner3.shape[0], 2) - 0.5)
 
-    def hzfunc(self, label):#radioボタンを押した時の処理
-
-        if self.count_click==self.hzdict[label]:
+    def hzfunc(self, label): #radioボタンを押した時の処理
+        if self.count_click == self.hzdict[label]:
             return
         else:
-            self.count_click=self.hzdict[label]
+            self.count_click = self.hzdict[label]
             self.Radio_click_unit = self.hzdict[label]
             self.__calc_component(1)
             self.__calc_component(2)
@@ -166,6 +170,11 @@ class TSOM3_Viewer:
             self.__draw_map2()
             self.__draw_map3()
             self.__draw_click_point()
+
+    def colorfunc(self, label):
+        colordict = {'abs': 0, 'rel': 1}
+        self.Radio_click_unit2 = colordict[label]
+
     # ------------------------------ #
     # --- イベント時の処理 ----------- #
     # ------------------------------ #
@@ -281,7 +290,7 @@ class TSOM3_Viewer:
         self.__draw_map1()
         self.__draw_map2()
         self.__draw_map3()
-        self.radio.on_clicked(self.hzfunc)
+        # self.radio.on_clicked(self.hzfunc)
         self.__draw_click_point()
 
     # ------------------------------ #
@@ -295,6 +304,7 @@ class TSOM3_Viewer:
         self.__draw_map2()
         self.__draw_map3()
         # self.radio.on_clicked(self.hzfunc)
+        self.radio2.on_clicked(self.colorfunc)
         self.__draw_click_point()
 
         # クリックイベント
@@ -447,8 +457,16 @@ class TSOM3_Viewer:
         self.Map1.cla()
         self.Map1.set_title(self.view1_title)
         self.__draw_label_map1()
-        self.Map1.imshow(self.Map1_val[::], interpolation='spline36',
+        if self.Radio_click_unit2 == 0:
+            print("abs")
+            self.Map1.imshow(self.Map1_val[::], interpolation='spline36',
                          extent=[0, self.Map1_val.shape[0] - 1, -self.Map1_val.shape[1] + 1, 0], cmap="bwr")
+        else:
+            print("rel")
+            print(np.max(self.Map1_val))
+            self.Map1.imshow(self.Map1_val[::], interpolation='spline36', vmin=np.min(self.Y), vmax=np.max(self.Y),
+                             extent=[0, self.Map1_val.shape[0] - 1, -self.Map1_val.shape[1] + 1, 0], cmap="bwr")
+        # print(self.Map1_val/np.max(self.Map1_val))
         self.Map1.set_xlim(-1, self.Mapsize)
         self.Map1.set_ylim(-self.Mapsize, 1)
         self.Fig.show()
@@ -457,8 +475,12 @@ class TSOM3_Viewer:
         self.Map2.cla()
         self.Map2.set_title(self.view2_title)
         self.__draw_label_map2()
-        self.Map2.imshow(self.Map2_val[::], interpolation='spline36',
+        if self.Radio_click_unit2 == 0:
+            self.Map2.imshow(self.Map2_val[::], interpolation='spline36',
                          extent=[0, self.Map2_val.shape[0] - 1, -self.Map2_val.shape[1] + 1, 0], cmap="bwr")
+        else:
+            self.Map2.imshow(self.Map2_val[::], interpolation='spline36', vmin=np.min(self.Y), vmax=np.max(self.Y),
+                             extent=[0, self.Map2_val.shape[0] - 1, -self.Map2_val.shape[1] + 1, 0], cmap="bwr")
         self.Map2.set_xlim(-1, self.Mapsize)
         self.Map2.set_ylim(-self.Mapsize, 1)
         self.Fig.show()
@@ -467,8 +489,12 @@ class TSOM3_Viewer:
         self.Map3.cla()
         self.Map3.set_title(self.view3_title)
         self.__draw_label_map3()
-        self.Map3.imshow(self.Map3_val[::], interpolation='spline36',
+        if self.Radio_click_unit2 == 0:
+            self.Map3.imshow(self.Map3_val[::], interpolation='spline36',
                          extent=[0, self.Map3_val.shape[0] - 1, -self.Map3_val.shape[1] + 1, 0], cmap="bwr")
+        else:
+            self.Map3.imshow(self.Map3_val[::], interpolation='spline36', vmin=np.min(self.Y), vmax=np.max(self.Y),
+                             extent=[0, self.Map3_val.shape[0] - 1, -self.Map3_val.shape[1] + 1, 0], cmap="bwr")
         self.Map3.set_xlim(-1, self.Mapsize)
         self.Map3.set_ylim(-self.Mapsize, 1)
         self.Fig.show()
