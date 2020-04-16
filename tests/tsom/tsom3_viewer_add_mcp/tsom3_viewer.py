@@ -6,6 +6,7 @@ import scipy.spatial.distance as dist
 from matplotlib.widgets import RadioButtons
 
 #color bar
+from matplotlib.colors import Normalize
 import mpl_toolkits.axes_grid1
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
@@ -312,8 +313,12 @@ class TSOM3_Viewer:
         self.__draw_click_point()
 
         # divider = mpl_toolkits.axes_grid1.make_axes_locatable(self.Map3)
-        # cax = divider.append_axes('right', '5%', pad='3%')
-        # self.Fig.colorbar(self.cmap3, cax=cax)
+        # cax = divider.append_axes('right', '2%', pad=0.1)
+        mappable0 = self.Map3.pcolormesh(self.Map3_val[::], cmap='bwr', norm=Normalize(vmin=np.min(self.Y), vmax=np.max(self.Y)))
+        cax = plt.axes([0.88, 0.2, 0.010, 0.60]) # [左端からの距離、下からの距離、幅、高さ]
+        self.cbar3 = self.Fig.colorbar(mappable0, cax=cax, ax=self.Map3, orientation="vertical")
+        # self.cbar3 = self.Fig.colorbar(self.cmap3, cax=cax)
+        self.cbar3.set_clim(np.min(self.Y), np.max(self.Y))
 
         # クリックイベント
         self.Fig.canvas.mpl_connect('button_press_event', self.__onclick_fig)
@@ -504,6 +509,7 @@ class TSOM3_Viewer:
                              extent=[0, self.Map3_val.shape[0] - 1, -self.Map3_val.shape[1] + 1, 0], cmap="bwr")
             # self.cmap3 = self.Map3.imshow(self.Map3_val[::], interpolation='spline36', vmin=np.min(self.Y), vmax=np.max(self.Y),
             #                  extent=[0, self.Map3_val.shape[0] - 1, -self.Map3_val.shape[1] + 1, 0], cmap="bwr")
+
         self.Map3.set_xlim(-1, self.Mapsize)
         self.Map3.set_ylim(-self.Mapsize, 1)
         self.Fig.show()
