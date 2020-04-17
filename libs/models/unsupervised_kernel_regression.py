@@ -174,7 +174,7 @@ class UnsupervisedKernelRegression(object):
 
         return F
 
-    def visualize(self, resolution=100, label_data=None, label_feature=None, fig_size=None):
+    def visualize(self, resolution=30, label_data=None, label_feature=None, fig_size=None):
         # invalid check
         if self.n_components != 2:
             raise ValueError('Now support only n_components = 2')
@@ -188,8 +188,11 @@ class UnsupervisedKernelRegression(object):
         # ---------------------------------- #
         # -----initialize variables--------- #
         # ---------------------------------- #
-
-        self.latent_space_click_unit = 0  # index of the clicked representative point
+        if self.is_compact:
+            self.representative_points = create_zeta(-1.0,1.0,self.n_components,resolution)
+        else:
+            raise ValueError('Not support is_compact=False')
+        self.click_point_latent_space = 0  # index of the clicked representative point
 
         # invalid check
         if label_data is None:
@@ -243,7 +246,60 @@ class UnsupervisedKernelRegression(object):
     def __draw_hist(self):
         pass
     def __onclick_fig(self,event):
-        pass
+        if event.xdata is not None:
+            if event.inaxes == self.ax_latent_space.axes:  # 潜在空間をクリックしたかどうか
+                # クリックされた座標の取得
+                click_coordinates = np.array([event.xdata,event.ydata])
+
+                self.click_point_latent_space = self.__calc_nearest_representative_point(click_coordinates)  # クリックしたところといちばん近いノードがどこかを計算
+
+
+                # if self.map1_t-self.Map1_click_unit==0:#前回と同じところをクリックした or Map2をクリックした
+                #     self.action1=0
+                # elif self.map1_t -self.Map1_click_unit !=0:#前回と別のところをクリックした
+                #     self.action1=1
+                #
+                # #t回目→t+1回目
+                # self.map1_t=self.Map1_click_unit
+                # self.map2_t = self.Map2_click_unit
+                #
+                # if self.action1==0 and self.action2==0:# map1: marginal map2: marginal
+                #     #各マップのコンポーネントプレーンの計算
+                #     self.__calc_marginal_comp(1)  # Map1_click_unitを元に計算
+                #     self.__calc_marginal_comp(2)  # Map1_click_unitを元に計算
+                #     #component planeを描画
+                #     self.__draw_marginal_map1()
+                #     self.__draw_marginal_map2()
+                #
+                # elif self.action1==1 and self.action2==0: # map1: marginal map2: conditional
+                #     # 各マップのコンポーネントプレーンの計算
+                #     self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
+                #     self.__calc_marginal_comp(1)
+                #     # component planeを描画
+                #     self.__draw_marginal_map1()
+                #     self.__draw_map1_click_point()
+                #     self.__draw_conditional_map2()
+                # elif self.action1==0 and self.action2==1: # map1: conditional map2: marginal
+                #     # 各マップのコンポーネントプレーンの計算
+                #     self.__calc_conditional_comp(1)  # Map2_click_unitを元に計算
+                #     self.__calc_marginal_comp(2)
+                #     # component planeを描画
+                #     self.__draw_marginal_map2()
+                #     self.__draw_map2_click_point()
+                #     self.__draw_conditional_map1()
+                #
+                # elif self.action1==1 and self.action2==1:# map1: conditional map2: conditional
+                #     # 各マップのコンポーネントプレーンの計算
+                #     self.__calc_conditional_comp(1)  # Map1_click_unitを元に計算
+                #     self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
+                #     # component planeを描画
+                #     self.__draw_conditional_map1()
+                #     self.__draw_conditional_map2()
+                #     self.__draw_map1_click_point()
+                #     self.__draw_map2_click_point()
+            elif event.inaxes == self.Map2.axes:  # map2がクリックされた時
+                pass
+    def __calc_nearest_representative_point(self):
 
 
 def create_zeta(zeta_min, zeta_max, latent_dim, resolution):
