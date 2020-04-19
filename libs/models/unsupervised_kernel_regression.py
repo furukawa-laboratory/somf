@@ -219,6 +219,7 @@ class UnsupervisedKernelRegression(object):
                 raise ValueError('label_feature must be 1d array')
         else:
             raise ValueError('label_feature must be 1d array or list')
+        self.clicked_features = np.zeros_like(self.label_feature)
 
         if fig_size is None:
             self.fig = plt.figure(figsize=(15, 6))
@@ -242,13 +243,13 @@ class UnsupervisedKernelRegression(object):
 
     def __draw_latent_space(self):
         self.ax_latent_space.cla()
-        self.__draw_features()
+        # self.__draw_features()
         self.ax_latent_space.scatter(self.Z[:,0],self.Z[:,1])
         self.fig.show()
 
     def __draw_features(self):
         self.ax_features.cla()
-        self.__draw_latent_space()
+        # self.__draw_latent_space()
         self.ax_features.bar(self.label_feature,self.clicked_features)
         self.ax_features.set_title('Features')
         self.fig.show()
