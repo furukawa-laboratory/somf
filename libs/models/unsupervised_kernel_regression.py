@@ -226,84 +226,58 @@ class UnsupervisedKernelRegression(object):
             self.fig = plt.figure(figsize=fig_size)
         self.ax_latent_space = self.fig.add_subplot(1, 2, 1, aspect='equal')
         self.ax_latent_space.set_title('Latent space')
-        self.ax_hist = self.fig.add_subplot(1, 2, 2)
-        self.ax_hist.set_title('Mean of mapping')
+        self.ax_features = self.fig.add_subplot(1, 2, 2)
+        self.ax_features.set_title('Mean of mapping')
 
         # ---------------------------------- #
         # -------------draw map------------- #
         # ---------------------------------- #
 
         self.__draw_latent_space()
-        self.__draw_hist()
+        self.__draw_features()
 
         # connect figure and method defining action when latent space is clicked
         self.fig.canvas.mpl_connect('button_press_event', self.__onclick_fig)
         plt.show()
 
     def __draw_latent_space(self):
+        self.ax_latent_space.cla()
+        self.__draw_features()
         self.ax_latent_space.scatter(self.Z[:,0],self.Z[:,1])
         self.fig.show()
 
-    def __draw_hist(self):
-        pass
+    def __draw_features(self):
+        self.ax_features.cla()
+        self.__draw_latent_space()
+        self.ax_features.bar(self.label_feature,self.clicked_features)
+        self.ax_features.set_title('Features')
+        self.fig.show()
+
     def __onclick_fig(self,event):
         if event.xdata is not None:
             if event.inaxes == self.ax_latent_space.axes:  # 潜在空間をクリックしたかどうか
                 # クリックされた座標の取得
                 click_coordinates = np.array([event.xdata,event.ydata])
 
-                self.click_point_latent_space = self.__calc_nearest_representative_point(click_coordinates)  # クリックしたところといちばん近いノードがどこかを計算
+                # クリックしたところといちばん近い代表点がどこかを計算
+                self.click_point_latent_space = self.__calc_nearest_representative_point(click_coordinates)
 
+                # その代表点の写像先の特徴量を計算
+                self.__calc_features()
 
-                # if self.map1_t-self.Map1_click_unit==0:#前回と同じところをクリックした or Map2をクリックした
-                #     self.action1=0
-                # elif self.map1_t -self.Map1_click_unit !=0:#前回と別のところをクリックした
-                #     self.action1=1
-                #
-                # #t回目→t+1回目
-                # self.map1_t=self.Map1_click_unit
-                # self.map2_t = self.Map2_click_unit
-                #
-                # if self.action1==0 and self.action2==0:# map1: marginal map2: marginal
-                #     #各マップのコンポーネントプレーンの計算
-                #     self.__calc_marginal_comp(1)  # Map1_click_unitを元に計算
-                #     self.__calc_marginal_comp(2)  # Map1_click_unitを元に計算
-                #     #component planeを描画
-                #     self.__draw_marginal_map1()
-                #     self.__draw_marginal_map2()
-                #
-                # elif self.action1==1 and self.action2==0: # map1: marginal map2: conditional
-                #     # 各マップのコンポーネントプレーンの計算
-                #     self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
-                #     self.__calc_marginal_comp(1)
-                #     # component planeを描画
-                #     self.__draw_marginal_map1()
-                #     self.__draw_map1_click_point()
-                #     self.__draw_conditional_map2()
-                # elif self.action1==0 and self.action2==1: # map1: conditional map2: marginal
-                #     # 各マップのコンポーネントプレーンの計算
-                #     self.__calc_conditional_comp(1)  # Map2_click_unitを元に計算
-                #     self.__calc_marginal_comp(2)
-                #     # component planeを描画
-                #     self.__draw_marginal_map2()
-                #     self.__draw_map2_click_point()
-                #     self.__draw_conditional_map1()
-                #
-                # elif self.action1==1 and self.action2==1:# map1: conditional map2: conditional
-                #     # 各マップのコンポーネントプレーンの計算
-                #     self.__calc_conditional_comp(1)  # Map1_click_unitを元に計算
-                #     self.__calc_conditional_comp(2)  # Map1_click_unitを元に計算
-                #     # component planeを描画
-                #     self.__draw_conditional_map1()
-                #     self.__draw_conditional_map2()
-                #     self.__draw_map1_click_point()
-                #     self.__draw_map2_click_point()
-            elif event.inaxes == self.Map2.axes:  # map2がクリックされた時
+                # その特徴量の値を描画
+                self.__draw_features()
+            elif event.inaxes == self.ax_features.axes:  # map2がクリックされた時
+                # not implemented yet
                 pass
     def __calc_nearest_representative_point(self, click_coodinates):
         distance = dist.cdist(self.representative_points,click_coodinates.reshape(1,-1))
         index_nearest = np.argmin(distance)
         return index_nearest
+
+    def __calc_features(self):
+        self.clicked_features = self.representative_mapping[self.click_point_latent_space , :]
+
 
 
 def create_zeta(zeta_min, zeta_max, latent_dim, resolution):
