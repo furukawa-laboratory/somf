@@ -191,9 +191,10 @@ class UnsupervisedKernelRegression(object):
         if self.is_compact:
             self.representative_points = create_zeta(-1.0,1.0,self.n_components,resolution)
         else:
-            raise ValueError('Not support is_compact=False')
+            raise ValueError('Not support is_compact=False') #create_zetaの整備が必要なので実装は後で
         self.click_point_latent_space = 0  # index of the clicked representative point
 
+        self.representative_mapping = self.inverse_transform(self.representative_points)
         # invalid check
         if label_data is None:
             self.label_data = np.arange(self.n_samples)
@@ -299,7 +300,10 @@ class UnsupervisedKernelRegression(object):
                 #     self.__draw_map2_click_point()
             elif event.inaxes == self.Map2.axes:  # map2がクリックされた時
                 pass
-    def __calc_nearest_representative_point(self):
+    def __calc_nearest_representative_point(self, click_coodinates):
+        distance = dist.cdist(self.representative_points,click_coodinates.reshape(1,-1))
+        index_nearest = np.argmin(distance)
+        return index_nearest
 
 
 def create_zeta(zeta_min, zeta_max, latent_dim, resolution):
