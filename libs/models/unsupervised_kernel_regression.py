@@ -252,6 +252,7 @@ class UnsupervisedKernelRegression(object):
         # self.__draw_latent_space()
         self.ax_features.bar(self.label_feature,self.clicked_features)
         self.ax_features.set_title('Features')
+        self.ax_features.set_xticklabels(labels=self.label_feature,rotation=270)
         self.fig.show()
 
     def __onclick_fig(self,event):
