@@ -193,6 +193,8 @@ class UnsupervisedKernelRegression(object):
         else:
             raise ValueError('Not support is_compact=False') #create_zetaの整備が必要なので実装は後で
         self.click_point_latent_space = 0  # index of the clicked representative point
+        self.clicked_features = self.X.mean(axis=0)
+        self.is_initial_view = True
 
         self.representative_mapping = self.inverse_transform(self.representative_points)
         # invalid check
@@ -219,7 +221,6 @@ class UnsupervisedKernelRegression(object):
                 raise ValueError('label_feature must be 1d array')
         else:
             raise ValueError('label_feature must be 1d array or list')
-        self.clicked_features = np.zeros_like(self.label_feature)
 
         if fig_size is None:
             self.fig = plt.figure(figsize=(15, 6))
@@ -253,14 +254,25 @@ class UnsupervisedKernelRegression(object):
                 point_label = z + noise
                 self.ax_latent_space.text(point_label[0] ,point_label[1],label,
                                           ha='center', va='bottom',color='black')
-        self.__draw_click_point()
+        # self.ax_latent_space.set_xlim(self.representative_points[:,0].min(),
+        #                               self.representative_points[:,0].max())
+        # self.ax_latent_space.set_ylim(self.representative_points[:,1].min(),
+        #                               self.representative_points[:,1].max())
+        if self.is_initial_view:
+            pass
+        else:
+            self.__draw_click_point()
         self.fig.show()
 
     def __draw_features(self):
         self.ax_features.cla()
         # self.__draw_latent_space()
         self.ax_features.bar(self.label_feature,self.clicked_features)
-        self.ax_features.set_title('Features')
+        self.ax_features.set_ylim(self.X.min(),self.X.max() * 1.05)
+        if self.is_initial_view:
+            self.ax_features.set_title('mean of data')
+        else:
+            self.ax_features.set_title('Features')
         self.ax_features.set_xticklabels(labels=self.label_feature,rotation=270)
         self.fig.show()
 
@@ -270,6 +282,7 @@ class UnsupervisedKernelRegression(object):
                                   ".", color = "black", ms = 20, fillstyle = "none")
 
     def __onclick_fig(self,event):
+        self.is_initial_view = False
         if event.xdata is not None:
             if event.inaxes == self.ax_latent_space.axes:  # 潜在空間をクリックしたかどうか
                 # クリックされた座標の取得
