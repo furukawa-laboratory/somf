@@ -15,7 +15,8 @@ if __name__ == '__main__':
 
     resolution = 100
 
-    X, labels = animal.load_data()
+    X, labels_animal, labels_feature = animal.load_data(retlabel_animal=True,
+                                                        retlabel_feature=True)
 
     seed = 13
     np.random.seed(seed)
@@ -24,4 +25,6 @@ if __name__ == '__main__':
               is_compact=is_compact, is_save_history=is_save_history, lambda_=lambda_)
     ukr.fit(nb_epoch=nb_epoch, eta=eta)
 
-    ukr.visualize(resolution=resolution)
+    ukr.visualize(resolution=resolution,
+                  label_data = labels_animal,
+                  label_feature=labels_feature)
