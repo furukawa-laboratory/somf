@@ -193,7 +193,7 @@ class UnsupervisedKernelRegression(object):
         else:
             raise ValueError('Not support is_compact=False') #create_zetaの整備が必要なので実装は後で
         self.click_point_latent_space = 0  # index of the clicked representative point
-        self.clicked_features = self.X.mean(axis=0)
+        self.clicked_mapping = self.X.mean(axis=0)
         self.is_initial_view = True
 
         self.representative_mapping = self.inverse_transform(self.representative_points)
@@ -261,13 +261,13 @@ class UnsupervisedKernelRegression(object):
         if self.is_initial_view:
             pass
         else:
-            self.__draw_click_point()
+            self.__draw_click_point_latent_space()
         self.fig.show()
 
     def __draw_features(self):
         self.ax_features.cla()
         # self.__draw_latent_space()
-        self.ax_features.bar(self.label_feature,self.clicked_features)
+        self.feature_bars = self.ax_features.bar(self.label_feature, self.clicked_mapping)
         self.ax_features.set_ylim(self.X.min(),self.X.max() * 1.05)
         if self.is_initial_view:
             self.ax_features.set_title('mean of data')
@@ -276,7 +276,7 @@ class UnsupervisedKernelRegression(object):
         self.ax_features.set_xticklabels(labels=self.label_feature,rotation=270)
         self.fig.show()
 
-    def __draw_click_point(self):
+    def __draw_click_point_latent_space(self):
         coordinate = self.representative_points[self.click_point_latent_space]
         self.ax_latent_space.plot(coordinate[0],coordinate[1],
                                   ".", color = "black", ms = 20, fillstyle = "none")
@@ -299,14 +299,22 @@ class UnsupervisedKernelRegression(object):
                 self.__draw_features()
             elif event.inaxes == self.ax_features.axes:  # map2がクリックされた時
                 # not implemented yet
-                pass
+                print('clicked ax_features')
+                click_coordinates = np.array([event.xdata, event.ydata])
+                for i, bar in enumerate(self.feature_bars):
+                    if click_coordinates[0] > bar._x0 and click_coordinates[0] < bar._x1:
+                        print('pushed {}'.format(self.label_feature[i]))
+                        self.selected_feature = i
+
+
+
     def __calc_nearest_representative_point(self, click_point):
         distance = dist.cdist(self.representative_points, click_point.reshape(1, -1))
         index_nearest = np.argmin(distance)
         return index_nearest
 
     def __calc_features(self):
-        self.clicked_features = self.representative_mapping[self.click_point_latent_space, :]
+        self.clicked_mapping = self.representative_mapping[self.click_point_latent_space, :]
 
 
 
