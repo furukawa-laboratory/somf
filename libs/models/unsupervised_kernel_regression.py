@@ -252,6 +252,13 @@ class UnsupervisedKernelRegression(object):
 
     def __draw_latent_space(self):
         self.ax_latent_space.cla()
+        if self.selected_feature is not None:
+            values_selected_feature = self.representative_mapping[:, self.selected_feature]
+            values_selected_feature_2d = self.__unflatten_representative_array(values_selected_feature)
+            representative_points_2d = self.__unflatten_representative_array(self.representative_points)
+            self.ax_latent_space.pcolormesh(representative_points_2d[:, :, 0],
+                                            representative_points_2d[:, :, 1],
+                                            values_selected_feature_2d)
         self.ax_latent_space.scatter(self.Z[:,0],self.Z[:,1])
         if self.label_data is None:
             pass
@@ -267,13 +274,6 @@ class UnsupervisedKernelRegression(object):
         if self.is_initial_view:
             pass
         else:
-            if self.selected_feature is not None:
-                values_selected_feature = self.representative_mapping[:,self.selected_feature]
-                values_selected_feature_2d = self.__unflatten_representative_array(values_selected_feature)
-                representative_points_2d = self.__unflatten_representative_array(self.representative_points)
-                self.ax_latent_space.pcolormesh(representative_points_2d[:,:,0],
-                                                representative_points_2d[:,:,1],
-                                                values_selected_feature_2d)
             self.__draw_click_point_latent_space()
         self.fig.show()
 
@@ -331,7 +331,7 @@ class UnsupervisedKernelRegression(object):
         self.clicked_mapping = self.representative_mapping[self.click_point_latent_space, :]
 
     def __unflatten_representative_array(self,representative_array):
-        if representative_array.shape[0] == np.prod(self.representative_points):
+        if representative_array.shape[0] == np.prod(self.n_representative_points):
             return np.squeeze(representative_array.reshape(np.append(self.n_representative_points,-1)))
         else:
             raise ValueError('arg shape {} is not consistent'.format(representative_array.shape))
