@@ -25,6 +25,6 @@ if __name__ == '__main__':
               is_compact=is_compact, is_save_history=is_save_history, lambda_=lambda_)
     ukr.fit(nb_epoch=nb_epoch, eta=eta)
 
-    ukr.visualize(resolution=resolution,
+    ukr.visualize(n_representative_points=resolution,
                   label_data = labels_animal,
                   label_feature=labels_feature)

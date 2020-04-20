@@ -174,7 +174,7 @@ class UnsupervisedKernelRegression(object):
 
         return F
 
-    def visualize(self, resolution=30, label_data=None, label_feature=None, fig_size=None):
+    def visualize(self, n_representative_points=30, label_data=None, label_feature=None, fig_size=None):
         # invalid check
         if self.n_components != 2:
             raise ValueError('Now support only n_components = 2')
@@ -188,13 +188,19 @@ class UnsupervisedKernelRegression(object):
         # ---------------------------------- #
         # -----initialize variables--------- #
         # ---------------------------------- #
+        if isinstance(n_representative_points,int):
+            # 代表点の数を潜在空間の次元ごとに格納
+            self.n_representative_points = np.ones(self.n_components, dtype='int8') * n_representative_points
+        else:
+            raise ValueError('Only support n_reprsentative_point is int')
         if self.is_compact:
-            self.representative_points = create_zeta(-1.0,1.0,self.n_components,resolution)
+            self.representative_points = create_zeta(-1.0, 1.0, self.n_components, n_representative_points)
         else:
             raise ValueError('Not support is_compact=False') #create_zetaの整備が必要なので実装は後で
         self.click_point_latent_space = 0  # index of the clicked representative point
         self.clicked_mapping = self.X.mean(axis=0)
         self.is_initial_view = True
+        self.selected_feature = None
 
         self.representative_mapping = self.inverse_transform(self.representative_points)
         # invalid check
@@ -261,6 +267,13 @@ class UnsupervisedKernelRegression(object):
         if self.is_initial_view:
             pass
         else:
+            if self.selected_feature is not None:
+                values_selected_feature = self.representative_mapping[:,self.selected_feature]
+                values_selected_feature_2d = self.__unflatten_representative_array(values_selected_feature)
+                representative_points_2d = self.__unflatten_representative_array(self.representative_points)
+                self.ax_latent_space.pcolormesh(representative_points_2d[:,:,0],
+                                                representative_points_2d[:,:,1],
+                                                values_selected_feature_2d)
             self.__draw_click_point_latent_space()
         self.fig.show()
 
@@ -305,6 +318,7 @@ class UnsupervisedKernelRegression(object):
                     if click_coordinates[0] > bar._x0 and click_coordinates[0] < bar._x1:
                         print('pushed {}'.format(self.label_feature[i]))
                         self.selected_feature = i
+                        self.__draw_latent_space()
 
 
 
@@ -315,6 +329,12 @@ class UnsupervisedKernelRegression(object):
 
     def __calc_features(self):
         self.clicked_mapping = self.representative_mapping[self.click_point_latent_space, :]
+
+    def __unflatten_representative_array(self,representative_array):
+        if representative_array.shape[0] == np.prod(self.representative_points):
+            return np.squeeze(representative_array.reshape(np.append(self.n_representative_points,-1)))
+        else:
+            raise ValueError('arg shape {} is not consistent'.format(representative_array.shape))
 
 
 
