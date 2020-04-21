@@ -183,7 +183,6 @@ class UnsupervisedKernelRegression(object):
         import matplotlib
         matplotlib.use('TkAgg')
         import matplotlib.pyplot as plt
-        from matplotlib.widgets import RadioButtons
 
         # ---------------------------------- #
         # -----initialize variables--------- #
@@ -194,7 +193,7 @@ class UnsupervisedKernelRegression(object):
         else:
             raise ValueError('Only support n_reprsentative_point is int')
         if self.is_compact:
-            self.representative_points = create_zeta(-1.0, 1.0, self.n_components, n_grid_points)
+            self.grid_points = create_zeta(-1.0, 1.0, self.n_components, n_grid_points)
         else:
             raise ValueError('Not support is_compact=False')  # create_zetaの整備が必要なので実装は後で
         self.click_point_latent_space = 0  # index of the clicked representative point
@@ -202,7 +201,7 @@ class UnsupervisedKernelRegression(object):
         self.is_initial_view = True
         self.selected_feature = None
 
-        self.representative_mapping = self.inverse_transform(self.representative_points)
+        self.grid_mapping = self.inverse_transform(self.grid_points)
         # invalid check
         if label_data is None:
             self.label_data = label_data
@@ -237,7 +236,7 @@ class UnsupervisedKernelRegression(object):
         self.ax_features = self.fig.add_subplot(1, 2, 2)
         self.ax_features.set_title('Mean of mapping')
 
-        epsilon = 0.03 * np.abs(self.representative_points.max() - self.representative_points.min())
+        epsilon = 0.03 * np.abs(self.grid_points.max() - self.grid_points.min())
         self.noise_label = epsilon * (np.random.rand(self.n_samples, self.n_components) * 2.0 - 1.0)
         # ---------------------------------- #
         # -------------draw map------------- #
@@ -253,17 +252,16 @@ class UnsupervisedKernelRegression(object):
     def __draw_latent_space(self):
         self.ax_latent_space.cla()
         if self.selected_feature is not None:
-            values_selected_feature = self.representative_mapping[:, self.selected_feature]
+            values_selected_feature = self.grid_mapping[:, self.selected_feature]
             values_selected_feature_2d = self.__unflatten_representative_array(values_selected_feature)
-            representative_points_2d = self.__unflatten_representative_array(self.representative_points)
+            representative_points_2d = self.__unflatten_representative_array(self.grid_points)
             pcm = self.ax_latent_space.pcolormesh(representative_points_2d[:, :, 0],
                                                   representative_points_2d[:, :, 1],
                                                   values_selected_feature_2d)
             ctr = self.ax_latent_space.contour(representative_points_2d[:, :, 0],
                                                representative_points_2d[:, :, 1],
-                                               values_selected_feature_2d,6,colors='k')
+                                               values_selected_feature_2d, 6, colors='k')
             self.ax_latent_space.clabel(ctr)
-            # self.fig.colorbar(pcm, ax=self.ax_latent_space)
         self.ax_latent_space.scatter(self.Z[:, 0], self.Z[:, 1])
         if self.label_data is None:
             pass
@@ -272,10 +270,6 @@ class UnsupervisedKernelRegression(object):
                 point_label = z + noise
                 self.ax_latent_space.text(point_label[0], point_label[1], label,
                                           ha='center', va='bottom', color='black')
-        # self.ax_latent_space.set_xlim(self.representative_points[:,0].min(),
-        #                               self.representative_points[:,0].max())
-        # self.ax_latent_space.set_ylim(self.representative_points[:,1].min(),
-        #                               self.representative_points[:,1].max())
         if self.is_initial_view:
             pass
         else:
@@ -284,7 +278,6 @@ class UnsupervisedKernelRegression(object):
 
     def __draw_features(self):
         self.ax_features.cla()
-        # self.__draw_latent_space()
         self.feature_bars = self.ax_features.bar(self.label_feature, self.clicked_mapping)
         if self.selected_feature is not None:
             self.feature_bars[self.selected_feature].set_color('r')
@@ -297,7 +290,7 @@ class UnsupervisedKernelRegression(object):
         self.fig.show()
 
     def __draw_click_point_latent_space(self):
-        coordinate = self.representative_points[self.click_point_latent_space]
+        coordinate = self.grid_points[self.click_point_latent_space]
         self.ax_latent_space.plot(coordinate[0], coordinate[1],
                                   ".", color="red", ms=20, fillstyle="none")
 
@@ -318,23 +311,20 @@ class UnsupervisedKernelRegression(object):
                 self.__draw_latent_space()
                 self.__draw_features()
             elif event.inaxes == self.ax_features.axes:  # map2がクリックされた時
-                # not implemented yet
-                # print('clicked ax_features')
                 click_coordinates = np.array([event.xdata, event.ydata])
                 for i, bar in enumerate(self.feature_bars):
                     if click_coordinates[0] > bar._x0 and click_coordinates[0] < bar._x1:
-                        # print('pushed {}'.format(self.label_feature[i]))
                         self.selected_feature = i
                         self.__draw_latent_space()
                         self.__draw_features()
 
     def __calc_nearest_representative_point(self, click_point):
-        distance = dist.cdist(self.representative_points, click_point.reshape(1, -1))
+        distance = dist.cdist(self.grid_points, click_point.reshape(1, -1))
         index_nearest = np.argmin(distance)
         return index_nearest
 
     def __calc_features(self):
-        self.clicked_mapping = self.representative_mapping[self.click_point_latent_space, :]
+        self.clicked_mapping = self.grid_mapping[self.click_point_latent_space, :]
 
     def __unflatten_representative_array(self, representative_array):
         if representative_array.shape[0] == np.prod(self.n_grid_points):
