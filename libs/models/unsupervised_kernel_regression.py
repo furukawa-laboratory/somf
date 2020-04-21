@@ -286,6 +286,8 @@ class UnsupervisedKernelRegression(object):
         self.ax_features.cla()
         # self.__draw_latent_space()
         self.feature_bars = self.ax_features.bar(self.label_feature, self.clicked_mapping)
+        if self.selected_feature is not None:
+            self.feature_bars[self.selected_feature].set_color('r')
         self.ax_features.set_ylim(self.X.min(), self.X.max() * 1.05)
         if self.is_initial_view:
             self.ax_features.set_title('mean of data')
@@ -297,7 +299,7 @@ class UnsupervisedKernelRegression(object):
     def __draw_click_point_latent_space(self):
         coordinate = self.representative_points[self.click_point_latent_space]
         self.ax_latent_space.plot(coordinate[0], coordinate[1],
-                                  ".", color="black", ms=20, fillstyle="none")
+                                  ".", color="red", ms=20, fillstyle="none")
 
     def __onclick_fig(self, event):
         self.is_initial_view = False
@@ -324,6 +326,7 @@ class UnsupervisedKernelRegression(object):
                         # print('pushed {}'.format(self.label_feature[i]))
                         self.selected_feature = i
                         self.__draw_latent_space()
+                        self.__draw_features()
 
     def __calc_nearest_representative_point(self, click_point):
         distance = dist.cdist(self.representative_points, click_point.reshape(1, -1))
