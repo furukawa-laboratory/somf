@@ -174,7 +174,7 @@ class UnsupervisedKernelRegression(object):
 
         return F
 
-    def visualize(self, n_representative_points=30, label_data=None, label_feature=None, fig_size=None):
+    def visualize(self, n_grid_points=30, label_data=None, label_feature=None, fig_size=None):
         # invalid check
         if self.n_components != 2:
             raise ValueError('Now support only n_components = 2')
@@ -188,15 +188,15 @@ class UnsupervisedKernelRegression(object):
         # ---------------------------------- #
         # -----initialize variables--------- #
         # ---------------------------------- #
-        if isinstance(n_representative_points,int):
+        if isinstance(n_grid_points, int):
             # 代表点の数を潜在空間の次元ごとに格納
-            self.n_representative_points = np.ones(self.n_components, dtype='int8') * n_representative_points
+            self.n_grid_points = np.ones(self.n_components, dtype='int8') * n_grid_points
         else:
             raise ValueError('Only support n_reprsentative_point is int')
         if self.is_compact:
-            self.representative_points = create_zeta(-1.0, 1.0, self.n_components, n_representative_points)
+            self.representative_points = create_zeta(-1.0, 1.0, self.n_components, n_grid_points)
         else:
-            raise ValueError('Not support is_compact=False') #create_zetaの整備が必要なので実装は後で
+            raise ValueError('Not support is_compact=False')  # create_zetaの整備が必要なので実装は後で
         self.click_point_latent_space = 0  # index of the clicked representative point
         self.clicked_mapping = self.X.mean(axis=0)
         self.is_initial_view = True
@@ -238,7 +238,7 @@ class UnsupervisedKernelRegression(object):
         self.ax_features.set_title('Mean of mapping')
 
         epsilon = 0.03 * np.abs(self.representative_points.max() - self.representative_points.min())
-        self.noise_label = epsilon * (np.random.rand(self.n_samples,self.n_components) * 2.0 - 1.0)
+        self.noise_label = epsilon * (np.random.rand(self.n_samples, self.n_components) * 2.0 - 1.0)
         # ---------------------------------- #
         # -------------draw map------------- #
         # ---------------------------------- #
@@ -256,17 +256,22 @@ class UnsupervisedKernelRegression(object):
             values_selected_feature = self.representative_mapping[:, self.selected_feature]
             values_selected_feature_2d = self.__unflatten_representative_array(values_selected_feature)
             representative_points_2d = self.__unflatten_representative_array(self.representative_points)
-            self.ax_latent_space.pcolormesh(representative_points_2d[:, :, 0],
-                                            representative_points_2d[:, :, 1],
-                                            values_selected_feature_2d)
-        self.ax_latent_space.scatter(self.Z[:,0],self.Z[:,1])
+            pcm = self.ax_latent_space.pcolormesh(representative_points_2d[:, :, 0],
+                                                  representative_points_2d[:, :, 1],
+                                                  values_selected_feature_2d)
+            ctr = self.ax_latent_space.contour(representative_points_2d[:, :, 0],
+                                               representative_points_2d[:, :, 1],
+                                               values_selected_feature_2d,6,colors='k')
+            self.ax_latent_space.clabel(ctr)
+            # self.fig.colorbar(pcm, ax=self.ax_latent_space)
+        self.ax_latent_space.scatter(self.Z[:, 0], self.Z[:, 1])
         if self.label_data is None:
             pass
         else:
-            for z,noise,label in zip(self.Z, self.noise_label,self.label_data):
+            for z, noise, label in zip(self.Z, self.noise_label, self.label_data):
                 point_label = z + noise
-                self.ax_latent_space.text(point_label[0] ,point_label[1],label,
-                                          ha='center', va='bottom',color='black')
+                self.ax_latent_space.text(point_label[0], point_label[1], label,
+                                          ha='center', va='bottom', color='black')
         # self.ax_latent_space.set_xlim(self.representative_points[:,0].min(),
         #                               self.representative_points[:,0].max())
         # self.ax_latent_space.set_ylim(self.representative_points[:,1].min(),
@@ -281,25 +286,25 @@ class UnsupervisedKernelRegression(object):
         self.ax_features.cla()
         # self.__draw_latent_space()
         self.feature_bars = self.ax_features.bar(self.label_feature, self.clicked_mapping)
-        self.ax_features.set_ylim(self.X.min(),self.X.max() * 1.05)
+        self.ax_features.set_ylim(self.X.min(), self.X.max() * 1.05)
         if self.is_initial_view:
             self.ax_features.set_title('mean of data')
         else:
             self.ax_features.set_title('Features')
-        self.ax_features.set_xticklabels(labels=self.label_feature,rotation=270)
+        self.ax_features.set_xticklabels(labels=self.label_feature, rotation=270)
         self.fig.show()
 
     def __draw_click_point_latent_space(self):
         coordinate = self.representative_points[self.click_point_latent_space]
-        self.ax_latent_space.plot(coordinate[0],coordinate[1],
-                                  ".", color = "black", ms = 20, fillstyle = "none")
+        self.ax_latent_space.plot(coordinate[0], coordinate[1],
+                                  ".", color="black", ms=20, fillstyle="none")
 
-    def __onclick_fig(self,event):
+    def __onclick_fig(self, event):
         self.is_initial_view = False
         if event.xdata is not None:
             if event.inaxes == self.ax_latent_space.axes:  # 潜在空間をクリックしたかどうか
                 # クリックされた座標の取得
-                click_coordinates = np.array([event.xdata,event.ydata])
+                click_coordinates = np.array([event.xdata, event.ydata])
 
                 # クリックしたところといちばん近い代表点がどこかを計算
                 self.click_point_latent_space = self.__calc_nearest_representative_point(click_coordinates)
@@ -312,15 +317,13 @@ class UnsupervisedKernelRegression(object):
                 self.__draw_features()
             elif event.inaxes == self.ax_features.axes:  # map2がクリックされた時
                 # not implemented yet
-                print('clicked ax_features')
+                # print('clicked ax_features')
                 click_coordinates = np.array([event.xdata, event.ydata])
                 for i, bar in enumerate(self.feature_bars):
                     if click_coordinates[0] > bar._x0 and click_coordinates[0] < bar._x1:
-                        print('pushed {}'.format(self.label_feature[i]))
+                        # print('pushed {}'.format(self.label_feature[i]))
                         self.selected_feature = i
                         self.__draw_latent_space()
-
-
 
     def __calc_nearest_representative_point(self, click_point):
         distance = dist.cdist(self.representative_points, click_point.reshape(1, -1))
@@ -330,12 +333,11 @@ class UnsupervisedKernelRegression(object):
     def __calc_features(self):
         self.clicked_mapping = self.representative_mapping[self.click_point_latent_space, :]
 
-    def __unflatten_representative_array(self,representative_array):
-        if representative_array.shape[0] == np.prod(self.n_representative_points):
-            return np.squeeze(representative_array.reshape(np.append(self.n_representative_points,-1)))
+    def __unflatten_representative_array(self, representative_array):
+        if representative_array.shape[0] == np.prod(self.n_grid_points):
+            return np.squeeze(representative_array.reshape(np.append(self.n_grid_points, -1)))
         else:
             raise ValueError('arg shape {} is not consistent'.format(representative_array.shape))
-
 
 
 def create_zeta(zeta_min, zeta_max, latent_dim, resolution):
