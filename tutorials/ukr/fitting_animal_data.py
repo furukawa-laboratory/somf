@@ -19,7 +19,7 @@ if __name__ == '__main__':
     X, labels_animal, labels_feature = animal.load_data(retlabel_animal=True,
                                                         retlabel_feature=True)
 
-    seed = 12
+    seed = 14
     random_state = check_random_state(seed)
     init = random_state.normal(0.0, bandwidth * 0.1, size=(X.shape[0], n_components))
 
