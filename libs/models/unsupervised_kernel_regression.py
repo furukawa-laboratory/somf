@@ -253,8 +253,8 @@ class UnsupervisedKernelRegression(object):
         self.ax_latent_space.cla()
         if self.selected_feature is not None:
             values_selected_feature = self.grid_mapping[:, self.selected_feature]
-            values_selected_feature_2d = self.__unflatten_representative_array(values_selected_feature)
-            representative_points_2d = self.__unflatten_representative_array(self.grid_points)
+            values_selected_feature_2d = self.__unflatten_grid_array(values_selected_feature)
+            representative_points_2d = self.__unflatten_grid_array(self.grid_points)
             pcm = self.ax_latent_space.pcolormesh(representative_points_2d[:, :, 0],
                                                   representative_points_2d[:, :, 1],
                                                   values_selected_feature_2d)
@@ -326,11 +326,11 @@ class UnsupervisedKernelRegression(object):
     def __calc_features(self):
         self.clicked_mapping = self.grid_mapping[self.click_point_latent_space, :]
 
-    def __unflatten_representative_array(self, representative_array):
-        if representative_array.shape[0] == np.prod(self.n_grid_points):
-            return np.squeeze(representative_array.reshape(np.append(self.n_grid_points, -1)))
+    def __unflatten_grid_array(self, grid_array):
+        if grid_array.shape[0] == np.prod(self.n_grid_points):
+            return np.squeeze(grid_array.reshape(np.append(self.n_grid_points, -1)))
         else:
-            raise ValueError('arg shape {} is not consistent'.format(representative_array.shape))
+            raise ValueError('arg shape {} is not consistent'.format(grid_array.shape))
 
 
 def create_zeta(zeta_min, zeta_max, latent_dim, resolution):
