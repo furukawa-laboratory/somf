@@ -193,7 +193,8 @@ class UnsupervisedKernelRegression(object):
         self.fig.canvas.mpl_connect('button_press_event', self.__onclick_fig)
         plt.show()
 
-    def _initialize_to_visualize(self, n_grid_points, label_data, label_feature, fig_size):
+    def _initialize_to_visualize(self, n_grid_points, label_data, label_feature,
+                                 fig_size, ax_latent_space=None, ax_feature_bars=None):
         import matplotlib.pyplot as plt
         if isinstance(n_grid_points, int):
             # 代表点の数を潜在空間の次元ごとに格納
@@ -236,14 +237,18 @@ class UnsupervisedKernelRegression(object):
         else:
             raise ValueError('label_feature must be 1d array or list')
 
-        if fig_size is None:
-            self.fig = plt.figure(figsize=(15, 6))
+        if ax_latent_space is None and ax_feature_bars is None:
+            if fig_size is None:
+                self.fig = plt.figure(figsize=(15, 6))
+            else:
+                self.fig = plt.figure(figsize=fig_size)
+            self.ax_latent_space = self.fig.add_subplot(1, 2, 1, aspect='equal')
+            self.ax_latent_space.set_title('Latent space')
+            self.ax_feature_bars = self.fig.add_subplot(1, 2, 2)
+            self.ax_feature_bars.set_title('Mean of data')
         else:
-            self.fig = plt.figure(figsize=fig_size)
-        self.ax_latent_space = self.fig.add_subplot(1, 2, 1, aspect='equal')
-        self.ax_latent_space.set_title('Latent space')
-        self.ax_feature_bars = self.fig.add_subplot(1, 2, 2)
-        self.ax_feature_bars.set_title('Mean of data')
+            self.ax_latent_space = ax_latent_space
+            self.ax_feature_bars = ax_feature_bars
 
         epsilon = 0.03 * np.abs(self.grid_points.max() - self.grid_points.min())
         self.noise_label = epsilon * (np.random.rand(self.n_samples, self.n_components) * 2.0 - 1.0)
