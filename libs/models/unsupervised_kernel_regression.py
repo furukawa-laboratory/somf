@@ -188,20 +188,20 @@ class UnsupervisedKernelRegression(object):
         # -----initialize variables--------- #
         # ---------------------------------- #
 
-        self.__initialize_to_visualize(n_grid_points, label_data, label_feature, fig_size)
+        self._initialize_to_visualize(n_grid_points, label_data, label_feature, fig_size)
 
         # ---------------------------------- #
         # -------------draw map------------- #
         # ---------------------------------- #
 
-        self.__draw_latent_space()
-        self.__draw_features()
+        self._draw_latent_space()
+        self._draw_features()
 
         # connect figure and method defining action when latent space is clicked
         self.fig.canvas.mpl_connect('button_press_event', self.__onclick_fig)
         plt.show()
 
-    def __initialize_to_visualize(self, n_grid_points, label_data, label_feature, fig_size):
+    def _initialize_to_visualize(self, n_grid_points, label_data, label_feature, fig_size):
         import matplotlib.pyplot as plt
         if isinstance(n_grid_points, int):
             # 代表点の数を潜在空間の次元ごとに格納
@@ -255,7 +255,7 @@ class UnsupervisedKernelRegression(object):
         epsilon = 0.03 * np.abs(self.grid_points.max() - self.grid_points.min())
         self.noise_label = epsilon * (np.random.rand(self.n_samples, self.n_components) * 2.0 - 1.0)
 
-    def __draw_latent_space(self):
+    def _draw_latent_space(self):
         self.ax_latent_space.cla()
         if self.selected_feature is not None:
             values_selected_feature = self.grid_mapping[:, self.selected_feature]
@@ -282,7 +282,7 @@ class UnsupervisedKernelRegression(object):
             self.__draw_click_point_latent_space()
         self.fig.show()
 
-    def __draw_features(self):
+    def _draw_features(self):
         self.ax_features.cla()
         self.feature_bars = self.ax_features.bar(self.label_feature, self.clicked_mapping)
         if self.selected_feature is not None:
@@ -314,15 +314,15 @@ class UnsupervisedKernelRegression(object):
                 self.__calc_features()
 
                 # その特徴量の値を描画
-                self.__draw_latent_space()
-                self.__draw_features()
+                self._draw_latent_space()
+                self._draw_features()
             elif event.inaxes == self.ax_features.axes:  # map2がクリックされた時
                 click_coordinates = np.array([event.xdata, event.ydata])
                 for i, bar in enumerate(self.feature_bars):
                     if click_coordinates[0] > bar._x0 and click_coordinates[0] < bar._x1:
                         self.selected_feature = i
-                        self.__draw_latent_space()
-                        self.__draw_features()
+                        self._draw_latent_space()
+                        self._draw_features()
 
     def __calc_nearest_representative_point(self, click_point):
         distance = dist.cdist(self.grid_points, click_point.reshape(1, -1))
