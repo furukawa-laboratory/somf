@@ -29,12 +29,6 @@ if __name__ == '__main__':
               is_compact=is_compact, is_save_history=is_save_history, lambda_=lambda_, init=init)
     ukr.fit(nb_epoch=nb_epoch, eta=eta)
 
-    fig = plt.figure(figsize=[14,7])
-    ax_latent_space = fig.add_subplot(121,aspect='equal')
-    ax_feature_bars = fig.add_subplot(122)
     ukr.visualize(n_grid_points=n_grid_points,
                   label_data=labels_animal,
-                  label_feature=labels_feature,
-                  fig=fig,
-                  ax_latent_space=ax_latent_space,
-                  ax_feature_bars=ax_feature_bars)
+                  label_feature=labels_feature)
