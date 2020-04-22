@@ -207,7 +207,7 @@ class UnsupervisedKernelRegression(object):
             # 代表点の数を潜在空間の次元ごとに格納
             self.n_grid_points = np.ones(self.n_components, dtype='int8') * n_grid_points
         else:
-            raise ValueError('Only support n_reprsentative_point is int')
+            raise ValueError('Only support n_grid_points is int')
         if self.is_compact:
             self.grid_points = create_zeta(-1.0, 1.0, self.n_components, n_grid_points)
         else:
