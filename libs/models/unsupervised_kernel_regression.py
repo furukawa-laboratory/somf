@@ -242,8 +242,8 @@ class UnsupervisedKernelRegression(object):
             self.fig = plt.figure(figsize=fig_size)
         self.ax_latent_space = self.fig.add_subplot(1, 2, 1, aspect='equal')
         self.ax_latent_space.set_title('Latent space')
-        self.ax_features = self.fig.add_subplot(1, 2, 2)
-        self.ax_features.set_title('Mean of data')
+        self.ax_feature_bars = self.fig.add_subplot(1, 2, 2)
+        self.ax_feature_bars.set_title('Mean of data')
 
         epsilon = 0.03 * np.abs(self.grid_points.max() - self.grid_points.min())
         self.noise_label = epsilon * (np.random.rand(self.n_samples, self.n_components) * 2.0 - 1.0)
@@ -277,16 +277,16 @@ class UnsupervisedKernelRegression(object):
         self.fig.show()
 
     def _draw_features(self):
-        self.ax_features.cla()
-        self.feature_bars = self.ax_features.bar(self.label_feature, self.clicked_mapping)
+        self.ax_feature_bars.cla()
+        self.feature_bars = self.ax_feature_bars.bar(self.label_feature, self.clicked_mapping)
         if self.selected_feature is not None:
             self.feature_bars[self.selected_feature].set_color('r')
-        self.ax_features.set_ylim(self.X.min(), self.X.max() * 1.05)
+        self.ax_feature_bars.set_ylim(self.X.min(), self.X.max() * 1.05)
         if self.click_point_latent_space is None:
-            self.ax_features.set_title('mean of data')
+            self.ax_feature_bars.set_title('mean of data')
         else:
-            self.ax_features.set_title('Features')
-        self.ax_features.set_xticklabels(labels=self.label_feature, rotation=270)
+            self.ax_feature_bars.set_title('Features')
+        self.ax_feature_bars.set_xticklabels(labels=self.label_feature, rotation=270)
         self.fig.show()
 
     def __draw_click_point_latent_space(self):
@@ -303,7 +303,7 @@ class UnsupervisedKernelRegression(object):
                 self.__set_feature_bar_from_latent_space(click_coordinates)
                 self._draw_latent_space()
                 self._draw_features()
-            elif event.inaxes == self.ax_features.axes:  # 特徴量のバーがクリックされたかどうか
+            elif event.inaxes == self.ax_feature_bars.axes:  # 特徴量のバーがクリックされたかどうか
                 self.__set_latent_space_from_feature_bar(click_coordinates)
                 self._draw_latent_space()
                 self._draw_features()
