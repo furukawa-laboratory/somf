@@ -188,7 +188,7 @@ class UnsupervisedKernelRegression(object):
         # -----initialize variables--------- #
         # ---------------------------------- #
 
-        self.__initialize_var_to_visualize(n_grid_points,label_data,label_feature,fig_size)
+        self.__initialize_to_visualize(n_grid_points, label_data, label_feature, fig_size)
 
         # ---------------------------------- #
         # -------------draw map------------- #
@@ -201,7 +201,7 @@ class UnsupervisedKernelRegression(object):
         self.fig.canvas.mpl_connect('button_press_event', self.__onclick_fig)
         plt.show()
 
-    def __initialize_var_to_visualize(self, n_grid_points, label_data, label_feature, fig_size):
+    def __initialize_to_visualize(self, n_grid_points, label_data, label_feature, fig_size):
         import matplotlib.pyplot as plt
         if isinstance(n_grid_points, int):
             # 代表点の数を潜在空間の次元ごとに格納
