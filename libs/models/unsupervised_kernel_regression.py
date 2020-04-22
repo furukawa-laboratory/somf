@@ -187,6 +187,21 @@ class UnsupervisedKernelRegression(object):
         # ---------------------------------- #
         # -----initialize variables--------- #
         # ---------------------------------- #
+
+        self.__initialize_var_to_visualize(n_grid_points,label_data,label_feature,fig_size)
+
+        # ---------------------------------- #
+        # -------------draw map------------- #
+        # ---------------------------------- #
+
+        self.__draw_latent_space()
+        self.__draw_features()
+
+        # connect figure and method defining action when latent space is clicked
+        self.fig.canvas.mpl_connect('button_press_event', self.__onclick_fig)
+        plt.show()
+
+    def __initialize_var_to_visualize(self, n_grid_points, label_data, label_feature, fig_size):
         if isinstance(n_grid_points, int):
             # 代表点の数を潜在空間の次元ごとに格納
             self.n_grid_points = np.ones(self.n_components, dtype='int8') * n_grid_points
@@ -238,16 +253,6 @@ class UnsupervisedKernelRegression(object):
 
         epsilon = 0.03 * np.abs(self.grid_points.max() - self.grid_points.min())
         self.noise_label = epsilon * (np.random.rand(self.n_samples, self.n_components) * 2.0 - 1.0)
-        # ---------------------------------- #
-        # -------------draw map------------- #
-        # ---------------------------------- #
-
-        self.__draw_latent_space()
-        self.__draw_features()
-
-        # connect figure and method defining action when latent space is clicked
-        self.fig.canvas.mpl_connect('button_press_event', self.__onclick_fig)
-        plt.show()
 
     def __draw_latent_space(self):
         self.ax_latent_space.cla()
