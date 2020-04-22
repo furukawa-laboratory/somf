@@ -184,15 +184,7 @@ class UnsupervisedKernelRegression(object):
         matplotlib.use('TkAgg')
         import matplotlib.pyplot as plt
 
-        # ---------------------------------- #
-        # -----initialize variables--------- #
-        # ---------------------------------- #
-
         self._initialize_to_visualize(n_grid_points, label_data, label_feature, fig_size)
-
-        # ---------------------------------- #
-        # -------------draw map------------- #
-        # ---------------------------------- #
 
         self._draw_latent_space()
         self._draw_features()
