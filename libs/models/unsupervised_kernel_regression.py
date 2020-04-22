@@ -174,7 +174,7 @@ class UnsupervisedKernelRegression(object):
 
         return F
 
-    def visualize(self, n_grid_points=30, label_data=None, label_feature=None, fig_size=None):
+    def visualize(self, n_grid_points=30, label_data=None, label_feature=None, fig=None, fig_size=None, ax_latent_space=None, ax_feature_bars=None):
         # invalid check
         if self.n_components != 2:
             raise ValueError('Now support only n_components = 2')
@@ -184,7 +184,7 @@ class UnsupervisedKernelRegression(object):
         matplotlib.use('TkAgg')
         import matplotlib.pyplot as plt
 
-        self._initialize_to_visualize(n_grid_points, label_data, label_feature, fig_size)
+        self._initialize_to_visualize(n_grid_points, label_data, label_feature, fig, fig_size, ax_latent_space, ax_feature_bars)
 
         self._draw_latent_space()
         self._draw_features()
@@ -194,7 +194,7 @@ class UnsupervisedKernelRegression(object):
         plt.show()
 
     def _initialize_to_visualize(self, n_grid_points, label_data, label_feature,
-                                 fig_size, ax_latent_space=None, ax_feature_bars=None):
+                                 fig, fig_size, ax_latent_space, ax_feature_bars):
         import matplotlib.pyplot as plt
         if isinstance(n_grid_points, int):
             # 代表点の数を潜在空間の次元ごとに格納
@@ -237,11 +237,15 @@ class UnsupervisedKernelRegression(object):
         else:
             raise ValueError('label_feature must be 1d array or list')
 
-        if ax_latent_space is None and ax_feature_bars is None:
+        if fig is None:
             if fig_size is None:
                 self.fig = plt.figure(figsize=(15, 6))
             else:
                 self.fig = plt.figure(figsize=fig_size)
+        else:
+            self.fig = fig
+
+        if ax_latent_space is None and ax_feature_bars is None:
             self.ax_latent_space = self.fig.add_subplot(1, 2, 1, aspect='equal')
             self.ax_latent_space.set_title('Latent space')
             self.ax_feature_bars = self.fig.add_subplot(1, 2, 2)
