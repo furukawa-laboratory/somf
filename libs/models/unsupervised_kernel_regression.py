@@ -208,6 +208,7 @@ class UnsupervisedKernelRegression(object):
         self.clicked_mapping = self.X.mean(axis=0)
         self.is_initial_view = True
         self.selected_feature = None
+        self.grid_values_to_draw = None
 
         self.grid_mapping = self.inverse_transform(self.grid_points)
         # invalid check
@@ -249,16 +250,17 @@ class UnsupervisedKernelRegression(object):
 
     def _draw_latent_space(self):
         self.ax_latent_space.cla()
-        if self.selected_feature is not None:
-            values_selected_feature = self.grid_mapping[:, self.selected_feature]
-            values_selected_feature_2d = self.__unflatten_grid_array(values_selected_feature)
-            representative_points_2d = self.__unflatten_grid_array(self.grid_points)
-            pcm = self.ax_latent_space.pcolormesh(representative_points_2d[:, :, 0],
-                                                  representative_points_2d[:, :, 1],
-                                                  values_selected_feature_2d)
-            ctr = self.ax_latent_space.contour(representative_points_2d[:, :, 0],
-                                               representative_points_2d[:, :, 1],
-                                               values_selected_feature_2d, 6, colors='k')
+        if self.grid_values_to_draw is not None:
+            #self.grid_values_to_draw = self.grid_mapping[:, self.selected_feature]
+            # To draw by pcolormesh and contour, reshape arrays like grid
+            grid_values_to_draw_3d = self.__unflatten_grid_array(self.grid_values_to_draw)
+            grid_points_3d = self.__unflatten_grid_array(self.grid_points)
+            pcm = self.ax_latent_space.pcolormesh(grid_points_3d[:, :, 0],
+                                                  grid_points_3d[:, :, 1],
+                                                  grid_values_to_draw_3d)
+            ctr = self.ax_latent_space.contour(grid_points_3d[:, :, 0],
+                                               grid_points_3d[:, :, 1],
+                                               grid_values_to_draw_3d, 6, colors='k')
             self.ax_latent_space.clabel(ctr)
         self.ax_latent_space.scatter(self.Z[:, 0], self.Z[:, 1])
         if self.label_data is None:
@@ -313,6 +315,7 @@ class UnsupervisedKernelRegression(object):
                 for i, bar in enumerate(self.feature_bars):
                     if click_coordinates[0] > bar._x0 and click_coordinates[0] < bar._x1:
                         self.selected_feature = i
+                        self.grid_values_to_draw = self.grid_mapping[:,i]
                         self._draw_latent_space()
                         self._draw_features()
 
