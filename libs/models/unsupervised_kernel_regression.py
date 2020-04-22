@@ -202,6 +202,7 @@ class UnsupervisedKernelRegression(object):
         plt.show()
 
     def __initialize_var_to_visualize(self, n_grid_points, label_data, label_feature, fig_size):
+        import matplotlib.pyplot as plt
         if isinstance(n_grid_points, int):
             # 代表点の数を潜在空間の次元ごとに格納
             self.n_grid_points = np.ones(self.n_components, dtype='int8') * n_grid_points
