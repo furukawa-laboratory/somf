@@ -204,7 +204,7 @@ class UnsupervisedKernelRegression(object):
             self.grid_points = create_zeta(-1.0, 1.0, self.n_components, n_grid_points)
         else:
             raise ValueError('Not support is_compact=False')  # create_zetaの整備が必要なので実装は後で
-        self.click_point_latent_space = 0  # index of the clicked representative point
+        self.click_point_latent_space = None  # index of the clicked representative point
         self.clicked_mapping = self.X.mean(axis=0)
         self.is_initial_view = True
         self.selected_feature = None
@@ -243,7 +243,7 @@ class UnsupervisedKernelRegression(object):
         self.ax_latent_space = self.fig.add_subplot(1, 2, 1, aspect='equal')
         self.ax_latent_space.set_title('Latent space')
         self.ax_features = self.fig.add_subplot(1, 2, 2)
-        self.ax_features.set_title('Mean of mapping')
+        self.ax_features.set_title('Mean of data')
 
         epsilon = 0.03 * np.abs(self.grid_points.max() - self.grid_points.min())
         self.noise_label = epsilon * (np.random.rand(self.n_samples, self.n_components) * 2.0 - 1.0)
@@ -270,7 +270,7 @@ class UnsupervisedKernelRegression(object):
                 point_label = z + noise
                 self.ax_latent_space.text(point_label[0], point_label[1], label,
                                           ha='center', va='bottom', color='black')
-        if self.is_initial_view:
+        if self.click_point_latent_space is None:
             pass
         else:
             self.__draw_click_point_latent_space()
@@ -282,7 +282,7 @@ class UnsupervisedKernelRegression(object):
         if self.selected_feature is not None:
             self.feature_bars[self.selected_feature].set_color('r')
         self.ax_features.set_ylim(self.X.min(), self.X.max() * 1.05)
-        if self.is_initial_view:
+        if self.click_point_latent_space is None:
             self.ax_features.set_title('mean of data')
         else:
             self.ax_features.set_title('Features')
@@ -297,35 +297,34 @@ class UnsupervisedKernelRegression(object):
     def __onclick_fig(self, event):
         self.is_initial_view = False
         if event.xdata is not None:
+            # クリックされた座標の取得
+            click_coordinates = np.array([event.xdata, event.ydata])
             if event.inaxes == self.ax_latent_space.axes:  # 潜在空間をクリックしたかどうか
-                # クリックされた座標の取得
-                click_coordinates = np.array([event.xdata, event.ydata])
-
-                # クリックしたところといちばん近い代表点がどこかを計算
-                self.click_point_latent_space = self.__calc_nearest_representative_point(click_coordinates)
-
-                # その代表点の写像先の特徴量を計算
-                self.__calc_features()
-
-                # その特徴量の値を描画
+                self.__set_feature_bar_from_latent_space(click_coordinates)
                 self._draw_latent_space()
                 self._draw_features()
-            elif event.inaxes == self.ax_features.axes:  # map2がクリックされた時
-                click_coordinates = np.array([event.xdata, event.ydata])
-                for i, bar in enumerate(self.feature_bars):
-                    if click_coordinates[0] > bar._x0 and click_coordinates[0] < bar._x1:
-                        self.selected_feature = i
-                        self.grid_values_to_draw = self.grid_mapping[:,i]
-                        self._draw_latent_space()
-                        self._draw_features()
+            elif event.inaxes == self.ax_features.axes:  # 特徴量のバーがクリックされたかどうか
+                self.__set_latent_space_from_feature_bar(click_coordinates)
+                self._draw_latent_space()
+                self._draw_features()
+
+    def __set_feature_bar_from_latent_space(self, click_coordinates):
+        # クリックしたところといちばん近い代表点がどこかを計算
+        self.click_point_latent_space = self.__calc_nearest_representative_point(click_coordinates)
+
+        # その代表点の写像先の特徴量を計算
+        self.clicked_mapping = self.grid_mapping[self.click_point_latent_space, :]
+
+    def __set_latent_space_from_feature_bar(self, click_coordinates):
+        for i, bar in enumerate(self.feature_bars):
+            if click_coordinates[0] > bar._x0 and click_coordinates[0] < bar._x1:
+                self.selected_feature = i
+                self.grid_values_to_draw = self.grid_mapping[:, i]
 
     def __calc_nearest_representative_point(self, click_point):
         distance = dist.cdist(self.grid_points, click_point.reshape(1, -1))
         index_nearest = np.argmin(distance)
         return index_nearest
-
-    def __calc_features(self):
-        self.clicked_mapping = self.grid_mapping[self.click_point_latent_space, :]
 
     def __unflatten_grid_array(self, grid_array):
         if grid_array.shape[0] == np.prod(self.n_grid_points):
