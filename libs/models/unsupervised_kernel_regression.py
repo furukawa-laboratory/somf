@@ -309,22 +309,22 @@ class UnsupervisedKernelRegression(object):
             # クリックされた座標の取得
             click_coordinates = np.array([event.xdata, event.ydata])
             if event.inaxes == self.ax_latent_space.axes:  # 潜在空間をクリックしたかどうか
-                self.__set_feature_bar_from_latent_space(click_coordinates)
+                self._set_feature_bar_from_latent_space(click_coordinates)
                 self._draw_latent_space()
                 self._draw_features()
             elif event.inaxes == self.ax_feature_bars.axes:  # 特徴量のバーがクリックされたかどうか
-                self.__set_latent_space_from_feature_bar(click_coordinates)
+                self._set_latent_space_from_feature_bar(click_coordinates)
                 self._draw_latent_space()
                 self._draw_features()
 
-    def __set_feature_bar_from_latent_space(self, click_coordinates):
+    def _set_feature_bar_from_latent_space(self, click_coordinates):
         # クリックしたところといちばん近い代表点がどこかを計算
         self.click_point_latent_space = self.__calc_nearest_representative_point(click_coordinates)
 
         # その代表点の写像先の特徴量を計算
         self.clicked_mapping = self.grid_mapping[self.click_point_latent_space, :]
 
-    def __set_latent_space_from_feature_bar(self, click_coordinates):
+    def _set_latent_space_from_feature_bar(self, click_coordinates):
         for i, bar in enumerate(self.feature_bars):
             if click_coordinates[0] > bar._x0 and click_coordinates[0] < bar._x1:
                 self.selected_feature = i
