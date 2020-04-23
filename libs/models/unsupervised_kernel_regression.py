@@ -187,7 +187,7 @@ class UnsupervisedKernelRegression(object):
         self._initialize_to_visualize(n_grid_points, label_data, label_feature, fig, fig_size, ax_latent_space, ax_feature_bars)
 
         self._draw_latent_space()
-        self._draw_features()
+        self._draw_feature_bars()
 
         # connect figure and method defining action when latent space is clicked
         self.fig.canvas.mpl_connect('button_press_event', self.__onclick_fig)
@@ -257,6 +257,33 @@ class UnsupervisedKernelRegression(object):
         epsilon = 0.03 * np.abs(self.grid_points.max() - self.grid_points.min())
         self.noise_label = epsilon * (np.random.rand(self.n_samples, self.n_components) * 2.0 - 1.0)
 
+    def __onclick_fig(self, event):
+        self.is_initial_view = False
+        if event.xdata is not None:
+            # クリックされた座標の取得
+            click_coordinates = np.array([event.xdata, event.ydata])
+            if event.inaxes == self.ax_latent_space.axes:  # 潜在空間をクリックしたかどうか
+                self._set_feature_bar_from_latent_space(click_coordinates)
+                self._draw_latent_space()
+                self._draw_feature_bars()
+            elif event.inaxes == self.ax_feature_bars.axes:  # 特徴量のバーがクリックされたかどうか
+                self._set_latent_space_from_feature_bar(click_coordinates)
+                self._draw_latent_space()
+                self._draw_feature_bars()
+
+    def _set_feature_bar_from_latent_space(self, click_coordinates):
+        # クリックしたところといちばん近い代表点がどこかを計算
+        self.click_point_latent_space = self.__calc_nearest_representative_point(click_coordinates)
+
+        # その代表点の写像先の特徴量を計算
+        self.clicked_mapping = self.grid_mapping[self.click_point_latent_space, :]
+
+    def _set_latent_space_from_feature_bar(self, click_coordinates):
+        for i, bar in enumerate(self.feature_bars):
+            if click_coordinates[0] > bar._x0 and click_coordinates[0] < bar._x1:
+                self.selected_feature = i
+                self.grid_values_to_draw = self.grid_mapping[:, i]
+
     def _draw_latent_space(self):
         self.ax_latent_space.cla()
         if self.grid_values_to_draw is not None:
@@ -285,7 +312,7 @@ class UnsupervisedKernelRegression(object):
             self.__draw_click_point_latent_space()
         self.fig.show()
 
-    def _draw_features(self):
+    def _draw_feature_bars(self):
         self.ax_feature_bars.cla()
         self.feature_bars = self.ax_feature_bars.bar(self.label_feature, self.clicked_mapping)
         if self.selected_feature is not None:
@@ -303,32 +330,6 @@ class UnsupervisedKernelRegression(object):
         self.ax_latent_space.plot(coordinate[0], coordinate[1],
                                   ".", color="red", ms=20, fillstyle="none")
 
-    def __onclick_fig(self, event):
-        self.is_initial_view = False
-        if event.xdata is not None:
-            # クリックされた座標の取得
-            click_coordinates = np.array([event.xdata, event.ydata])
-            if event.inaxes == self.ax_latent_space.axes:  # 潜在空間をクリックしたかどうか
-                self._set_feature_bar_from_latent_space(click_coordinates)
-                self._draw_latent_space()
-                self._draw_features()
-            elif event.inaxes == self.ax_feature_bars.axes:  # 特徴量のバーがクリックされたかどうか
-                self._set_latent_space_from_feature_bar(click_coordinates)
-                self._draw_latent_space()
-                self._draw_features()
-
-    def _set_feature_bar_from_latent_space(self, click_coordinates):
-        # クリックしたところといちばん近い代表点がどこかを計算
-        self.click_point_latent_space = self.__calc_nearest_representative_point(click_coordinates)
-
-        # その代表点の写像先の特徴量を計算
-        self.clicked_mapping = self.grid_mapping[self.click_point_latent_space, :]
-
-    def _set_latent_space_from_feature_bar(self, click_coordinates):
-        for i, bar in enumerate(self.feature_bars):
-            if click_coordinates[0] > bar._x0 and click_coordinates[0] < bar._x1:
-                self.selected_feature = i
-                self.grid_values_to_draw = self.grid_mapping[:, i]
 
     def __calc_nearest_representative_point(self, click_point):
         distance = dist.cdist(self.grid_points, click_point.reshape(1, -1))
