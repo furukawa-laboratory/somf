@@ -2,10 +2,6 @@ from libs.models.unsupervised_kernel_regression import UnsupervisedKernelRegress
 from libs.datasets.artificial import animal
 from sklearn.utils import check_random_state
 
-import matplotlib
-matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
-
 if __name__ == '__main__':
     n_components = 2
     bandwidth = 0.4
