@@ -195,7 +195,6 @@ class UnsupervisedKernelRegression(object):
 
     def _initialize_to_visualize(self, n_grid_points, label_data, label_feature,
                                  fig, fig_size, ax_latent_space, ax_feature_bars):
-        import matplotlib.pyplot as plt
         if isinstance(n_grid_points, int):
             # 代表点の数を潜在空間の次元ごとに格納
             self.n_grid_points = np.ones(self.n_components, dtype='int8') * n_grid_points
@@ -238,6 +237,7 @@ class UnsupervisedKernelRegression(object):
             raise ValueError('label_feature must be 1d array or list')
 
         if fig is None:
+            import matplotlib.pyplot as plt
             if fig_size is None:
                 self.fig = plt.figure(figsize=(15, 6))
             else:
