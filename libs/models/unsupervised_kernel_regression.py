@@ -174,20 +174,24 @@ class UnsupervisedKernelRegression(object):
 
         return F
 
-    def visualize(self, n_grid_points=30, label_data=None, label_feature=None, fig=None, fig_size=None, ax_latent_space=None, ax_feature_bars=None):
+    def visualize(self, n_grid_points=30, label_data=None, label_feature=None, is_show_all_label_data=False, fig=None, fig_size=None, ax_latent_space=None, ax_feature_bars=None):
 
         # import library to draw
         import matplotlib
         matplotlib.use('TkAgg')
         import matplotlib.pyplot as plt
 
-        self._initialize_to_visualize(n_grid_points, label_data, label_feature, fig, fig_size, ax_latent_space, ax_feature_bars)
+        self._initialize_to_visualize(n_grid_points, label_data, label_feature, is_show_all_label_data, fig, fig_size, ax_latent_space, ax_feature_bars)
 
         self._draw_latent_space()
         self._draw_feature_bars()
 
         # connect figure and method defining action when latent space is clicked
         self.fig.canvas.mpl_connect('button_press_event', self.__onclick_fig)
+        # connect figure and method defining action when mouse over
+        if self.label_data is not None and self.is_show_all_label_data is False:
+            self.fig.canvas.mpl_connect('motion_notify_event', self.__mouse_over_fig)
+            # self.fig.canvas.mpl_connect('axes_leave_event', self.__mouse_leave_fig)
         plt.show()
 
     def __onclick_fig(self, event):
@@ -204,7 +208,20 @@ class UnsupervisedKernelRegression(object):
                 self._draw_latent_space()
                 self._draw_feature_bars()
 
-    def _initialize_to_visualize(self, n_grid_points, label_data, label_feature,
+    def __mouse_over_fig(self, event):
+        if event.xdata is not None:
+            # クリックされた座標の取得
+            over_coordinates = np.array([event.xdata, event.ydata])
+            if event.inaxes == self.ax_latent_space.axes:
+                self._set_shown_label_in_latent_space(over_coordinates)
+                self._draw_latent_space()
+                self._draw_feature_bars()
+
+            elif event.inaxes == self.ax_feature_bars:
+                pass
+
+
+    def _initialize_to_visualize(self, n_grid_points, label_data, label_feature, is_show_all_label_data,
                                  fig, fig_size, ax_latent_space, ax_feature_bars):
         # invalid check
         if self.n_components != 2:
@@ -245,6 +262,8 @@ class UnsupervisedKernelRegression(object):
         else:
             raise ValueError('label_feature must be 1d array or list')
 
+        self.is_show_all_label_data = is_show_all_label_data
+
         # set variables
         if fig is None:
             import matplotlib.pyplot as plt
@@ -269,6 +288,7 @@ class UnsupervisedKernelRegression(object):
         self.is_initial_view = True
         self.selected_feature = None
         self.grid_values_to_draw = None
+        self.threshold_radius_show = np.abs(self.grid_points.max() - self.grid_points.min()) * 0.05
 
         epsilon = 0.03 * np.abs(self.grid_points.max() - self.grid_points.min())
         self.noise_label = epsilon * (np.random.rand(self.n_samples, self.n_components) * 2.0 - 1.0)
@@ -276,7 +296,7 @@ class UnsupervisedKernelRegression(object):
 
     def _set_feature_bar_from_latent_space(self, click_coordinates):
         # クリックしたところといちばん近い代表点がどこかを計算
-        self.click_point_latent_space = self.__calc_nearest_representative_point(click_coordinates)
+        self.click_point_latent_space = self.__calc_nearest_grid_point(click_coordinates)
 
         # その代表点の写像先の特徴量を計算
         self.clicked_mapping = self.grid_mapping[self.click_point_latent_space, :]
@@ -286,6 +306,13 @@ class UnsupervisedKernelRegression(object):
             if click_coordinates[0] > bar._x0 and click_coordinates[0] < bar._x1:
                 self.selected_feature = i
                 self.grid_values_to_draw = self.grid_mapping[:, i]
+
+    def _set_shown_label_in_latent_space(self, click_coordinates):
+        index, dist = self.__calc_nearest_latent_variable(click_coordinates,retdist=True)
+        if dist <= self.threshold_radius_show:
+            self.index_data_label_shown = index
+        else:
+            self.index_data_label_shown = None
 
     def _draw_latent_space(self):
         self.ax_latent_space.cla()
@@ -305,10 +332,18 @@ class UnsupervisedKernelRegression(object):
         if self.label_data is None:
             pass
         else:
-            for z, noise, label in zip(self.Z, self.noise_label, self.label_data):
-                point_label = z + noise
-                self.ax_latent_space.text(point_label[0], point_label[1], label,
-                                          ha='center', va='bottom', color='black')
+            if self.is_show_all_label_data:
+                for z, noise, label in zip(self.Z, self.noise_label, self.label_data):
+                    point_label = z + noise
+                    self.ax_latent_space.text(point_label[0], point_label[1], label,
+                                              ha='center', va='bottom', color='black')
+            else:
+                if self.index_data_label_shown is not None:
+                    point_label = self.Z[self.index_data_label_shown,:] + self.noise_label[self.index_data_label_shown,:]
+                    self.ax_latent_space.text(point_label[0], point_label[1], label,
+                                              ha='center', va='bottom', color='black')
+                else:
+                    pass
         if self.click_point_latent_space is None:
             pass
         else:
@@ -333,11 +368,19 @@ class UnsupervisedKernelRegression(object):
         self.ax_latent_space.plot(coordinate[0], coordinate[1],
                                   ".", color="red", ms=20, fillstyle="none")
 
-
-    def __calc_nearest_representative_point(self, click_point):
-        distance = dist.cdist(self.grid_points, click_point.reshape(1, -1))
-        index_nearest = np.argmin(distance)
+    def __calc_nearest_grid_point(self, click_coordinates):
+        distance = dist.cdist(self.grid_points, click_coordinates[None,:])
+        index_nearest = np.argmin(distance.ravel())
         return index_nearest
+
+    def __calc_nearest_latent_variable(self, click_coordinates, retdist=False):
+        distance = dist.cdist(self.Z, click_coordinates[None,:], metric='euclidean')
+        index_nearest = np.argmin(distance.ravel())
+        dist_min = distance.min()
+        if retdist:
+            return index_nearest, dist_min
+        else:
+            return index_nearest
 
     def __unflatten_grid_array(self, grid_array):
         if grid_array.shape[0] == np.prod(self.n_grid_points):
