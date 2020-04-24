@@ -193,6 +193,20 @@ class UnsupervisedKernelRegression(object):
         self.fig.canvas.mpl_connect('button_press_event', self.__onclick_fig)
         plt.show()
 
+    def __onclick_fig(self, event):
+        self.is_initial_view = False
+        if event.xdata is not None:
+            # クリックされた座標の取得
+            click_coordinates = np.array([event.xdata, event.ydata])
+            if event.inaxes == self.ax_latent_space.axes:  # 潜在空間をクリックしたかどうか
+                self._set_feature_bar_from_latent_space(click_coordinates)
+                self._draw_latent_space()
+                self._draw_feature_bars()
+            elif event.inaxes == self.ax_feature_bars.axes:  # 特徴量のバーがクリックされたかどうか
+                self._set_latent_space_from_feature_bar(click_coordinates)
+                self._draw_latent_space()
+                self._draw_feature_bars()
+
     def _initialize_to_visualize(self, n_grid_points, label_data, label_feature,
                                  fig, fig_size, ax_latent_space, ax_feature_bars):
         if isinstance(n_grid_points, int):
@@ -257,19 +271,6 @@ class UnsupervisedKernelRegression(object):
         epsilon = 0.03 * np.abs(self.grid_points.max() - self.grid_points.min())
         self.noise_label = epsilon * (np.random.rand(self.n_samples, self.n_components) * 2.0 - 1.0)
 
-    def __onclick_fig(self, event):
-        self.is_initial_view = False
-        if event.xdata is not None:
-            # クリックされた座標の取得
-            click_coordinates = np.array([event.xdata, event.ydata])
-            if event.inaxes == self.ax_latent_space.axes:  # 潜在空間をクリックしたかどうか
-                self._set_feature_bar_from_latent_space(click_coordinates)
-                self._draw_latent_space()
-                self._draw_feature_bars()
-            elif event.inaxes == self.ax_feature_bars.axes:  # 特徴量のバーがクリックされたかどうか
-                self._set_latent_space_from_feature_bar(click_coordinates)
-                self._draw_latent_space()
-                self._draw_feature_bars()
 
     def _set_feature_bar_from_latent_space(self, click_coordinates):
         # クリックしたところといちばん近い代表点がどこかを計算
