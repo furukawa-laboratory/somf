@@ -332,7 +332,7 @@ class UnsupervisedKernelRegression(object):
                                                grid_points_3d[:, :, 1],
                                                grid_values_to_draw_3d, 6, colors='k')
             self.ax_latent_space.clabel(ctr)
-        self.ax_latent_space.scatter(self.Z[:, 0], self.Z[:, 1])
+        self.ax_latent_space.scatter(self.Z[:, 0], self.Z[:, 1], s=10)
         if self.label_data is None:
             pass
         else:
