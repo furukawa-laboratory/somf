@@ -26,5 +26,7 @@ if __name__ == '__main__':
     ukr.fit(nb_epoch=nb_epoch, eta=eta)
 
     ukr.visualize(n_grid_points=n_grid_points,
+                  cmap='GnBu',
                   label_data=labels_animal,
-                  label_feature=labels_feature)
+                  label_feature=labels_feature,
+                  is_show_all_label_data=True)
