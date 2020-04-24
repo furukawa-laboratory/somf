@@ -175,11 +175,8 @@ class UnsupervisedKernelRegression(object):
         return F
 
     def visualize(self, n_grid_points=30, label_data=None, label_feature=None, fig=None, fig_size=None, ax_latent_space=None, ax_feature_bars=None):
-        # invalid check
-        if self.n_components != 2:
-            raise ValueError('Now support only n_components = 2')
 
-        # import necessary library to draw
+        # import library to draw
         import matplotlib
         matplotlib.use('TkAgg')
         import matplotlib.pyplot as plt
@@ -209,6 +206,10 @@ class UnsupervisedKernelRegression(object):
 
     def _initialize_to_visualize(self, n_grid_points, label_data, label_feature,
                                  fig, fig_size, ax_latent_space, ax_feature_bars):
+        # invalid check
+        if self.n_components != 2:
+            raise ValueError('Now support only n_components = 2')
+
         if isinstance(n_grid_points, int):
             # 代表点の数を潜在空間の次元ごとに格納
             self.n_grid_points = np.ones(self.n_components, dtype='int8') * n_grid_points
@@ -218,14 +219,8 @@ class UnsupervisedKernelRegression(object):
             self.grid_points = create_zeta(-1.0, 1.0, self.n_components, n_grid_points)
         else:
             raise ValueError('Not support is_compact=False')  # create_zetaの整備が必要なので実装は後で
-        self.click_point_latent_space = None  # index of the clicked representative point
-        self.clicked_mapping = self.X.mean(axis=0)
-        self.is_initial_view = True
-        self.selected_feature = None
-        self.grid_values_to_draw = None
 
         self.grid_mapping = self.inverse_transform(self.grid_points)
-        # invalid check
         if label_data is None:
             self.label_data = label_data
         elif isinstance(label_data, list):
@@ -250,6 +245,7 @@ class UnsupervisedKernelRegression(object):
         else:
             raise ValueError('label_feature must be 1d array or list')
 
+        # set variables
         if fig is None:
             import matplotlib.pyplot as plt
             if fig_size is None:
@@ -267,6 +263,12 @@ class UnsupervisedKernelRegression(object):
         else:
             self.ax_latent_space = ax_latent_space
             self.ax_feature_bars = ax_feature_bars
+
+        self.click_point_latent_space = None  # index of the clicked representative point
+        self.clicked_mapping = self.X.mean(axis=0)
+        self.is_initial_view = True
+        self.selected_feature = None
+        self.grid_values_to_draw = None
 
         epsilon = 0.03 * np.abs(self.grid_points.max() - self.grid_points.min())
         self.noise_label = epsilon * (np.random.rand(self.n_samples, self.n_components) * 2.0 - 1.0)
