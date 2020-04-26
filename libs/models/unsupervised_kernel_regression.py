@@ -323,6 +323,9 @@ class UnsupervisedKernelRegression(object):
         else:
             self.index_data_label_shown = None
 
+    def _set_grid_values_to_draw(self, grid_values):
+        self.grid_values_to_draw = grid_values
+
     def _draw_latent_space(self):
         self.ax_latent_space.cla()
         if self.grid_values_to_draw is not None:
