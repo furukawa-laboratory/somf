@@ -232,12 +232,12 @@ class UnsupervisedKernelRegression(object):
         if isinstance(n_grid_points, int):
             # 代表点の数を潜在空間の次元ごとに格納
             self.n_grid_points = np.ones(self.n_components, dtype='int8') * n_grid_points
+            if self.is_compact:
+                self._set_grid(create_zeta(-1.0, 1.0, self.n_components, n_grid_points), self.n_grid_points)
+            else:
+                raise ValueError('Not support is_compact=False')  # create_zetaの整備が必要なので実装は後で
         else:
             raise ValueError('Only support n_grid_points is int')
-        if self.is_compact:
-            self._set_grid_points(create_zeta(-1.0, 1.0, self.n_components, n_grid_points))
-        else:
-            raise ValueError('Not support is_compact=False')  # create_zetaの整備が必要なので実装は後で
 
         if label_data is None:
             self.label_data = label_data
@@ -290,15 +290,19 @@ class UnsupervisedKernelRegression(object):
         self.is_initial_view = True
         self.selected_feature = None
         self.grid_values_to_draw = None
-        self.threshold_radius_show = np.abs(self.grid_points.max() - self.grid_points.min()) * 0.05
         self.index_data_label_shown = None
 
+    def _set_grid(self, grid_points, n_grid_points):
+        self.grid_points = grid_points
+        self.grid_mapping = self.inverse_transform(self.grid_points)
+        if grid_points.shape[0] == np.prod(n_grid_points):
+            self.n_grid_points = n_grid_points
+        else:
+            raise ValueError('grid_points shape and n_grid_points one are not consistent')
+        self.threshold_radius_show = np.abs(self.grid_points.max() - self.grid_points.min()) * 0.05
         epsilon = 0.03 * np.abs(self.grid_points.max() - self.grid_points.min())
         self.noise_label = epsilon * (np.random.rand(self.n_samples, self.n_components) * 2.0 - 1.0)
 
-    def _set_grid_points(self, grid_points):
-        self.grid_points = grid_points
-        self.grid_mapping = self.inverse_transform(self.grid_points)
     def _set_feature_bar_from_latent_space(self, click_coordinates):
         # クリックしたところといちばん近い代表点がどこかを計算
         self.click_point_latent_space = self.__calc_nearest_grid_point(click_coordinates)
