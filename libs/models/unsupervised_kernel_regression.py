@@ -235,7 +235,7 @@ class UnsupervisedKernelRegression(object):
         else:
             raise ValueError('Only support n_grid_points is int')
         if self.is_compact:
-            self.grid_points = create_zeta(-1.0, 1.0, self.n_components, n_grid_points)
+            self._set_grid_points(create_zeta(-1.0, 1.0, self.n_components, n_grid_points))
         else:
             raise ValueError('Not support is_compact=False')  # create_zetaの整備が必要なので実装は後で
 
@@ -285,7 +285,6 @@ class UnsupervisedKernelRegression(object):
             self.ax_feature_bars = ax_feature_bars
 
         self.cmap = cmap
-        self.grid_mapping = self.inverse_transform(self.grid_points)
         self.click_point_latent_space = None  # index of the clicked representative point
         self.clicked_mapping = self.X.mean(axis=0)
         self.is_initial_view = True
@@ -297,6 +296,9 @@ class UnsupervisedKernelRegression(object):
         epsilon = 0.03 * np.abs(self.grid_points.max() - self.grid_points.min())
         self.noise_label = epsilon * (np.random.rand(self.n_samples, self.n_components) * 2.0 - 1.0)
 
+    def _set_grid_points(self, grid_points):
+        self.grid_points = grid_points
+        self.grid_mapping = self.inverse_transform(self.grid_points)
     def _set_feature_bar_from_latent_space(self, click_coordinates):
         # クリックしたところといちばん近い代表点がどこかを計算
         self.click_point_latent_space = self.__calc_nearest_grid_point(click_coordinates)
