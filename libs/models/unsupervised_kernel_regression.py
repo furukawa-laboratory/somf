@@ -327,6 +327,9 @@ class UnsupervisedKernelRegression(object):
         self.grid_values_to_draw = grid_values
         self.selected_feature = None
 
+    def _set_cmap(self, cmap):
+        self.cmap = cmap
+
     def _draw_latent_space(self):
         self.ax_latent_space.cla()
         if self.grid_values_to_draw is not None:
