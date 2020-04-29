@@ -344,6 +344,9 @@ class UnsupervisedKernelRegression(object):
 
     def _draw_latent_space(self):
         self.ax_latent_space.cla()
+        self.ax_latent_space.set_title(self.title_latent_space)
+
+        # Draw color using self.grid_values_to_draw by pcolormesh and contour
         if self.grid_values_to_draw is not None:
             # self.grid_values_to_draw = self.grid_mapping[:, self.selected_feature]
             # To draw by pcolormesh and contour, reshape arrays like grid
@@ -357,7 +360,11 @@ class UnsupervisedKernelRegression(object):
                                                grid_points_3d[:, :, 1],
                                                grid_values_to_draw_3d, 6, colors='k')
             self.ax_latent_space.clabel(ctr)
+
+        # Plot latent variables
         self.ax_latent_space.scatter(self.Z[:, 0], self.Z[:, 1], s=10)
+
+        # Write label
         if self.label_data is None:
             pass
         else:
@@ -379,10 +386,13 @@ class UnsupervisedKernelRegression(object):
                                                         fc=(1., 0.8, 0.8)))
                 else:
                     pass
+
+        # Draw clicked coordinates
         if self.click_point_latent_space is None:
             pass
         else:
             self.__draw_click_point_latent_space()
+
         self.fig.show()
 
     def _draw_feature_bars(self):
@@ -392,9 +402,10 @@ class UnsupervisedKernelRegression(object):
             self.feature_bars[self.selected_feature].set_color('r')
         self.ax_feature_bars.set_ylim(self.X.min(), self.X.max() * 1.05)
         if self.click_point_latent_space is None:
-            self.ax_feature_bars.set_title('mean of data')
+            title = self.title_feature_bars+'(Dataset mean)'
         else:
-            self.ax_feature_bars.set_title('Features')
+            title = self.title_feature_bars
+        self.ax_feature_bars.set_title(title)
         self.ax_feature_bars.set_xticklabels(labels=self.label_feature, rotation=270)
         self.fig.show()
 
