@@ -29,4 +29,6 @@ if __name__ == '__main__':
                   cmap='GnBu',
                   label_data=labels_animal,
                   label_feature=labels_feature,
+                  title_latent_space='Animal map (latent space)',
+                  title_feature_bars='Animal feature',
                   is_show_all_label_data=True)
