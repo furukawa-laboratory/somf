@@ -340,6 +340,10 @@ class UnsupervisedKernelRegression(object):
     def _set_cmap(self, cmap):
         self.cmap = cmap
 
+    def _set_titles(self, title_latent_space, title_feature_bars):
+        self.title_latent_space = title_latent_space
+        self.title_feature_bars = title_feature_bars
+
     def _draw_latent_space(self):
         self.ax_latent_space.cla()
         self.ax_latent_space.set_title(self.title_latent_space)
