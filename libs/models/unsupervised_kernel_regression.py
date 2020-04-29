@@ -174,7 +174,8 @@ class UnsupervisedKernelRegression(object):
 
         return F
 
-    def visualize(self, n_grid_points=30, cmap=None, label_data=None, label_feature=None, is_show_all_label_data=False,
+    def visualize(self, n_grid_points=30, cmap=None, label_data=None, label_feature=None,
+                  title_latent_space=None, title_feature_bars=None, is_show_all_label_data=False,
                   fig=None, fig_size=None, ax_latent_space=None, ax_feature_bars=None):
 
         # import library to draw
@@ -183,7 +184,8 @@ class UnsupervisedKernelRegression(object):
         import matplotlib.pyplot as plt
 
         self._initialize_to_visualize(n_grid_points, cmap, label_data, label_feature,
-                                      is_show_all_label_data, fig, fig_size, ax_latent_space, ax_feature_bars)
+                                      title_latent_space, title_feature_bars, is_show_all_label_data,
+                                      fig, fig_size, ax_latent_space, ax_feature_bars)
 
         self._draw_latent_space()
         self._draw_feature_bars()
@@ -223,7 +225,7 @@ class UnsupervisedKernelRegression(object):
                 pass
 
     def _initialize_to_visualize(self, n_grid_points, cmap, label_data, label_feature,
-                                 is_show_all_label_data,
+                                 title_latent_space, title_feature_bars, is_show_all_label_data,
                                  fig, fig_size, ax_latent_space, ax_feature_bars):
         # invalid check
         if self.n_components != 2:
@@ -262,6 +264,16 @@ class UnsupervisedKernelRegression(object):
                 raise ValueError('label_feature must be 1d array')
         else:
             raise ValueError('label_feature must be 1d array or list')
+
+        if title_latent_space is None:
+            self.title_latent_space = 'Latent space'
+        else:
+            self.title_latent_space = title_latent_space
+
+        if title_feature_bars is None:
+            self.title_feature_bars = 'Feature bars'
+        else:
+            self.title_latent_space = title_feature_bars
 
         self.is_show_all_label_data = is_show_all_label_data
 
