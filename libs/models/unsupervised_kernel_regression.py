@@ -408,7 +408,7 @@ class UnsupervisedKernelRegression(object):
         else:
             title = self.title_feature_bars
         self.ax_feature_bars.set_title(title)
-        self.ax_feature_bars.set_xticklabels(labels=self.label_feature, rotation=270)
+        self.ax_feature_bars.set_xticklabels(labels=self.label_feature, fontsize=8, rotation=270)
         self.fig.show()
 
     def __draw_click_point_latent_space(self):
