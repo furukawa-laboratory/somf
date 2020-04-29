@@ -273,7 +273,7 @@ class UnsupervisedKernelRegression(object):
         if title_feature_bars is None:
             self.title_feature_bars = 'Feature bars'
         else:
-            self.title_latent_space = title_feature_bars
+            self.title_feature_bars = title_feature_bars
 
         self.is_show_all_label_data = is_show_all_label_data
 
@@ -289,9 +289,7 @@ class UnsupervisedKernelRegression(object):
 
         if ax_latent_space is None and ax_feature_bars is None:
             self.ax_latent_space = self.fig.add_subplot(1, 2, 1, aspect='equal')
-            self.ax_latent_space.set_title('Latent space')
             self.ax_feature_bars = self.fig.add_subplot(1, 2, 2)
-            self.ax_feature_bars.set_title('Mean of data')
         else:
             self.ax_latent_space = ax_latent_space
             self.ax_feature_bars = ax_feature_bars
@@ -402,7 +400,7 @@ class UnsupervisedKernelRegression(object):
             self.feature_bars[self.selected_feature].set_color('r')
         self.ax_feature_bars.set_ylim(self.X.min(), self.X.max() * 1.05)
         if self.click_point_latent_space is None:
-            title = self.title_feature_bars+'(Dataset mean)'
+            title = self.title_feature_bars + ' (Dataset mean)'
         else:
             title = self.title_feature_bars
         self.ax_feature_bars.set_title(title)
