@@ -70,7 +70,7 @@ class UnsupervisedKernelRegression(object):
             Y = R @ self.X
             DeltaYX = Y[:, None, :] - self.X[None, :, :]
             Error = Y - self.X
-            obj_func = np.sum(np.square(Error)) / self.weights.sum() + self.lambda_ * np.sum(np.square(self.Z))
+            obj_func = np.sum(np.square(Error) * self.weights[:, None]) / self.weights.sum() + self.lambda_ * np.sum(np.square(self.Z))
 
             A = np.einsum('ni,n,nd,nid->ni', R, self.weights, Y - self.X, DeltaYX)
             dFdZ = 2.0 * self.precision * np.einsum('ni,nil->nl', A + A.T, Delta) / self.weights.sum()
