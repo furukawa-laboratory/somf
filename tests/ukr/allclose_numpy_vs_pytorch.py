@@ -11,7 +11,7 @@ from tests.ukr.model.unsupervised_kernel_regression_pytorch import Unsupervised_
 
 class TestUKR(unittest.TestCase):
     def test_numpy_vs_pytorch(self):
-        # create artiricial dataset
+        # create artificial dataset
         nb_samples = 500
         seed = 1
         np.random.seed(seed)
@@ -20,7 +20,7 @@ class TestUKR(unittest.TestCase):
         X += np.random.normal(0, x_sigma, X.shape)
 
         # set parameter
-        n_components_list = [1,2,3]
+        n_components_list = [1, 2, 3]
         bandwidth_gaussian_kernel_list = [0.2, 1.0]
         nb_epoch = 500
 
@@ -45,13 +45,14 @@ class TestUKR(unittest.TestCase):
                         ukr_pytorch = UKR_pytorch(torch.from_numpy(X),
                                                   nb_components=n_components,
                                                   bandwidth_gaussian_kernel=bandwidth_gaussian_kernel,
-                                                  is_compact=is_compact, is_save_history=is_save_history, lambda_=lambda_,
+                                                  is_compact=is_compact, is_save_history=is_save_history,
+                                                  lambda_=lambda_,
                                                   init=torch.tensor(Zinit, requires_grad=True, dtype=torch.float64))
                         ukr_pytorch.fit(nb_epoch=nb_epoch, eta=eta)
                         all_z_pytorch = ukr_pytorch.history['z'].detach().numpy()
                         all_obj_func_pytorch = ukr_pytorch.history['obj_func'].detach().numpy()
                         np.testing.assert_allclose(all_z, all_z_pytorch)
-                        np.testing.assert_allclose(all_obj_func,all_obj_func_pytorch)
+                        np.testing.assert_allclose(all_obj_func, all_obj_func_pytorch)
 
 
 if __name__ == "__main__":
