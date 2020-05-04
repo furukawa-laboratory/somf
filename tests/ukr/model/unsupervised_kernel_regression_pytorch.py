@@ -30,7 +30,10 @@ class Unsupervised_Kernel_Regression_pytorch(object):
 
         self.lambda_ = lambda_
 
-        self.weights = weights
+        if weights is None:
+            self.weights = torch.ones(self.nb_samples)
+        else:
+            self.weights = weights
 
         self._done_fit = False
 
