@@ -28,7 +28,7 @@ class TestUKR(unittest.TestCase):
         is_save_history = True
         lambda_list = [0.0, 0.005]
         weights_list = [None, np.random.rand(nb_samples)]
-        eta = 8.0
+        eta = 7.0
 
         for n_components in n_components_list:
             # initialize Z
