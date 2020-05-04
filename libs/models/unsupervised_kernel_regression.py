@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 class UnsupervisedKernelRegression(object):
     def __init__(self, X, n_components, bandwidth_gaussian_kernel=1.0,
-                 is_compact=False, lambda_=1.0,
+                 is_compact=False, lambda_=1.0, weight=None,
                  init='random', is_loocv=False, is_save_history=False):
         self.X = X.copy()
         self.n_samples = X.shape[0]
@@ -15,7 +15,7 @@ class UnsupervisedKernelRegression(object):
         self.precision = 1.0 / (bandwidth_gaussian_kernel * bandwidth_gaussian_kernel)
         self.is_compact = is_compact
         self.is_loocv = is_loocv
-        self.is_save_hisotry = is_save_history
+        self.is_save_history = is_save_history
 
         self.Z = None
         if isinstance(init, str) and init in 'random':
@@ -27,15 +27,23 @@ class UnsupervisedKernelRegression(object):
 
         self.lambda_ = lambda_
 
+        if weight is None:
+            self.weights = np.ones(self.n_samples)
+        elif weight.shape[0] == self.n_samples and np.squeeze(weight).ndim == 1:
+            if np.all(weight >= 0):
+                self.weights = np.squeeze(weight)
+            else:
+                raise ValueError("weight don't include non-negative value")
+        else:
+            raise ValueError('weight shape must match X shape')
+
         self._done_fit = False
 
     def fit(self, nb_epoch=100, verbose=True, eta=0.5, expand_epoch=None):
 
-        K = self.X @ self.X.T
-
         self.nb_epoch = nb_epoch
 
-        if self.is_save_hisotry:
+        if self.is_save_history:
             self.history = {}
             self.history['z'] = np.zeros((nb_epoch, self.n_samples, self.n_components))
             self.history['y'] = np.zeros((nb_epoch, self.n_samples, self.n_dimensions))
@@ -53,6 +61,7 @@ class UnsupervisedKernelRegression(object):
             H = np.exp(-0.5 * self.precision * DistZ)
             if self.is_loocv:
                 H -= np.identity(H.shape[0])
+            H = H * self.weights[None, :]
 
             G = np.sum(H, axis=1)[:, None]
             GInv = 1 / G
@@ -63,18 +72,18 @@ class UnsupervisedKernelRegression(object):
             Error = Y - self.X
             obj_func = np.sum(np.square(Error)) / self.n_samples + self.lambda_ * np.sum(np.square(self.Z))
 
-            A = self.precision * R * np.einsum('nd,nid->ni', Y - self.X, DeltaYX)
-            dFdZ = -2.0 * np.sum((A + A.T)[:, :, None] * Delta, axis=1) / self.n_samples
+            A = np.einsum('ni,n,nd,nid->ni', R, self.weights, Y - self.X, DeltaYX)
+            dFdZ = 2.0 * self.precision * np.einsum('ni,nil->nl', A + A.T, Delta) / self.weights.sum()
 
-            dFdZ -= 2.0 * self.lambda_ * self.Z
+            dFdZ += 2.0 * self.lambda_ * self.Z
 
-            self.Z += eta * dFdZ
+            self.Z -= eta * dFdZ
             if self.is_compact:
                 self.Z = np.clip(self.Z, -1.0, 1.0)
             else:
                 self.Z -= self.Z.mean(axis=0)
 
-            if self.is_save_hisotry:
+            if self.is_save_history:
                 self.history['z'][epoch] = self.Z
                 self.history['obj_func'][epoch] = obj_func
 
@@ -105,7 +114,7 @@ class UnsupervisedKernelRegression(object):
 
             Dist = dist.cdist(Zeta, Z, 'sqeuclidean')
 
-            H = np.exp(-0.5 * self.precision * Dist)
+            H = np.exp(-0.5 * self.precision * Dist) * self.weights[None, :]
             G = np.sum(H, axis=1)[:, None]
             GInv = np.reciprocal(G)
             R = H * GInv
