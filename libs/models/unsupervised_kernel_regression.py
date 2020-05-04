@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 class UnsupervisedKernelRegression(object):
     def __init__(self, X, n_components, bandwidth_gaussian_kernel=1.0,
-                 is_compact=False, lambda_=1.0, weight=None,
+                 is_compact=False, lambda_=1.0, weights=None,
                  init='random', is_loocv=False, is_save_history=False):
         self.X = X.copy()
         self.n_samples = X.shape[0]
@@ -27,11 +27,11 @@ class UnsupervisedKernelRegression(object):
 
         self.lambda_ = lambda_
 
-        if weight is None:
+        if weights is None:
             self.weights = np.ones(self.n_samples)
-        elif weight.shape[0] == self.n_samples and np.squeeze(weight).ndim == 1:
-            if np.all(weight >= 0):
-                self.weights = np.squeeze(weight)
+        elif weights.shape[0] == self.n_samples and np.squeeze(weights).ndim == 1:
+            if np.all(weights >= 0):
+                self.weights = np.squeeze(weights)
             else:
                 raise ValueError("weight don't include non-negative value")
         else:
