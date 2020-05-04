@@ -49,7 +49,7 @@ class TestUKR(unittest.TestCase):
                                                       nb_components=n_components,
                                                       bandwidth_gaussian_kernel=bandwidth_gaussian_kernel,
                                                       is_compact=is_compact, is_save_history=is_save_history,
-                                                      lambda_=lambda_, weights=weights,
+                                                      lambda_=lambda_, weights=torch.from_numpy(weights),
                                                       init=torch.tensor(Zinit, requires_grad=True, dtype=torch.float64))
                             ukr_pytorch.fit(nb_epoch=nb_epoch, eta=eta)
                             all_z_pytorch = ukr_pytorch.history['z'].detach().numpy()
