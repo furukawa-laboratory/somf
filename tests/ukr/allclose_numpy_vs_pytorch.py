@@ -45,11 +45,16 @@ class TestUKR(unittest.TestCase):
                             all_z = ukr.history['z']
                             all_obj_func = ukr.history['obj_func']
 
+                            if isinstance(weights, np.ndarray):
+                                weights = torch.from_numpy(weights)
+                            else:
+                                pass
+
                             ukr_pytorch = UKR_pytorch(torch.from_numpy(X),
                                                       nb_components=n_components,
                                                       bandwidth_gaussian_kernel=bandwidth_gaussian_kernel,
                                                       is_compact=is_compact, is_save_history=is_save_history,
-                                                      lambda_=lambda_, weights=torch.from_numpy(weights),
+                                                      lambda_=lambda_, weights=weights,
                                                       init=torch.tensor(Zinit, requires_grad=True, dtype=torch.float64))
                             ukr_pytorch.fit(nb_epoch=nb_epoch, eta=eta)
                             all_z_pytorch = ukr_pytorch.history['z'].detach().numpy()
