@@ -146,7 +146,7 @@ class UnsupervisedKernelRegression(object):
             # calculate gradient
             Delta = self.Z[None, :, :] - Znew[:, None, :]  # shape = (Nnew,N,L)
             Dist_Znew_Z = dist.cdist(Znew, self.Z, "sqeuclidean")  # shape = (Nnew,N)
-            H = np.exp(-0.5 * self.precision * Dist_Znew_Z)  # shape = (Nnew,N)
+            H = np.exp(-0.5 * self.precision * Dist_Znew_Z) * self.weights[None, :]  # shape = (Nnew,N)
             G = np.sum(H, axis=1)[:, None]  # shape = (Nnew,1)
             Ginv = np.reciprocal(G)  # shape = (Nnew,1)
             R = H * Ginv  # shape = (Nnew,N)
@@ -175,7 +175,7 @@ class UnsupervisedKernelRegression(object):
             raise ValueError("Znew dimension must be {}".format(self.n_components))
 
         Dist_Znew_Z = dist.cdist(Znew, self.Z, "sqeuclidean")  # shape = (Nnew,N)
-        H = np.exp(-0.5 * self.precision * Dist_Znew_Z)  # shape = (Nnew,N)
+        H = np.exp(-0.5 * self.precision * Dist_Znew_Z) * self.weights[None, :]  # shape = (Nnew,N)
         G = np.sum(H, axis=1)[:, None]  # shape = (Nnew,1)
         Ginv = np.reciprocal(G)  # shape = (Nnew,1)
         R = H * Ginv  # shape = (Nnew,N)
