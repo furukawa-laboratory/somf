@@ -27,7 +27,7 @@ class TestUKR(unittest.TestCase):
         is_compact_list = [True, False]
         is_save_history = True
         lambda_list = [0.0, 0.005]
-        weights_list = [None, np.random.randint(0,10,nb_samples,dtype=np.float)]
+        weights_list = [None, np.random.rand(nb_samples)]
         eta = 8.0
 
         for n_components in n_components_list:
