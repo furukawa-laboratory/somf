@@ -54,7 +54,7 @@ class Unsupervised_Kernel_Regression_pytorch(object):
 
         for epoch in bar:
             DistZ = torch.sum((self.Z[:, None, :] - self.Z[None, :, :])**2, dim=2)
-            H = torch.exp(-0.5 * self.precision * DistZ) * self.weights[:, None]
+            H = torch.exp(-0.5 * self.precision * DistZ) * self.weights[None, :]
             if self.is_loocv:
                 # H -= np.identity(H.shape[0])
                 assert 'Not Implemented Error'
