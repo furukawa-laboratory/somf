@@ -53,25 +53,27 @@ class SOM2:
             bar = range(nb_epoch)
 
         for epoch in bar:
-            SOMs_manifold = np.zeros((self.n_class, self.cK * self.Dim))
+            SOMs_mapping = np.zeros((self.n_class, self.cK * self.Dim))
 
             for n in range(self.n_class):
                 if epoch == 0:
-                    SOMs[n]._estimate_mapping()
-                    SOMs[n]._estimate_Z()
+                    SOMs[n]._cooperative_process()
+                    SOMs[n]._adaptive_process()
+                    SOMs[n]._competitive_process()
                 else:
                     SOMs[n].y_k = SOM.X[n].reshape(self.cK, self.Dim)   # copy back
-                    SOMs[n]._estimate_Z()
-                    SOMs[n]._estimate_mapping()
+                    SOMs[n]._competitive_process()
+                    SOMs[n]._cooperative_process()
+                    SOMs[n]._adaptive_process()
+                SOMs_mapping[n] = SOMs[n].y.reshape(self.cK * self.Dim)
 
-                SOMs_manifold[n] = SOMs[n].y.reshape(self.cK * self.Dim)
-
-            SOM._set_learning_data(SOMs_manifold)
-            SOM._estimate_mapping()
-            SOM._estimate_Z()
+            SOM.update_mapping(SOMs_mapping)
+            SOM._cooperative_process()
+            SOM._adaptive_process()
+            SOM._competitive_process()
 
             for n in range(self.n_class):
                 self.history["cZ"][epoch, n] = SOMs[n].Z
-                self.history["cY"][epoch, n] = SOMs[n].y
+                self.history["cY"][epoch, n] = SOMs[n].Y
             self.history["pZ"][epoch] = SOM.Z
-            self.history["pY"][epoch] = SOM.y.reshape(self.pK, self.cK, self.Dim)
+            self.history["pY"][epoch] = SOM.Y.reshape(self.pK, self.cK, self.Dim)
