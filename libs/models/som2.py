@@ -1,51 +1,77 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from scipy.spatial import distance as dist
 from tqdm import tqdm
-from sklearn.decomposition import PCA
 
-import libs.models.som as SOM
+import libs.models.som.SOM as som
 
 
-class SOM2(object):
-    def __init__(self, X, parent_latent_dim, child_latent_dim, parent_resolution, child_resolution,
+class SOM2:
+    def __init__(self, Datasets, parent_latent_dim, child_latent_dim, parent_resolution, child_resolution,
                  parent_sigma_max, child_sigma_max, parent_sigma_min, child_sigma_min,
-                 parent_tau, child_tau, init='random', metric="sqeuclidean"):
-        self.X = X
-        self.I = self.X.shape[0]
-        self.N = self.X.shape[1]
-        self.D = self.X.shape[2]
-        self.K = parent_latent_dim
-        self.L = child_latent_dim
+                 parent_tau, child_tau, init='random'):
+
+        self.Datasets = Datasets
+        self.n_class = self.Datasets.shape[0]
+        self.n_sample = self.Datasets.shape[1]
+        self.Dim = self.Datasets.shape[2]
+        self.W = np.zeros((self.n_class, self.cK * self.Dim))
+        self.parent_latent_dim = parent_latent_dim
+        self.child_latent_dim = child_latent_dim
         self.parent_sigma_max = parent_sigma_max
         self.child_sigma_max = child_sigma_max
         self.parent_sigma_min = parent_sigma_min
         self.child_sigma_min = child_sigma_min
         self.parent_tau = parent_tau
         self.child_tau = child_tau
-
-        self.child_soms = [SOM(X[i], self.L, child_resolution, child_sigma_max, child_sigma_min, child_tau, init) for i in range(self.I)]
-        self.parent_som = SOM(X, self.K, parent_resolution, parent_sigma_max, parent_sigma_min, parent_tau, init)
-
-        self.W = np.zeros((self.I, self.L*self.D))
-
+        self.init = init
+        self.pK = parent_resolution ** parent_latent_dim
+        self.cK = child_resolution ** child_latent_dim
         self.history = {}
 
-    def fit(self, nb_epoch=100):
-        self.history['z'] = np.zeros((nb_epoch, self.N, self.L))
-        self.history['y'] = np.zeros((nb_epoch, self.K, self.D))
-        self.history['sigma'] = np.zeros(nb_epoch)
+        self._done_fit = False
+        self.Z_grad = None
 
-        for _ in nb_epoch:
-            # 子SOMからクラスSOMへの逆コピー
-            bmus = self.parent_som.bmus
-            V = self.parent_som.history['y'][0].reshape(-1, self.L, self.D)[bmus, :, :]
+    def fit(self, nb_epoch, verbose=True):
 
-            # 子SOMの更新
-            for i, child_som in enumerate(self.child_soms):
-                child_som.fit(nb_epoch=1)
-                self.W[i] = child_som.history['y'].ravel()
+        self.history['cZ'] = np.zeros((nb_epoch, self.n_class, self.n_sample, self.child_latent_dim))
+        self.history['pZ'] = np.zeros((nb_epoch, self.n_class, self.n_sample, self.parent_latent_dim))
+        self.history['cY'] = np.zeros((nb_epoch, self.n_class, self.cK, self.Dim))
+        self.history['pY'] = np.zeros((nb_epoch, self.pY, self.cK, self.Dim))
 
-            # 親SOMの更新
-            self.parent_som.X = self.W
-            self.parent_som.fit(nb_epoch=1)
+        SOMs = []
+        for n in range(self.n_class):
+            SOMs.append(som(self.Datasets[n], self.child_latent_dim,self.child_resolution,
+                            self.child_sigma_max, self.child_sigma_min, self.child_tau, self.init))
+
+        empty = np.empty(self.n_class, self.cK * self.Dim)
+        SOM = som(empty, self.parent_latent_dim,self.parent_resolution,
+                  self.parent_sigma_max, self.parent_sigma_min, self.parent_tau, self.init)
+
+        if verbose:
+            bar = tqdm(range(nb_epoch))
+        else:
+            bar = range(nb_epoch)
+
+        for epoch in bar:
+            SOMs_manifold = np.zeros((self.n_class, self.cK * self.Dim))
+
+            for n in range(self.n_class):
+                if epoch == 0:
+                    SOMs[n]._estimate_mapping()
+                    SOMs[n]._estimate_Z()
+                else:
+                    SOMs[n].y_k = SOM.X[n].reshape(self.cK, self.Dim)   # copy back
+                    SOMs[n]._estimate_Z()
+                    SOMs[n]._estimate_mapping()
+
+                SOMs_manifold[n] = SOMs[n].y.reshape(self.cK * self.Dim)
+
+            SOM._set_learning_data(SOMs_manifold)
+            SOM._estimate_mapping()
+            SOM._estimate_Z()
+
+            for n in range(self.n_class):
+                self.history["cZ"][epoch, n] = SOMs[n].Z
+                self.history["cY"][epoch, n] = SOMs[n].y
+            self.history["pZ"][epoch] = SOM.Z
+            self.history["pY"][epoch] = SOM.y.reshape(self.pK, self.cK, self.Dim)
