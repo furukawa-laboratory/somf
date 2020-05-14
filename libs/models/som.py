@@ -6,7 +6,7 @@ from sklearn.decomposition import PCA
 
 
 class SOM:
-    def __init__(self, X, latent_dim, resolution, sigma_max, sigma_min, tau, init='random',metric="sqeuclidean"):
+    def __init__(self, X, latent_dim, resolution, sigma_max, sigma_min, tau, init='random', metric="sqeuclidean"):
         self.X = X
         self.N = self.X.shape[0]
 
@@ -63,6 +63,41 @@ class SOM:
 
         self.history = {}
 
+    def _cooperative_process(self, epoch):
+        # 学習量を計算
+        # sigma = self.sigma_min + (self.sigma_max - self.sigma_min) * np.exp(-epoch / self.tau) # 近傍半径を設定
+        self.sigma = max(self.sigma_min, self.sigma_max * (1 - (epoch / self.tau)))  # 近傍半径を設定
+        Dist = dist.cdist(self.Zeta, self.Z, 'sqeuclidean')
+        # KxNの距離行列を計算
+        # ノードと勝者ノードの全ての組み合わせにおける距離を網羅した行列
+        self.H = np.exp(-Dist / (2 * self.sigma * self.sigma))  # KxNの学習量行列を計算
+
+    def _adaptive_process(self):
+        # 参照ベクトルの更新
+        G = np.sum(self.H, axis=1)[:, np.newaxis]  # 各ノードが受ける学習量の総和を保持するKx1の列ベクトルを計算
+        Ginv = np.reciprocal(G)  # Gのそれぞれの要素の逆数を取る
+        R = self.H * Ginv  # 学習量の総和が1になるように規格化
+        self.Y = R @ self.X  # 学習量を重みとして観測データの平均を取り参照ベクトルとする
+
+    def _competitive_process(self):
+        if self.metric is "sqeuclidean":  # ユークリッド距離を使った勝者決定
+            # 勝者ノードの計算H
+            Dist = dist.cdist(self.X, self.Y)  # NxKの距離行列を計算
+            self.bmus = Dist.argmin(axis=1)
+            # Nx1の勝者ノード番号をまとめた列ベクトルを計算
+            # argmin(axis=1)を用いて各行で最小値を探しそのインデックスを返す
+            self.Z = self.Zeta[self.bmus, :]  # 勝者ノード番号から勝者ノードを求める
+        elif self.metric is "KLdivergence":  # KL情報量を使った勝者決定
+            Dist = np.sum(self.X[:, np.newaxis, :] * np.log(self.Y)[np.newaxis, :, :], axis=2)  # N*K行列
+            # 勝者番号の決定
+            self.bmus = np.argmax(Dist, axis=1)
+            # Nx1の勝者ノード番号をまとめた列ベクトルを計算
+            # argmin(axis=1)を用いて各行で最小値を探しそのインデックスを返す
+            self.Z = self.Zeta[self.bmus, :]  # 勝者ノード番号から勝者ノードを求める
+
+    def update_mapping(self, Y):
+        self.Y = Y
+
     def fit(self, nb_epoch=100, verbose=True):
 
         self.history['z'] = np.zeros((nb_epoch, self.N, self.L))
@@ -75,38 +110,10 @@ class SOM:
             bar = range(nb_epoch)
 
         for epoch in bar:
-            # 協調過程
-            # 学習量を計算
-            # sigma = self.sigma_min + (self.sigma_max - self.sigma_min) * np.exp(-epoch / self.tau) # 近傍半径を設定
-            sigma = max(self.sigma_min, self.sigma_max * ( 1 - (epoch / self.tau) ) )# 近傍半径を設定
-            Dist = dist.cdist(self.Zeta, self.Z, 'sqeuclidean')
-            # KxNの距離行列を計算
-            # ノードと勝者ノードの全ての組み合わせにおける距離を網羅した行列
-            H = np.exp(-Dist / (2 * sigma * sigma)) # KxNの学習量行列を計算
-
-            # 適合過程
-            # 参照ベクトルの更新
-            G = np.sum(H, axis=1)[:, np.newaxis] # 各ノードが受ける学習量の総和を保持するKx1の列ベクトルを計算
-            Ginv = np.reciprocal(G) # Gのそれぞれの要素の逆数を取る
-            R = H * Ginv # 学習量の総和が1になるように規格化
-            self.Y = R @ self.X # 学習量を重みとして観測データの平均を取り参照ベクトルとする
-
-            # 競合過程
-            if self.metric is "sqeuclidean":  # ユークリッド距離を使った勝者決定
-                # 勝者ノードの計算
-                Dist = dist.cdist(self.X, self.Y)  # NxKの距離行列を計算
-                bmus = Dist.argmin(axis=1)
-                # Nx1の勝者ノード番号をまとめた列ベクトルを計算
-                # argmin(axis=1)を用いて各行で最小値を探しそのインデックスを返す
-                self.Z = self.Zeta[bmus, :]  # 勝者ノード番号から勝者ノードを求める
-            elif self.metric is "KLdivergence":  # KL情報量を使った勝者決定
-                Dist = np.sum(self.X[:, np.newaxis, :] * np.log(self.Y)[np.newaxis, :, :], axis=2)  # N*K行列
-                # 勝者番号の決定
-                bmus = np.argmax(Dist, axis=1)
-                # Nx1の勝者ノード番号をまとめた列ベクトルを計算
-                # argmin(axis=1)を用いて各行で最小値を探しそのインデックスを返す
-                self.Z = self.Zeta[bmus, :]  # 勝者ノード番号から勝者ノードを求める
+            self._cooperative_process(epoch)   # 協調過程
+            self._adaptive_process()           # 適合過程
+            self._competitive_process()        # 競合過程
 
             self.history['z'][epoch] = self.Z
             self.history['y'][epoch] = self.Y
-            self.history['sigma'][epoch] = sigma
+            self.history['sigma'][epoch] = self.sigma

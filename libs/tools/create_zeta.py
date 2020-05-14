@@ -1,6 +1,6 @@
 import numpy as np
 
-def create_zeta(zeta_min, zeta_max, latent_dim, resolution, include_min_max=True):
+def create_zeta(zeta_min, zeta_max, latent_dim, resolution, include_min_max=True, return_step=False):
     mesh1d, step = np.linspace(zeta_min, zeta_max, resolution, endpoint=include_min_max, retstep=True)
     if include_min_max:
         pass
@@ -15,4 +15,7 @@ def create_zeta(zeta_min, zeta_max, latent_dim, resolution, include_min_max=True
         raise ValueError("invalid latent dim {}".format(latent_dim))
 
     Zeta = np.dstack(Zeta).reshape(-1, latent_dim)
-    return Zeta
+    if return_step:
+        return Zeta, step
+    else:
+        return Zeta

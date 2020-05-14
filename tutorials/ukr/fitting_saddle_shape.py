@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     # learn ukr and som
     som = SOM(X, latent_dim=n_components, resolution=resolution,
-              sigma_max=init_bandwidth, sigma_min=bandwidth_gaussian_kernel, tau=tau)
+              sigma_max=init_bandwidth, sigma_min=bandwidth_gaussian_kernel, tau=tau, init='random')
     ukr = UKR(X, n_components=n_components, bandwidth_gaussian_kernel=bandwidth_gaussian_kernel,
               is_compact=is_compact, is_save_history=is_save_history, lambda_=lambda_)
     som.fit(nb_epoch=nb_epoch)
