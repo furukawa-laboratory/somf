@@ -10,7 +10,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from libs.models.som2 import SOM2
 
 if __name__ == "__main__":
-    seed = 1
+    seed = 2
     np.random.seed(seed)
     nb_epoch = 100
     n_class = 3
@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     # データ生成
     Datasets = np.zeros((n_class, n_sample, Dim))
-    theta = np.linspace(-np.pi / 6, np.pi / 6, n_class)
+    theta = np.linspace(-np.pi / 12, np.pi / 12, n_class)
     for n in range(n_class):
         min_X, max_X = 0, 4
         min_Y, max_Y = -1, 1
@@ -115,5 +115,5 @@ if __name__ == "__main__":
         ax2.set_ylim(-1.2, 1.2)
 
     ani = anim.FuncAnimation(fig, update, interval=interval, frames=nb_epoch, repeat=False)
-    ani.save("SOM2.gif", writer='pillow')
-    # plt.show()
+    # ani.save("SOM2.gif", writer='pillow')
+    plt.show()
