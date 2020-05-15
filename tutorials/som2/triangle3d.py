@@ -87,8 +87,8 @@ if __name__ == "__main__":
         ax2.cla()
 
         for n in range(n_class):
-            # ax1.scatter(Datasets[n, :, 0], Datasets[n, :, 1], Datasets[n, :, 2], c=Datasets[n, :, 0],
-            #             cmap="viridis", marker="+", label='observation data')
+            ax1.scatter(Datasets[n, :, 0], Datasets[n, :, 1], Datasets[n, :, 2], c=Datasets[n, :, 0],
+                        cmap="viridis", marker="+", label='observation data')
 
             if parent_latent_dim == 2:
                 ax2.scatter(pZeta[:, 0], pZeta[:, 1], s=100, c='white', edgecolors='grey', label='Zeta', zorder=1)
@@ -105,8 +105,8 @@ if __name__ == "__main__":
         # unique_bmu = np.unique(bmu)
 
         # fiberの表示
-        for i in randomint:
-            ax1.plot(pY[epoch, :, i, 0], pY[epoch, :, i, 1], pY[epoch, :, i, 2], color='b')
+        # for i in randomint:
+        #     ax1.plot(pY[epoch, :, i, 0], pY[epoch, :, i, 1], pY[epoch, :, i, 2], color='b')
 
         ax1.set_title("observation space", fontsize=9)
         ax2.set_title("latent space(parent)", fontsize=9)
