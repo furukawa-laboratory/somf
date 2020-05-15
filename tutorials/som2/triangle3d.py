@@ -12,14 +12,14 @@ from libs.models.som2 import SOM2
 if __name__ == "__main__":
     seed = 1
     np.random.seed(seed)
-    nb_epoch = 500
+    nb_epoch = 100
     n_class = 3
-    n_sample = 400
+    n_sample = 300
     Dim = 3
     parent_latent_dim = 1
     child_latent_dim = 2
     parent_resolution = 5
-    child_resolution = 7
+    child_resolution = 10
     pCluster_num = parent_resolution ** parent_latent_dim
     cCluster_num = child_resolution ** child_latent_dim
     parent_sigma_max = 2.0
@@ -115,5 +115,5 @@ if __name__ == "__main__":
         ax2.set_ylim(-1.2, 1.2)
 
     ani = anim.FuncAnimation(fig, update, interval=interval, frames=nb_epoch, repeat=False)
-    # ani.save("SOM2.gif", writer='pillow')
-    plt.show()
+    ani.save("SOM2.gif", writer='pillow')
+    # plt.show()
