@@ -77,7 +77,7 @@ if __name__ == "__main__":
         ax2.cla()
 
         for n in range(n_class):
-            ax1.scatter(Datasets[n, :, 0], Datasets[n, :, 1], c=Datasets[n, :, 0], s=20, label='observation data')
+            ax1.scatter(Datasets[n, :, 0], Datasets[n, :, 1], c=Datasets[n, :, 0], s=3, label='observation data')
 
             if parent_latent_dim == 2:
                 ax2.scatter(pZeta[:, 0], pZeta[:, 1], s=100, c='white', edgecolors='grey', label='Zeta', zorder=1)
