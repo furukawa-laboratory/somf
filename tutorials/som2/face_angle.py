@@ -42,7 +42,7 @@ if __name__ == "__main__":
     else:
         cZ = np.random.normal(size=(n_sample, 1), loc=0.0, scale=0.01)
 
-    # データ生成
+    # マルチアングル画像は古川研のdropbox上にあります
     Datasets = np.zeros((n_class, n_sample, Dim))
     Dir_resized = "../../../Angle_resized/"
     angles = np.linspace(-max_angle, max_angle, n_sample, dtype="int8")
