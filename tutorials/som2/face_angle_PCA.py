@@ -4,12 +4,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as anim
+from mpl_toolkits.mplot3d import Axes3D
 from PIL import Image
-
+from sklearn.decomposition import PCA
 from libs.models.som2 import SOM2
 
 if __name__ == "__main__":
-    seed = 2
+    seed = 1
     np.random.seed(seed)
     nb_epoch = 20
     max_angle = 80
@@ -59,7 +60,14 @@ if __name__ == "__main__":
                 .resize((pixel_size, pixel_size))
                 .convert("L")
             )
-            Datasets[i, n, :] = np.reshape(img, pixel_size ** 2)
+            Datasets[i, n, :] = np.reshape(img, pixel_size ** 2) / 255.0
+
+    # Datasetsの平均を0にする
+    Datasets -= Datasets.mean()
+    pca = PCA(n_components=3)
+    A = Datasets.reshape(n_class * n_sample, pixel_size ** 2)
+    B = pca.fit_transform(A)
+    U = A.T @ B   # 変換行列U
 
     model = SOM2(
         Datasets,
@@ -85,35 +93,35 @@ if __name__ == "__main__":
     pZeta = model.history["pZeta"]
     bmu = model.history["bmu"]
 
-    fig, axes = plt.subplots(parent_resolution, parent_resolution, figsize=(7, 7))
+    fig = plt.figure(figsize=(6, 6))
+    ax = fig.add_subplot(111, projection='3d')
 
     def update(epoch):
-        for i in range(parent_resolution):
-            for j in range(parent_resolution):
-                axes[i, j].cla()
+        ax.cla()
+        display_manifold_idx = np.linspace(0, n_class-1, 3, dtype="int64")
+        for i in display_manifold_idx:
+            transformed_cY = cY[epoch, i] @ U
+            ax.scatter(transformed_cY[:, 0], transformed_cY[:, 1], transformed_cY[:, 2])
+            # for j in bmu[epoch]:
+            #     j = int(j)
+            #     ax.text(transformed_cY[j, 0], transformed_cY[j, 1], transformed_cY[j, 2], j)
+        # fiberの表示
+        for i in np.linspace(0, cCluster_num-1, 5, dtype="int64"):
+            transformed_cY = cY[epoch, :, i] @ U
+            transformed_cY = transformed_cY[display_manifold_idx]
+            ax.plot(transformed_cY[:, 0], transformed_cY[:, 1], transformed_cY[:, 2], color='gray')
 
-        unique_bmu = np.unique(bmu[epoch])
-        list_bmu = [0] * pCluster_num
-        for i in unique_bmu:
-            list_bmu[int(i)] = 1
-
-        t = 0
-        for i in range(parent_resolution):
-            for j in range(parent_resolution):
-                axes[i, j].imshow(
-                    pY[epoch, t, 74].reshape(pixel_size, pixel_size), "gray"
-                )
-                t += 1
-                axes[i, j].set_xticks([])
-                axes[i, j].set_yticks([])
+        ax.set_xlabel("component1")
+        ax.set_ylabel("component2")
+        ax.set_zlabel("component3")
 
         fig.suptitle(
-            "epoch {}/{} latent space(parent)".format((epoch + 1), nb_epoch),
+            "epoch {}/{} observation space".format((epoch + 1), nb_epoch),
             fontsize=10,
         )
 
     ani = anim.FuncAnimation(
         fig, update, interval=interval, frames=nb_epoch, repeat=False
     )
-    ani.save("SOM2.gif", writer='pillow')
+    ani.save("SOM2_PCA.gif", writer='pillow')
     # plt.show()
