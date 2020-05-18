@@ -40,7 +40,8 @@ class SOM2:
         self.history['pZ'] = np.zeros((nb_epoch, self.n_class, self.parent_latent_dim))
         self.history['cY'] = np.zeros((nb_epoch, self.n_class, self.cK, self.Dim))
         self.history['pY'] = np.zeros((nb_epoch, self.pK, self.cK, self.Dim))
-        self.history['bmu'] = np.zeros((nb_epoch, self.n_class))
+        self.history["bmu"] = np.zeros((nb_epoch, self.n_class, self.n_sample))
+        self.history["bmm"] = np.zeros((nb_epoch, self.n_class))
 
         SOMs = []
         for n in range(self.n_class):
@@ -82,6 +83,7 @@ class SOM2:
             for n in range(self.n_class):
                 self.history["cZ"][epoch, n] = SOMs[n].Z
                 self.history["cY"][epoch, n] = SOMs[n].Y
+                self.history["bmu"][epoch, n] = SOMs[n].bmus
             self.history["pZ"][epoch] = SOM.Z
             self.history["pY"][epoch] = SOM.Y.reshape(self.pK, self.cK, self.Dim)
-            self.history["bmu"][epoch] = SOM.bmus
+            self.history["bmm"][epoch] = SOM.bmus
