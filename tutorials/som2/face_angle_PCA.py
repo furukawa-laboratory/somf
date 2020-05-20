@@ -17,7 +17,7 @@ if __name__ == "__main__":
     nb_epoch = 20
     max_angle = 80
     pixel_size = 64
-    n_class = 90
+    n_class = 5
     n_sample = int(2 * max_angle / 5 + 1)
     Dim = pixel_size ** 2
     parent_latent_dim = 2
@@ -126,7 +126,6 @@ if __name__ == "__main__":
     # 色を乱数生成
     cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
-
     def update(epoch):
         ax.cla()
         ax2.cla()
@@ -205,12 +204,12 @@ if __name__ == "__main__":
 
 
     # 学習過程のアニメーション
-    # ani = anim.FuncAnimation(
-    #     fig, update, interval=interval, frames=nb_epoch, repeat=True
-    # )
-    # 学習後のアニメーション（回転）
     ani = anim.FuncAnimation(
-        fig, rotate, interval=interval, frames=np.arange(0, 364, 4), repeat=True
+        fig, update, interval=interval, frames=nb_epoch, repeat=True
     )
+    # 学習後のアニメーション（回転）
+    # ani = anim.FuncAnimation(
+    #     fig, rotate, interval=interval, frames=np.arange(0, 364, 4), repeat=True
+    # )
     ani.save("SOM2_PCA.gif", writer='pillow')
     # plt.show()
