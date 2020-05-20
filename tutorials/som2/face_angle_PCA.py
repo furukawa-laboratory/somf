@@ -205,12 +205,12 @@ if __name__ == "__main__":
 
 
     # 学習過程のアニメーション
-    ani = anim.FuncAnimation(
-        fig, update, interval=interval, frames=nb_epoch, repeat=True
-    )
-    # 学習後のアニメーション（回転）
     # ani = anim.FuncAnimation(
-    #     fig, rotate, interval=interval, frames=np.arange(0, 362, 2), repeat=True
+    #     fig, update, interval=interval, frames=nb_epoch, repeat=True
     # )
+    # 学習後のアニメーション（回転）
+    ani = anim.FuncAnimation(
+        fig, rotate, interval=interval, frames=np.arange(0, 364, 4), repeat=True
+    )
     ani.save("SOM2_PCA.gif", writer='pillow')
     # plt.show()
