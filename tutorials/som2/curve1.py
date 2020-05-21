@@ -10,7 +10,7 @@ from libs.models.som2 import SOM2
 if __name__ == "__main__":
     seed = 2
     np.random.seed(seed)
-    nb_epoch = 30
+    nb_epoch = 20
     n_class = 6
     n_sample = 400
     Dim = 2
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     cZ = model.history["cZ"]
     pZ = model.history["pZ"]
     pZeta = model.history["pZeta"]
-    bmu = model.history["bmu"]
+    bmm = model.history["bmm"]
 
     fig, axes = plt.subplots(parent_resolution, parent_resolution, figsize=(7, 7))
 
@@ -67,16 +67,16 @@ if __name__ == "__main__":
             for j in range(parent_resolution):
                 axes[i, j].cla()
 
-        unique_bmu = np.unique(bmu[epoch])
-        list_bmu = [0]*pCluster_num
-        for i in unique_bmu:
-            list_bmu[int(i)] = 1
+        unique_bmm = np.unique(bmm[epoch])
+        list_bmm = [0]*pCluster_num
+        for i in unique_bmm:
+            list_bmm[int(i)] = 1
 
         t = 0
         for i in range(parent_resolution):
             for j in range(parent_resolution):
-                if list_bmu[t] == 1:
-                    axes[i, j].scatter(pY[epoch, t, :, 0], pY[epoch, t, :, 1], s=5, color='r', label='bmu')
+                if list_bmm[t] == 1:
+                    axes[i, j].scatter(pY[epoch, t, :, 0], pY[epoch, t, :, 1], s=5, color='r', label='bmm')
                     axes[i, j].set_facecolor('k')
                     axes[i, j].legend(loc=2, prop={'size': 5})
                 else:
@@ -91,5 +91,5 @@ if __name__ == "__main__":
         fig.suptitle("epoch {}/{} latent space(parent)".format((epoch + 1), nb_epoch), fontsize=10)
 
     ani = anim.FuncAnimation(fig, update, interval=interval, frames=nb_epoch, repeat=False)
-    ani.save("SOM2.gif", writer='pillow')
-    # plt.show()
+    # ani.save("SOM2.gif", writer='pillow')
+    plt.show()
