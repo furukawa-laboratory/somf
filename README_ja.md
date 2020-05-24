@@ -32,3 +32,15 @@ SOMはニューラルネットワークの一種で、高次元データに対�
 
 # User guide
 現在整備中です。手っ取り早く動かしたい方は[tutorials](https://github.com/furukawa-laboratory/somf/tree/master/tutorials)に実行コードがありますのでそちらをお試しください。
+
+## 要件
+
+* [poetry](https://github.com/python-poetry/poetry)
+
+## 仮想環境の使い方
+
+```bash
+poetry install
+poetry shell
+```
+

@@ -34,3 +34,14 @@ SOM is a type of neural network, and is a widely used algorithm for visualizatio
 
 # User guide
 Under preparation. If you want to run for now, please refer to [tutorials](https://github.com/furukawa-laboratory/somf/tree/master/tutorials).
+
+## Requirements
+
+* [poetry](https://github.com/python-poetry/poetry)
+
+## Use virtual env
+
+```bash
+poetry install
+poetry shell
+```
