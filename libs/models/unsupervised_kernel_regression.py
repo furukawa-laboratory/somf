@@ -363,10 +363,10 @@ class UnsupervisedKernelRegression(object):
             # To draw by pcolormesh and contour, reshape arrays like grid
             grid_values_to_draw_3d = self.__unflatten_grid_array(self.grid_values_to_draw)
             grid_points_3d = self.__unflatten_grid_array(self.grid_points)
-            pcm = self.ax_latent_space.pcolormesh(grid_points_3d[:, :, 0],
-                                                  grid_points_3d[:, :, 1],
-                                                  grid_values_to_draw_3d,
-                                                  cmap=self.cmap)
+            self.ax_latent_space.pcolormesh(grid_points_3d[:, :, 0],
+                                            grid_points_3d[:, :, 1],
+                                            grid_values_to_draw_3d,
+                                            cmap=self.cmap)
             ctr = self.ax_latent_space.contour(grid_points_3d[:, :, 0],
                                                grid_points_3d[:, :, 1],
                                                grid_values_to_draw_3d, 6, colors='k')
