@@ -378,12 +378,13 @@ class UnsupervisedKernelRegression(object):
         self.title_feature_bars = title_feature_bars
 
     def _draw_latent_space(self):
+        import matplotlib.pyplot as plt
+        from matplotlib import patheffects as path_effects
         self.ax_latent_space.cla()
         self.ax_latent_space.set_title(self.title_latent_space)
 
         # Draw color using self.grid_values_to_draw by pcolormesh and contour
         if self.grid_values_to_draw is not None:
-            # self.grid_values_to_draw = self.grid_mapping[:, self.selected_feature]
             # To draw by pcolormesh and contour, reshape arrays like grid
             grid_values_to_draw_3d = self.__unflatten_grid_array(self.grid_values_to_draw)
             grid_points_3d = self.__unflatten_grid_array(self.grid_points)
@@ -394,7 +395,11 @@ class UnsupervisedKernelRegression(object):
             ctr = self.ax_latent_space.contour(grid_points_3d[:, :, 0],
                                                grid_points_3d[:, :, 1],
                                                grid_values_to_draw_3d, 6, colors='k')
-            self.ax_latent_space.clabel(ctr)
+            plt.setp(ctr.collections, path_effects=[path_effects.Stroke(linewidth=2, foreground='white'),
+                                                    path_effects.Normal()])
+            clbls = self.ax_latent_space.clabel(ctr)
+            plt.setp(clbls, path_effects=[path_effects.Stroke(linewidth=1, foreground='white'),
+                                          path_effects.Normal()])
 
         # Plot latent variables
         self.ax_latent_space.scatter(self.Z[:, 0], self.Z[:, 1], s=10)
@@ -406,13 +411,14 @@ class UnsupervisedKernelRegression(object):
             if self.is_show_all_label_data:
                 for z, noise, label in zip(self.Z, self.noise_label, self.label_data):
                     point_label = z + noise
-                    self.ax_latent_space.text(point_label[0], point_label[1], label,
+                    text = self.ax_latent_space.text(point_label[0], point_label[1], label,
                                               ha='center', va='bottom', color='black')
+                    text.set_path_effects([path_effects.Stroke(linewidth=3, foreground='white'),
+                                           path_effects.Normal()])
             else:
                 if self.index_data_label_shown is not None:
                     # point_label = self.Z[self.index_data_label_shown,:] + self.noise_label[self.index_data_label_shown,:]
                     # label = self.label_data[self.index_data_label_shown]
-                    from matplotlib import patheffects as path_effects
                     text = self.ax_latent_space.text(self.Z[self.index_data_label_shown, 0],
                                               self.Z[self.index_data_label_shown, 1],
                                               self.label_data[self.index_data_label_shown],
@@ -420,7 +426,9 @@ class UnsupervisedKernelRegression(object):
                                               bbox=dict(boxstyle='square',
                                                         ec=(1., 0.5, 0.5),
                                                         fc=(1., 0.8, 0.8)))
-                     text.set_path_effects([path_effects.Stroke(linewidth=3, foreground='white'), path_effects.Normal()])
+                    text.set_path_effects([path_effects.Stroke(linewidth=3, foreground='white'),
+                                           path_effects.Normal()]
+                                          )
                 else:
                     pass
 
