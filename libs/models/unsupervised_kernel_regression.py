@@ -412,13 +412,15 @@ class UnsupervisedKernelRegression(object):
                 if self.index_data_label_shown is not None:
                     # point_label = self.Z[self.index_data_label_shown,:] + self.noise_label[self.index_data_label_shown,:]
                     # label = self.label_data[self.index_data_label_shown]
-                    self.ax_latent_space.text(self.Z[self.index_data_label_shown, 0],
+                    from matplotlib import patheffects as path_effects
+                    text = self.ax_latent_space.text(self.Z[self.index_data_label_shown, 0],
                                               self.Z[self.index_data_label_shown, 1],
                                               self.label_data[self.index_data_label_shown],
                                               ha='center', va='bottom', color='black',
                                               bbox=dict(boxstyle='square',
                                                         ec=(1., 0.5, 0.5),
                                                         fc=(1., 0.8, 0.8)))
+                     text.set_path_effects([path_effects.Stroke(linewidth=3, foreground='white'), path_effects.Normal()])
                 else:
                     pass
 
