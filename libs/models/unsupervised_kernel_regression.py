@@ -412,7 +412,7 @@ class UnsupervisedKernelRegression(object):
                 for z, noise, label in zip(self.Z, self.noise_label, self.label_data):
                     point_label = z + noise
                     text = self.ax_latent_space.text(point_label[0], point_label[1], label,
-                                              ha='center', va='bottom', color='black')
+                                                     ha='center', va='bottom', color='black')
                     text.set_path_effects([path_effects.Stroke(linewidth=3, foreground='white'),
                                            path_effects.Normal()])
             else:
@@ -420,9 +420,9 @@ class UnsupervisedKernelRegression(object):
                     # point_label = self.Z[self.index_data_label_shown,:] + self.noise_label[self.index_data_label_shown,:]
                     # label = self.label_data[self.index_data_label_shown]
                     text = self.ax_latent_space.text(self.Z[self.index_data_label_shown, 0],
-                                              self.Z[self.index_data_label_shown, 1],
-                                              self.label_data[self.index_data_label_shown],
-                                              ha='center', va='bottom', color='black')
+                                                     self.Z[self.index_data_label_shown, 1],
+                                                     self.label_data[self.index_data_label_shown],
+                                                     ha='center', va='bottom', color='black')
                     text.set_path_effects([path_effects.Stroke(linewidth=3, foreground='white'),
                                            path_effects.Normal()]
                                           )
