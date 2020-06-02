@@ -12,8 +12,6 @@ if __name__ == '__main__':
     nb_epoch = 1000
     eta = 0.02
 
-    n_grid_points = 100
-
     X, labels_animal, labels_feature = animal.load_data(retlabel_animal=True,
                                                         retlabel_feature=True)
 
@@ -25,10 +23,11 @@ if __name__ == '__main__':
               is_compact=is_compact, is_save_history=is_save_history, lambda_=lambda_, init=init)
     ukr.fit(nb_epoch=nb_epoch, eta=eta)
 
-    ukr.visualize(n_grid_points=n_grid_points,
+    ukr.visualize(n_grid_points=100,
                   cmap='GnBu',
                   label_data=labels_animal,
                   label_feature=labels_feature,
                   title_latent_space='Animal map (latent space)',
                   title_feature_bars='Animal feature',
+                  interpolation='spline16',
                   is_show_all_label_data=True)
