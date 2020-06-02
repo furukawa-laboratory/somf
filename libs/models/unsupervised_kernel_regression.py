@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.spatial.distance as dist
 from tqdm import tqdm
+from ..tools.create_zeta import create_zeta
 
 
 class UnsupervisedKernelRegression(object):
@@ -499,15 +500,3 @@ class UnsupervisedKernelRegression(object):
         else:
             raise ValueError('arg shape {} is not consistent'.format(grid_array.shape))
 
-
-def create_zeta(zeta_min, zeta_max, latent_dim, resolution):
-    mesh1d, step = np.linspace(zeta_min, zeta_max, resolution, endpoint=False, retstep=True)
-    mesh1d += step / 2.0
-    if latent_dim == 1:
-        Zeta = mesh1d
-    elif latent_dim == 2:
-        Zeta = np.meshgrid(mesh1d, mesh1d)
-    else:
-        raise ValueError("invalid latent dim {}".format(latent_dim))
-    Zeta = np.dstack(Zeta).reshape(-1, latent_dim)
-    return Zeta
