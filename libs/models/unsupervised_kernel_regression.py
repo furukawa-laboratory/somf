@@ -390,7 +390,8 @@ class UnsupervisedKernelRegression(object):
         # Draw color using self.grid_values_to_draw by pcolormesh and contour
         if self.grid_values_to_draw is not None:
             # To draw by pcolormesh and contour, reshape arrays like grid
-            grid_values_to_draw_3d = self.__unflatten_grid_array(self.grid_values_to_draw)
+            grid_values_to_imshow = self.__unflatten_grid_array(self.grid_values_to_draw)
+            grid_values_to_contour = self.__unflatten_grid_array(self.grid_values_to_draw)
             grid_points_3d = self.__unflatten_grid_array(self.grid_points)
             # set coordinate of axis
             any_index = 0
@@ -400,7 +401,7 @@ class UnsupervisedKernelRegression(object):
             else:
                 coordinate_ax_left = grid_points_3d[any_index, -1, 0]
                 coordinate_ax_right = grid_points_3d[any_index, 0, 0]
-                grid_values_to_draw_3d = np.flip(grid_values_to_draw_3d, axis=1).copy()
+                grid_values_to_imshow = np.flip(grid_values_to_imshow, axis=1).copy()
 
             if grid_points_3d[-1, any_index, 1] < grid_points_3d[0, any_index, 1]:
                 coordinate_ax_bottom = grid_points_3d[-1, any_index, 1]
@@ -408,8 +409,8 @@ class UnsupervisedKernelRegression(object):
             else:
                 coordinate_ax_bottom = grid_points_3d[0, any_index, 1]
                 coordinate_ax_top = grid_points_3d[-1, any_index, 1]
-                grid_values_to_draw_3d = np.flip(grid_values_to_draw_3d, axis=0).copy()
-            self.ax_latent_space.imshow(grid_values_to_draw_3d,
+                grid_values_to_imshow = np.flip(grid_values_to_imshow, axis=0).copy()
+            self.ax_latent_space.imshow(grid_values_to_imshow,
                                         extent=[coordinate_ax_left,
                                                 coordinate_ax_right,
                                                 coordinate_ax_bottom,
@@ -418,7 +419,7 @@ class UnsupervisedKernelRegression(object):
                                         cmap=self.cmap)
             ctr = self.ax_latent_space.contour(grid_points_3d[:, :, 0],
                                                grid_points_3d[:, :, 1],
-                                               grid_values_to_draw_3d, 6, colors='k')
+                                               grid_values_to_contour, 6, colors='k')
             plt.setp(ctr.collections, path_effects=[path_effects.Stroke(linewidth=2, foreground='white'),
                                                     path_effects.Normal()])
             clbls = self.ax_latent_space.clabel(ctr)
