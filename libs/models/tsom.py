@@ -1,10 +1,11 @@
 import numpy as np
 from scipy.spatial import distance
 from tqdm import tqdm
+
 from ..tools.create_zeta import create_zeta
 
 class TSOM2():
-    def __init__(self, X, latent_dim, resolution, SIGMA_MAX, SIGMA_MIN, TAU, init='random'):
+    def __init__(self, X, latent_dim, resolution, SIGMA_MAX, SIGMA_MIN, TAU, model=None, gamma=None, init='random'):
 
         # 入力データXについて
         if X.ndim == 2:
@@ -20,6 +21,42 @@ class TSOM2():
             self.observed_dim = self.X.shape[2]  # 観測空間の次元
         else:
             raise ValueError("invalid X: {}\nX must be 2d or 3d ndarray".format(X))
+
+        if gamma is not None:  # gammaが指定されている時
+            # 欠損値アルゴリズム処理
+            if X.shape != gamma.shape:
+                raise ValueError("invalid gamma: {}\ndata size and gamma size is not match. ".format(gamma))
+
+            elif X.shape == gamma.shape:
+                if np.any(np.isnan(self.X)) == 1:  # gamma指定してデータに欠損がある場合
+                    temp_gamma = np.where(np.isnan(self.X) == 1, 0, 1)  # データに基づいてgammaを作る
+                    temp_is_missing = np.allclose(temp_gamma, gamma)
+                    self.X[np.isnan(self.X)] = 0  # 欠損値の部分を0で置換
+                    if temp_is_missing is True:  # データの欠損しているところとgammaの0の値が一致する時
+                        self.gamma = gamma
+                        self.is_missing = 1
+                    else:
+                        raise ValueError("invalid gamma: {}\ndata size and gamma size is not match. ".format(gamma))
+                elif np.any(np.isnan(self.X)) == 0:  # 観測データの一部を無視したい時
+                    self.gamma = gamma
+                    self.is_missing = 1
+        elif gamma is None:#データXに欠損がある場合はそれに基づいてgammaを作成する
+            self.is_missing=np.any(np.isnan(self.X))# 欠損値があるかを判定.欠損があれば1,欠損がなければ0
+            # 欠損値がある場合
+            if self.is_missing == 1:
+                gamma = np.where(np.isnan(self.X) == 1, 0, 1)#nan格納されているindexを返す
+                self.gamma = gamma
+                self.X[np.isnan(self.X)] = 0#欠損値の部分を0で置換
+            elif self.is_missing==0:#欠損値がない場合はgammaは作らない
+                pass
+
+        # 1次モデル型と直接型を選択する引数
+        if model=="direct":
+            self.model = "direct"
+        elif model==None or model=="indirect":
+            self.model="indirect"
+        else:
+            raise ValueError("invalid model: {}\nmodel is only direct or indirect. ".format(model))
 
         # 最大近傍半径(SIGMAX)の設定
         if type(SIGMA_MAX) is float:
@@ -62,7 +99,7 @@ class TSOM2():
             raise ValueError("invalid resolution: {}".format(resolution))
 
         # 潜在空間の設定
-        if type(latent_dim) is int:  # latent_dimがintであればどちらのモードも潜在空間の次元は同じ
+        if type(latent_dim) is int:
             self.latent_dim1 = latent_dim
             self.latent_dim2 = latent_dim
 
@@ -75,7 +112,6 @@ class TSOM2():
         self.Zeta1 = create_zeta(-1.0, 1.0, latent_dim=self.latent_dim1, resolution=resolution1, include_min_max=True)
         self.Zeta2 = create_zeta(-1.0, 1.0, latent_dim=self.latent_dim2, resolution=resolution2, include_min_max=True)
 
-        # K1とK2は潜在空間の設定が終わった後がいいよね
         self.K1 = self.Zeta1.shape[0]
         self.K2 = self.Zeta2.shape[0]
 
@@ -121,13 +157,57 @@ class TSOM2():
             H2 = np.exp(-distance2 / (2 * pow(sigma2, 2)))  # かっこに気を付ける
             G2 = np.sum(H2, axis=1)  # Gは行ごとの和をとったベクトル
             R2 = (H2.T / G2).T  # 行列の計算なので.Tで転置を行う
-            # １次モデル，２次モデルの決定
-            self.U = np.einsum('lj,ijd->ild', R2, self.X)
-            self.V = np.einsum('ki,ijd->kjd', R1, self.X)
-            self.Y = np.einsum('ki,lj,ijd->kld', R1, R2, self.X)
-            # 勝者決定
-            self.k_star1 = np.argmin(np.sum(np.square(self.U[:, None, :, :] - self.Y[None, :, :, :]), axis=(2, 3)), axis=1)
-            self.k_star2 = np.argmin(np.sum(np.square(self.V[:, :, None, :] - self.Y[:, None, :, :]), axis=(0, 3)), axis=1)
+
+            if self.is_missing == 1: # 欠損値有り
+                # ２次モデルの決定
+
+                G = np.einsum("ik,jl,ijd->kld", H1.T, H2.T, self.gamma)#K1*K2*D
+
+                self.Y = np.einsum('ik,jl,ijd,ijd->kld', H1.T, H2.T, self.gamma, self.X) / G
+                if self.model == "indirect": # 1次モデル型
+                    # １次モデル，２次モデルの決定
+                    self.U = np.einsum('jl,ijd,ijd->ild', H2.T, self.gamma, self.X)/np.einsum('ijd,jl->ild', self.gamma, H2.T)
+                    self.V = np.einsum('ik,ijd,ijd->kjd', H1.T, self.gamma, self.X)/np.einsum('ijd,ik->kjd', self.gamma, H1.T)
+                    # 勝者決定
+                    self.k_star1 = np.argmin(
+                        np.sum(np.square(self.U[:, None, :, :] - self.Y[None, :, :, :]), axis=(2, 3)), axis=1)
+                    self.k_star2 = np.argmin(
+                        np.sum(np.square(self.V[:, :, None, :] - self.Y[:, None, :, :]), axis=(0, 3)), axis=1)
+
+                elif self.model == "direct": # 直接型
+                    # 勝者決定
+                    Dist = self.gamma[:, :, None, None, :] * np.square(
+                        self.X[:, :, None, None, :] - self.Y[None, None, :, :, :])
+                    self.k_star1 = np.argmin(np.einsum("jl,ijklm->ik", H2.T, Dist), axis=1)
+                    self.k_star2 = np.argmin(np.einsum("ik,ijklm->jl", H1.T, Dist), axis=1)
+
+                else:
+                    raise ValueError("invalid model: {}\nmodel must be None or direct".format(self.model))
+
+
+            else: # 欠損値無し
+                #２次モデルの決定
+                self.Y = np.einsum('ki,lj,ijd->kld', R1, R2, self.X)
+                if self.model == "indirect": # 1次モデル型
+                    # １次モデル，２次モデルの決定
+                    self.U = np.einsum('lj,ijd->ild', R2, self.X)
+                    self.V = np.einsum('ki,ijd->kjd', R1, self.X)
+
+                    # 勝者決定
+                    self.k_star1 = np.argmin(
+                        np.sum(np.square(self.U[:, None, :, :] - self.Y[None, :, :, :]), axis=(2, 3)), axis=1)
+                    self.k_star2 = np.argmin(
+                        np.sum(np.square(self.V[:, :, None, :] - self.Y[:, None, :, :]), axis=(0, 3)), axis=1)
+
+                elif self.model == "direct": # 直接型
+                    # 勝者決定
+                    Dist = np.square(
+                        self.X[:, :, None, None, :] - self.Y[None, None, :, :, :])
+                    self.k_star1 = np.argmin(np.einsum("jl,ijklm->ik", H2.T, Dist), axis=1)
+                    self.k_star2 = np.argmin(np.einsum("ik,ijklm->jl", H1.T, Dist), axis=1)
+
+                else:
+                    raise ValueError("invalid model: {}\nmodel must be None or direct".format(self.model))
             self.Z1 = self.Zeta1[self.k_star1, :]  # k_starのZの座標N*L(L=2
             self.Z2 = self.Zeta2[self.k_star2, :]  # k_starのZの座標N*L(L=2
 
@@ -136,4 +216,3 @@ class TSOM2():
             self.history['z2'][epoch, :] = self.Z2
             self.history['sigma1'][epoch] = sigma1
             self.history['sigma2'][epoch] = sigma2
-
