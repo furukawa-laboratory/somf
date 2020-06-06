@@ -209,8 +209,8 @@ class TSOM2():
         self.history['y'] = np.zeros((nb_epoch, self.K1, self.K2, self.observed_dim))
         self.history['z1'] = np.zeros((nb_epoch, self.N1, self.latent_dim1))
         self.history['z2'] = np.zeros((nb_epoch, self.N2, self.latent_dim2))
-        self.history['self.sigma1'] = np.zeros(nb_epoch)
-        self.history['self.sigma2'] = np.zeros(nb_epoch)
+        self.history['sigma1'] = np.zeros(nb_epoch)
+        self.history['sigma2'] = np.zeros(nb_epoch)
 
         for epoch in tqdm(np.arange(nb_epoch)):
 
@@ -244,5 +244,5 @@ class TSOM2():
             self.history['y'][epoch, :, :] = self.Y
             self.history['z1'][epoch, :] = self.Z1
             self.history['z2'][epoch, :] = self.Z2
-            self.history['self.sigma1'][epoch] = self.sigma1
-            self.history['self.sigma2'][epoch] = self.sigma2
+            self.history['sigma1'][epoch] = self.sigma1
+            self.history['sigma2'][epoch] = self.sigma2
