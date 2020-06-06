@@ -4,6 +4,7 @@ from tqdm import tqdm
 
 from ..tools.create_zeta import create_zeta
 
+
 class TSOM2():
     def __init__(self, X, latent_dim, resolution, SIGMA_MAX, SIGMA_MIN, TAU, model=None, gamma=None, init='random'):
 
