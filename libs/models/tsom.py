@@ -141,28 +141,28 @@ class TSOM2():
         # self.sigma1 = self.SIGMA1_MIN + (self.SIGMA1_MAX - self.SIGMA1_MIN) * np.exp(-epoch / self.TAU1)
         self.sigma1 = max(self.SIGMA1_MIN, self.SIGMA1_MAX * (1 - (epoch / self.TAU1)))
         distance1 = distance.cdist(self.Zeta1, self.Z1, 'sqeuclidean')  # 距離行列をつくるDはN*K行列
-        H1 = np.exp(-distance1 / (2 * pow(self.sigma1, 2)))  # かっこに気を付ける
-        G1 = np.sum(H1, axis=1)  # Gは行ごとの和をとったベクトル
-        self.R1 = (H1.T / G1).T  # 行列の計算なので.Tで転置を行う
+        self.H1 = np.exp(-distance1 / (2 * pow(self.sigma1, 2)))  # かっこに気を付ける
+        G1 = np.sum(self.H1, axis=1)  # Gは行ごとの和をとったベクトル
+        self.R1 = (self.H1.T / G1).T  # 行列の計算なので.Tで転置を行う
 
         # self.sigma2 = self.SIGMA2_MIN + (self.SIGMA2_MAX - self.SIGMA2_MIN) * np.exp(-epoch / self.TAU2)
         self.sigma2 = max(self.SIGMA2_MIN, self.SIGMA2_MAX * (1 - (epoch / self.TAU2)))
         distance2 = distance.cdist(self.Zeta2, self.Z2, 'sqeuclidean')  # 距離行列をつくるDはN*K行列
-        H2 = np.exp(-distance2 / (2 * pow(self.sigma2, 2)))  # かっこに気を付ける
-        G2 = np.sum(H2, axis=1)  # Gは行ごとの和をとったベクトル
-        self.R2 = (H2.T / G2).T  # 行列の計算なので.Tで転置を行う
+        self.H2 = np.exp(-distance2 / (2 * pow(self.sigma2, 2)))  # かっこに気を付ける
+        G2 = np.sum(self.H2, axis=1)  # Gは行ごとの和をとったベクトル
+        self.R2 = (self.H2.T / G2).T  # 行列の計算なので.Tで転置を行う
     
     # 適応過程
     def _adaptive_process_missing_indirect(self):
         # １次モデル，２次モデルの決定
-        self.U = np.einsum('jl,ijd,ijd->ild', H2.T, self.gamma, self.X) / np.einsum('ijd,jl->ild', self.gamma, H2.T)
-        self.V = np.einsum('ik,ijd,ijd->kjd', H1.T, self.gamma, self.X) / np.einsum('ijd,ik->kjd', self.gamma, H1.T)
-        G = np.einsum("ik,jl,ijd->kld", H1.T, H2.T, self.gamma)  # K1*K2*D
-        self.Y = np.einsum('ik,jl,ijd,ijd->kld', H1.T, H2.T, self.gamma, self.X) / G
+        self.U = np.einsum('jl,ijd,ijd->ild', self.H2.T, self.gamma, self.X) / np.einsum('ijd,jl->ild', self.gamma, self.H2.T)
+        self.V = np.einsum('ik,ijd,ijd->kjd', self.H1.T, self.gamma, self.X) / np.einsum('ijd,ik->kjd', self.gamma, self.H1.T)
+        G = np.einsum("ik,jl,ijd->kld", self.H1.T, self.H2.T, self.gamma)  # K1*K2*D
+        self.Y = np.einsum('ik,jl,ijd,ijd->kld', self.H1.T, self.H2.T, self.gamma, self.X) / G
 
     def _adaptive_process_missing_direct(self):
-        G = np.einsum("ik,jl,ijd->kld", H1.T, H2.T, self.gamma)  # K1*K2*D
-        self.Y = np.einsum('ik,jl,ijd,ijd->kld', H1.T, H2.T, self.gamma, self.X) / G
+        G = np.einsum("ik,jl,ijd->kld", self.H1.T, self.H2.T, self.gamma)  # K1*K2*D
+        self.Y = np.einsum('ik,jl,ijd,ijd->kld', self.H1.T, self.H2.T, self.gamma, self.X) / G
 
     def _adaptive_process_nonmissing_indirect(self):
         # １次モデル，２次モデルの決定
@@ -187,8 +187,8 @@ class TSOM2():
         # 勝者決定
         Dist = self.gamma[:, :, None, None, :] * np.square(
             self.X[:, :, None, None, :] - self.Y[None, None, :, :, :])
-        self.k_star1 = np.argmin(np.einsum("jl,ijklm->ik", H2.T, Dist), axis=1)
-        self.k_star2 = np.argmin(np.einsum("ik,ijklm->jl", H1.T, Dist), axis=1)
+        self.k_star1 = np.argmin(np.einsum("jl,ijklm->ik", self.H2.T, Dist), axis=1)
+        self.k_star2 = np.argmin(np.einsum("ik,ijklm->jl", self.H1.T, Dist), axis=1)
 
     def _competitive_process_nonmissing_indirect(self):
         # 勝者決定
@@ -201,8 +201,8 @@ class TSOM2():
         # 勝者決定
         Dist = np.square(
             self.X[:, :, None, None, :] - self.Y[None, None, :, :, :])
-        self.k_star1 = np.argmin(np.einsum("jl,ijklm->ik", H2.T, Dist), axis=1)
-        self.k_star2 = np.argmin(np.einsum("ik,ijklm->jl", H1.T, Dist), axis=1)
+        self.k_star1 = np.argmin(np.einsum("jl,ijklm->ik", self.H2.T, Dist), axis=1)
+        self.k_star2 = np.argmin(np.einsum("ik,ijklm->jl", self.H1.T, Dist), axis=1)
 
 
     def fit(self, nb_epoch=200):
