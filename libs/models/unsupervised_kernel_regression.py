@@ -185,33 +185,39 @@ class UnsupervisedKernelRegression(object):
 
         Note: This method uses TkAgg as a backend. Therefore, if matplotlib is imported beforehand
         and a different backend is specified, it will not work.
-        :param n_grid_points: int, optional, default = None
+
+        Parameters
+        ----------
+        n_grid_points: int, optional, default = None
             Number of representative points of discretization of the latent space needed for the drawing.
-        :param cmap: str, optional, default = None
+        cmap: str, optional, default = None
             Colormap to color the latent space. It conforms to the matplotlib color map.
-        :param label_data: array of shape (n_data, ), optional. default = None
+        label_data: array of shape (n_data, ), optional. default = None
             The labels corresponds rows of the dataset X.
-        :param label_feature: array of shape (n_features, ), optional. default = None
+        label_feature: array of shape (n_features, ), optional. default = None
             The labels corresponds columns of the dataset X.
-        :param title_latent_space: str, optional, default = None
+        title_latent_space: str, optional, default = None
             The title of axis to visualize the latent space
-        :param title_feature_bars: str, optional, default = None
+        title_feature_bars: str, optional, default = None
             The title of axis to visualize bars of features
-        :param is_show_all_label_data: bool, optional, default = False
+        is_show_all_label_data: bool, optional, default = False
             When True the labels of the data is always shown.
             When False the label is only shown when the cursor overlaps the corresponding latent variable.
-        :param interpolation: str, optional, default = None
+        interpolation: str, optional, default = None
             Interpolation method by imshow.
-        :param fig: matplotlib.figure.Figure, default = True
+        fig: matplotlib.figure.Figure, default = True
             The figure to visualize.
             It is assigned only when you want to specify a figure to visualize.
-        :param fig_size: (float, float), optional, default = None
+        fig_size: (float, float), optional, default = None
             The size of figure.
-        :param ax_latent_space: matplotlib.axes._subplots.AxesSubplot, optional, default = False
+        ax_latent_space: matplotlib.axes._subplots.AxesSubplot, optional, default = False
             The axis to visualize latent space.
-        :param ax_feature_bars: matplotlib.axes._subplots.AxesSubplot, optional, default = False
+        ax_feature_bars: matplotlib.axes._subplots.AxesSubplot, optional, default = False
             The axis to visualize feature_bars.
-        :return: None
+
+        Returns
+        -------
+        No returns
         """
 
         # import library to draw
