@@ -192,7 +192,8 @@ class UnsupervisedKernelRegression(object):
 
     def visualize(self, n_grid_points=30, cmap=None, label_data=None, label_feature=None,
                   title_latent_space=None, title_feature_bars=None, is_show_all_label_data=False,
-                  interpolation=None, fig=None, fig_size=None, ax_latent_space=None, ax_feature_bars=None):
+                  interpolation=None, is_middle_color_zero=False,
+                  fig=None, fig_size=None, ax_latent_space=None, ax_feature_bars=None):
         """Visualize fit model interactively.
         The dataset can be visualized in an exploratory way using the latent variables and the mapping estimated by UKR.
         When an arbitrary coordinate on the latent space is specified, the corresponding feature is displayed as a bar.
@@ -200,33 +201,43 @@ class UnsupervisedKernelRegression(object):
 
         Note: This method uses TkAgg as a backend. Therefore, if matplotlib is imported beforehand
         and a different backend is specified, it will not work.
-        :param n_grid_points: int, optional, default = None
+
+        Parameters
+        ----------
+        n_grid_points: int, optional, default = None
             Number of representative points of discretization of the latent space needed for the drawing.
-        :param cmap: str, optional, default = None
+        cmap: str, optional, default = None
             Colormap to color the latent space. It conforms to the matplotlib color map.
-        :param label_data: array of shape (n_data, ), optional. default = None
+        label_data: array of shape (n_data, ), optional. default = None
             The labels corresponds rows of the dataset X.
-        :param label_feature: array of shape (n_features, ), optional. default = None
+        label_feature: array of shape (n_features, ), optional. default = None
             The labels corresponds columns of the dataset X.
-        :param title_latent_space: str, optional, default = None
+        title_latent_space: str, optional, default = None
             The title of axis to visualize the latent space
-        :param title_feature_bars: str, optional, default = None
+        title_feature_bars: str, optional, default = None
             The title of axis to visualize bars of features
-        :param is_show_all_label_data: bool, optional, default = False
+        is_show_all_label_data: bool, optional, default = False
             When True the labels of the data is always shown.
             When False the label is only shown when the cursor overlaps the corresponding latent variable.
-        :param interpolation: str, optional, default = None
+        interpolation: str, optional, default = None
             Interpolation method by imshow.
-        :param fig: matplotlib.figure.Figure, default = True
+        is_middle_color_zero: bool, optional, default = False
+            If `True`, the value corresponding to middle color in the colormap is fixed at 0.
+            If the data is normalized to zero mean and it is important whether it is higher or lower than the mean,
+            setting to `True` makes the coloring easier to read.
+        fig: matplotlib.figure.Figure, default = True
             The figure to visualize.
             It is assigned only when you want to specify a figure to visualize.
-        :param fig_size: (float, float), optional, default = None
+        fig_size: (float, float), optional, default = None
             The size of figure.
-        :param ax_latent_space: matplotlib.axes._subplots.AxesSubplot, optional, default = False
+        ax_latent_space: matplotlib.axes._subplots.AxesSubplot, optional, default = False
             The axis to visualize latent space.
-        :param ax_feature_bars: matplotlib.axes._subplots.AxesSubplot, optional, default = False
+        ax_feature_bars: matplotlib.axes._subplots.AxesSubplot, optional, default = False
             The axis to visualize feature_bars.
-        :return: None
+
+        Returns
+        -------
+        No returns
         """
 
         # import library to draw
@@ -234,9 +245,19 @@ class UnsupervisedKernelRegression(object):
         matplotlib.use('TkAgg')
         import matplotlib.pyplot as plt
 
-        self._initialize_to_visualize(n_grid_points, cmap, label_data, label_feature,
-                                      title_latent_space, title_feature_bars, is_show_all_label_data,
-                                      interpolation, fig, fig_size, ax_latent_space, ax_feature_bars)
+        self._initialize_to_visualize(n_grid_points=n_grid_points,
+                                      cmap=cmap,
+                                      label_data=label_data,
+                                      label_feature=label_feature,
+                                      title_latent_space=title_latent_space,
+                                      title_feature_bars=title_feature_bars,
+                                      is_show_all_label_data=is_show_all_label_data,
+                                      interpolation=interpolation,
+                                      is_middle_color_zero=is_middle_color_zero,
+                                      fig=fig,
+                                      fig_size=fig_size,
+                                      ax_latent_space=ax_latent_space,
+                                      ax_feature_bars=ax_feature_bars)
 
         self._draw_latent_space()
         self._draw_feature_bars()
@@ -277,7 +298,8 @@ class UnsupervisedKernelRegression(object):
 
     def _initialize_to_visualize(self, n_grid_points, cmap, label_data, label_feature,
                                  title_latent_space, title_feature_bars, is_show_all_label_data,
-                                 interpolation, fig, fig_size, ax_latent_space, ax_feature_bars):
+                                 interpolation, is_middle_color_zero,
+                                 fig, fig_size, ax_latent_space, ax_feature_bars):
         # invalid check
         if self.n_components != 2:
             raise ValueError('Now support only n_components = 2')
@@ -347,6 +369,7 @@ class UnsupervisedKernelRegression(object):
 
         self.cmap = cmap
         self.interpolation = interpolation
+        self.is_middle_color_zero = is_middle_color_zero
         self.click_point_latent_space = None  # index of the clicked representative point
         self.clicked_mapping = self.X.mean(axis=0)
         self.is_initial_view = True
@@ -404,10 +427,21 @@ class UnsupervisedKernelRegression(object):
 
         # Draw color using self.grid_values_to_draw by pcolormesh and contour
         if self.grid_values_to_draw is not None:
-            # To draw by pcolormesh and contour, reshape arrays like grid
+            # set vmin and vmax
+            if self.is_middle_color_zero:
+                max_grid_value = self.grid_values_to_draw.max()
+                min_grid_value = self.grid_values_to_draw.min()
+                vmin = -max(abs(max_grid_value), abs(min_grid_value))
+                vmax = max(abs(max_grid_value), abs(min_grid_value))
+            else:
+                vmin = None
+                vmax = None
+
+            # To draw by imshow and contour, reshape arrays like grid
             grid_values_to_imshow = self.__unflatten_grid_array(self.grid_values_to_draw)
             grid_values_to_contour = self.__unflatten_grid_array(self.grid_values_to_draw)
             grid_points_3d = self.__unflatten_grid_array(self.grid_points)
+
             # set coordinate of axis
             any_index = 0
             if grid_points_3d[any_index, 0, 0] < grid_points_3d[any_index, -1, 0]:
@@ -431,7 +465,9 @@ class UnsupervisedKernelRegression(object):
                                                 coordinate_ax_bottom,
                                                 coordinate_ax_top],
                                         interpolation=self.interpolation,
-                                        cmap=self.cmap)
+                                        cmap=self.cmap,
+                                        vmin=vmin,
+                                        vmax=vmax)
             ctr = self.ax_latent_space.contour(grid_points_3d[:, :, 0],
                                                grid_points_3d[:, :, 1],
                                                grid_values_to_contour, 6, colors='k')

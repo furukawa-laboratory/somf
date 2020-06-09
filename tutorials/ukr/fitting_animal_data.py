@@ -30,4 +30,5 @@ if __name__ == '__main__':
                   title_latent_space='Animal map (latent space)',
                   title_feature_bars='Animal feature',
                   interpolation='spline16',
+                  is_middle_color_zero=True,
                   is_show_all_label_data=True)
