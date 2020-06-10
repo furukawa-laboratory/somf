@@ -56,10 +56,10 @@ cZ = None
 # sigma2_zero=1.2
 
 
-tsom2=TSOM_cross_SOM(Datasets, parent_latent_dim, child_latent_dim, parent_resolution, child_resolution,
+tsom_cross_som=TSOM_cross_SOM(Datasets, parent_latent_dim, child_latent_dim, parent_resolution, child_resolution,
                  parent_sigma_max, child_sigma_max, parent_sigma_min, child_sigma_min,
                  parent_tau, child_tau, pZ, cZ)
-tsom2.fit(nb_epoch=5)
+tsom_cross_som.fit(nb_epoch=nb_epoch)
 #観測空間の描画
 
 fig = plt.figure()
@@ -68,7 +68,7 @@ n = 0
 def plot(i):
     ax.cla()
     ax.scatter(data[:,:, 0], data[:,:, 1], data[:,:, 2])
-    ax.plot_wireframe(tsom2.history['cY'][i,n,:, :, 0], tsom2.history['cY'][i,n,:, :, 1], tsom2.history['cY'][i,n,:, :, 2])
+    ax.plot_wireframe(tsom_cross_som.history['cY'][i,n,:, :, 0], tsom_cross_som.history['cY'][i,n,:, :, 1], tsom_cross_som.history['cY'][i,n,:, :, 2])
     plt.title(' t=' + str(i))
 
 ani = animation.FuncAnimation(fig, plot, frames=250,interval=100)
@@ -78,7 +78,7 @@ plt.show()
 # fig = plt.figure()
 # ax = Axes3D(fig)
 # ax.scatter(X[:,:, 0], X[:,:, 1], X[:,:, 2])
-# ax.plot_wireframe(tsom2.history['y'][249,:, :, 0], tsom2.history['y'][249,:, :, 1], tsom2.history['y'][249,:, :, 2])
+# ax.plot_wireframe(tsom_cross_som.history['y'][249,:, :, 0], tsom_cross_som.history['y'][249,:, :, 1], tsom_cross_som.history['y'][249,:, :, 2])
 #
 # #ani = animation.FuncAnimation(fig, plot, frames=250,interval=100)
 # plt.show()
@@ -93,7 +93,7 @@ plt.show()
 # #Umatrix表示
 # #modeごとで選べるようにしたいね
 # #X=X.reshape((X.shape[0],X.shape[1]))
-# # umatrix1=TSOM2_Umatrix( z1=tsom2.Z1,z2=tsom2.Z2, x=X, sigma1=sigma1_min,sigma2=sigma2_min, resolution=20, labels1=category_label,labels2=features_label)
+# # umatrix1=TSOM2_Umatrix( z1=tsom_cross_som.Z1,z2=tsom_cross_som.Z2, x=X, sigma1=sigma1_min,sigma2=sigma2_min, resolution=20, labels1=category_label,labels2=features_label)
 # # umatrix1.draw_umatrix()
 #
 # # #C

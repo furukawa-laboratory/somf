@@ -67,9 +67,9 @@ if __name__ == "__main__":
     # model_tsuno.fit(nb_epoch)
     model_harada.fit(nb_epoch)
 
-    print(model_harada.history['cY'].shape)
-    print(model_harada.history['cZ1'].shape)
-    print(model_harada.history['cZ2'].shape)
+    print(model_harada.history['cY'][4,0,0])
+    print(model_harada.history['cZ1'][4,0,0])
+    print(model_harada.history['cZ2'][4,0,0])
 
     # グラフの枠を作っていく
     fig = plt.figure()
@@ -88,8 +88,8 @@ if __name__ == "__main__":
     # 最後に.show()を書いてグラフ表示
     # plt.show()
 
-    # tv = TSOM2_Viewer(model_harada.history['cY'][49, 0], model_harada.history['bmu1'][49, 0], model_harada.history['bmu2'][49, 0])
-    # tv.draw_map()
+    tv = TSOM2_Viewer(model_harada.history['cY'][4, 0], model_harada.history['bmu1'][4, 0], model_harada.history['bmu2'][4, 0])
+    tv.draw_map()
 
     # print("cZ", np.allclose(model_tsuno.history["cZ"], model_harada.history["cZ"]))
     # print("pZ", np.allclose(model_tsuno.history["pZ"], model_harada.history["pZ"]))
