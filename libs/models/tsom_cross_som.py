@@ -3,9 +3,9 @@ import numpy as np
 from tqdm import tqdm
 
 from libs.models.tsom import TSOM2
-from libs.models.som import SOM as som
+from libs.models.som import SOM
 
-class tsom_cross_som:
+class TSOM_cross_SOM:
     def __init__(self, Datasets, parent_latent_dim, child_latent_dim, parent_resolution, child_resolution,
                  parent_sigma_max, child_sigma_max, parent_sigma_min, child_sigma_min,
                  parent_tau, child_tau, pZinit, cZinit):
@@ -35,8 +35,14 @@ class tsom_cross_som:
         self.child_sigma_min = child_sigma_min
         self.parent_tau = parent_tau
         self.child_tau = child_tau
-        self.pZinit = pZinit
-        self.cZinit = cZinit
+        if pZinit is None:
+            self.pZinit = 'random'
+        else:
+            self.pZinit = pZinit
+        if cZinit is None:
+            self.cZinit = 'random'
+        else:
+            self.cZinit = cZinit
         self.pK = parent_resolution ** parent_latent_dim
         # tsom の各モードのノード数
         self.cK1 = self.child_resolution_1 ** self.child_latent_dim_1
@@ -64,14 +70,14 @@ class tsom_cross_som:
         tsom_children = []
         for data_number in range(self.n_class):
             tsom_children.append(
-                TSOM2(self.Datasets[data_number], latent_dim=[self.child_latent_dim_1,self.child_latent_dim_2], resolution=[self.child_resolution_1,self.child_resolution_2], sigma_max=self.child_sigma_max, sigma_min=self.child_sigma_min, tau=self.child_tau, init=self.cZinit)
+                TSOM2(self.Datasets[data_number], latent_dim=[self.child_latent_dim_1,self.child_latent_dim_2], resolution=[self.child_resolution_1,self.child_resolution_2], SIGMA_MAX=self.child_sigma_max, SIGMA_MIN=self.child_sigma_min, TAU=self.child_tau, init=self.cZinit)
             )
 
         # 親SOM用意
         # 親SOMに入力されるデータ：子SOMの数n_class＊子SOMのノード数K＊子SOMの入力データの次元D
         # とりあえず仮データ渡しておく
-        provisional_data = np.zeros((self.n_class, self.cK * self.Dim))
-        som_parent = som(provisional_data, latent_dim=self.parent_latent_dim, resolution=self.parent_resolution, sigma_max=self.parent_sigma_max, sigma_min=self.parent_sigma_min, tau=self.parent_tau, init=self.pZinit)
+        provisional_data = np.zeros((self.n_class, self.cK1 * self.cK2 * self.Dim))
+        som_parent = SOM(provisional_data, latent_dim=self.parent_latent_dim, resolution=self.parent_resolution, sigma_max=self.parent_sigma_max, sigma_min=self.parent_sigma_min, tau=self.parent_tau, init=self.pZinit)
 
         self.history['cZeta1'] = tsom_children[0].Zeta1
         self.history['cZeta2'] = tsom_children[0].Zeta2
