@@ -7,7 +7,7 @@ from libs.models.tsom2_ishida import TSOM2_ishida
 
 
 class TestTSOM_missing(unittest.TestCase):
-    def test_kusumoto_vs_ishida(self):
+    def test_missing_or_not_and_indirect_or_direct(self):
         # random seed setting
         seed = 100
         np.random.seed(seed)
