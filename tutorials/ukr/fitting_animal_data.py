@@ -24,7 +24,7 @@ if __name__ == '__main__':
     ukr.fit(nb_epoch=nb_epoch, eta=eta)
 
     ukr.visualize(n_grid_points=100,
-                  cmap='GnBu',
+                  cmap_imshow='GnBu',
                   label_data=labels_animal,
                   label_feature=labels_feature,
                   title_latent_space='Animal map (latent space)',

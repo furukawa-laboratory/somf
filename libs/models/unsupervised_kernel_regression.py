@@ -175,7 +175,8 @@ class UnsupervisedKernelRegression(object):
 
         return F
 
-    def visualize(self, n_grid_points=30, cmap=None, label_data=None, label_feature=None,
+    def visualize(self, n_grid_points=30, cmap_imshow=None, cmap_z=None, color_z=None, marker_z=None,
+                  label_data=None, label_feature=None,
                   title_latent_space=None, title_feature_bars=None, is_show_all_label_data=False,
                   interpolation=None, is_middle_color_zero=False,
                   fig=None, fig_size=None, ax_latent_space=None, ax_feature_bars=None):
@@ -191,8 +192,14 @@ class UnsupervisedKernelRegression(object):
         ----------
         n_grid_points: int, optional, default = None
             Number of representative points of discretization of the latent space needed for the drawing.
-        cmap: str, optional, default = None
+        cmap_imshow: str, optional, default = None
             Colormap to color the latent space. It conforms to the matplotlib color map.
+        cmap_z: str, optional, default = None
+            Colormap to color latent variable in latent space. It conforms to the matplotlib color map.
+        color_z: color, sequence, or sequence of color, optional, default = None
+            The marker color of latent variable z. It conforms to the matplotlib.
+        marker_z: MarkerStyle, optional, default = None
+            The marker style of latent variable z. It conforms to the matplotlib.
         label_data: array of shape (n_data, ), optional. default = None
             The labels corresponds rows of the dataset X.
         label_feature: array of shape (n_features, ), optional. default = None
@@ -231,7 +238,10 @@ class UnsupervisedKernelRegression(object):
         import matplotlib.pyplot as plt
 
         self._initialize_to_visualize(n_grid_points=n_grid_points,
-                                      cmap=cmap,
+                                      cmap_imshow=cmap_imshow,
+                                      cmap_z=cmap_z,
+                                      color_z=color_z,
+                                      marker_z=marker_z,
                                       label_data=label_data,
                                       label_feature=label_feature,
                                       title_latent_space=title_latent_space,
@@ -281,7 +291,8 @@ class UnsupervisedKernelRegression(object):
             elif event.inaxes == self.ax_feature_bars:
                 pass
 
-    def _initialize_to_visualize(self, n_grid_points, cmap, label_data, label_feature,
+    def _initialize_to_visualize(self, n_grid_points, cmap_imshow, cmap_z, color_z, marker_z,
+                                 label_data, label_feature,
                                  title_latent_space, title_feature_bars, is_show_all_label_data,
                                  interpolation, is_middle_color_zero,
                                  fig, fig_size, ax_latent_space, ax_feature_bars):
@@ -352,7 +363,10 @@ class UnsupervisedKernelRegression(object):
             self.ax_latent_space = ax_latent_space
             self.ax_feature_bars = ax_feature_bars
 
-        self.cmap = cmap
+        self.cmap_imshow = cmap_imshow
+        self.cmap_z = cmap_z
+        self.color_z = color_z
+        self.marker_z = marker_z
         self.interpolation = interpolation
         self.is_middle_color_zero = is_middle_color_zero
         self.click_point_latent_space = None  # index of the clicked representative point
@@ -398,7 +412,7 @@ class UnsupervisedKernelRegression(object):
         self.selected_feature = None
 
     def _set_cmap(self, cmap):
-        self.cmap = cmap
+        self.cmap_imshow = cmap
 
     def _set_titles(self, title_latent_space, title_feature_bars):
         self.title_latent_space = title_latent_space
@@ -450,7 +464,7 @@ class UnsupervisedKernelRegression(object):
                                                 coordinate_ax_bottom,
                                                 coordinate_ax_top],
                                         interpolation=self.interpolation,
-                                        cmap=self.cmap,
+                                        cmap=self.cmap_imshow,
                                         vmin=vmin,
                                         vmax=vmax)
             ctr = self.ax_latent_space.contour(grid_points_3d[:, :, 0],
@@ -463,7 +477,8 @@ class UnsupervisedKernelRegression(object):
                                           path_effects.Normal()])
 
         # Plot latent variables
-        self.ax_latent_space.scatter(self.Z[:, 0], self.Z[:, 1], s=10)
+        self.ax_latent_space.scatter(self.Z[:, 0], self.Z[:, 1],
+                                     s=10, c=self.color_z, cmap=self.cmap_z, marker=self.marker_z)
 
         # Write label
         if self.label_data is None:
