@@ -346,7 +346,7 @@ class UnsupervisedKernelRegression(object):
 
         if params_scatter is None:
             self.params_scatter = {}
-            params_scatter['s'] = 10
+            self.params_scatter['s'] = 10
         elif isinstance(params_scatter, dict):
             self.params_scatter = params_scatter
         else:
