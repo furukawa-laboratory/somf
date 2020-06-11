@@ -176,7 +176,7 @@ class UnsupervisedKernelRegression(object):
         return F
 
     def visualize(self, n_grid_points=30, label_data=None, label_feature=None,
-                  is_show_all_label_data=False, is_middle_color_zero=False,
+                  marker=None, is_show_all_label_data=False, is_middle_color_zero=False,
                   params_imshow=None, params_scatter=None,
                   title_latent_space=None, title_feature_bars=None,
                   fig=None, fig_size=None, ax_latent_space=None, ax_feature_bars=None):
@@ -196,6 +196,8 @@ class UnsupervisedKernelRegression(object):
             The labels corresponds rows of the dataset X.
         label_feature: array of shape (n_features, ), optional. default = None
             The labels corresponds columns of the dataset X.
+        marker: MarkerStyle or its sequence, optional, default = None
+            The marker of scatter. It allows multiple markers.
         is_show_all_label_data: bool, optional, default = False
             When True the labels of the data is always shown.
             When False the label is only shown when the cursor overlaps the corresponding latent variable.
@@ -285,7 +287,7 @@ class UnsupervisedKernelRegression(object):
                 pass
 
     def _initialize_to_visualize(self, n_grid_points, label_data, label_feature,
-                                 is_show_all_label_data, is_middle_color_zero,
+                                 marker, is_show_all_label_data, is_middle_color_zero,
                                  params_imshow, params_scatter,
                                  title_latent_space, title_feature_bars,
                                  fig, fig_size, ax_latent_space, ax_feature_bars):
@@ -328,6 +330,7 @@ class UnsupervisedKernelRegression(object):
         else:
             raise ValueError('label_feature must be 1d array or list')
 
+
         if params_imshow is None:
             self.params_imshow = {}
         elif isinstance(params_imshow, dict):
@@ -342,6 +345,14 @@ class UnsupervisedKernelRegression(object):
             self.params_scatter = params_scatter
         else:
             raise ValueError('invalid params_scatter={}'.format(params_scatter))
+
+        if isinstance(marker, str):
+            self.params_scatter['marker'] = marker
+            self.multiple_marker = None
+        elif isinstance(marker, (list, tuple, np.ndarray)):
+            self.multiple_marker = np.array(marker)
+        else:
+            raise ValueError('invalid marker={}'.format(marker))
 
         if title_latent_space is None:
             self.title_latent_space = 'Latent space'
@@ -489,8 +500,18 @@ class UnsupervisedKernelRegression(object):
                                           path_effects.Normal()])
 
         # Plot latent variables
-        self.ax_latent_space.scatter(self.Z[:, 0], self.Z[:, 1], **self.params_scatter)
-
+        if self.multiple_marker is None:
+            self.ax_latent_space.scatter(self.Z[:, 0], self.Z[:, 1], **self.params_scatter)
+        else:
+            unique_markers = np.unique(self.multiple_marker)
+            for marker in unique_markers:
+                mask = (self.multiple_marker == marker)
+                self.ax_latent_space.scatter(
+                    self.Z[mask, 0],
+                    self.Z[mask, 1],
+                    marker=marker,
+                    **self.params_scatter
+                )
         # Write label
         if self.label_data is None:
             pass
