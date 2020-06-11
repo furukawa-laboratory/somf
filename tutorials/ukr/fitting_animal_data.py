@@ -23,12 +23,17 @@ if __name__ == '__main__':
               is_compact=is_compact, is_save_history=is_save_history, lambda_=lambda_, init=init)
     ukr.fit(nb_epoch=nb_epoch, eta=eta)
 
-    ukr.visualize(n_grid_points=100,
-                  cmap_imshow='GnBu',
-                  label_data=labels_animal,
-                  label_feature=labels_feature,
-                  title_latent_space='Animal map (latent space)',
-                  title_feature_bars='Animal feature',
-                  interpolation='spline16',
-                  is_middle_color_zero=True,
-                  is_show_all_label_data=True)
+    params_imshow = {'cmap': 'BrBG',
+                     'interpolation': 'spline16'}
+    params_scatter = {'s': 30, 'marker': 'x'}
+    ukr.visualize(
+        n_grid_points=100,
+        label_data=labels_animal,
+        label_feature=labels_feature,
+        is_middle_color_zero=True,
+        is_show_all_label_data=True,
+        params_imshow=params_imshow,
+        params_scatter=params_scatter,
+        title_latent_space='Animal map (latent space)',
+        title_feature_bars='Animal feature'
+    )

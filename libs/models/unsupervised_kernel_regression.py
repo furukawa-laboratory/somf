@@ -175,10 +175,10 @@ class UnsupervisedKernelRegression(object):
 
         return F
 
-    def visualize(self, n_grid_points=30, cmap_imshow=None, cmap_z=None, color_z=None, marker_z=None,
-                  label_data=None, label_feature=None,
-                  title_latent_space=None, title_feature_bars=None, is_show_all_label_data=False,
-                  interpolation=None, is_middle_color_zero=False,
+    def visualize(self, n_grid_points=30, label_data=None, label_feature=None,
+                  is_show_all_label_data=False, is_middle_color_zero=False,
+                  params_imshow=None, params_scatter=None,
+                  title_latent_space=None, title_feature_bars=None,
                   fig=None, fig_size=None, ax_latent_space=None, ax_feature_bars=None):
         """Visualize fit model interactively.
         The dataset can be visualized in an exploratory way using the latent variables and the mapping estimated by UKR.
@@ -192,31 +192,27 @@ class UnsupervisedKernelRegression(object):
         ----------
         n_grid_points: int, optional, default = None
             Number of representative points of discretization of the latent space needed for the drawing.
-        cmap_imshow: str, optional, default = None
-            Colormap to color the latent space. It conforms to the matplotlib color map.
-        cmap_z: str, optional, default = None
-            Colormap to color latent variable in latent space. It conforms to the matplotlib color map.
-        color_z: color, sequence, or sequence of color, optional, default = None
-            The marker color of latent variable z. It conforms to the matplotlib.
-        marker_z: MarkerStyle, optional, default = None
-            The marker style of latent variable z. It conforms to the matplotlib.
         label_data: array of shape (n_data, ), optional. default = None
             The labels corresponds rows of the dataset X.
         label_feature: array of shape (n_features, ), optional. default = None
             The labels corresponds columns of the dataset X.
-        title_latent_space: str, optional, default = None
-            The title of axis to visualize the latent space
-        title_feature_bars: str, optional, default = None
-            The title of axis to visualize bars of features
         is_show_all_label_data: bool, optional, default = False
             When True the labels of the data is always shown.
             When False the label is only shown when the cursor overlaps the corresponding latent variable.
-        interpolation: str, optional, default = None
-            Interpolation method by imshow.
         is_middle_color_zero: bool, optional, default = False
             If `True`, the value corresponding to middle color in the colormap is fixed at 0.
             If the data is normalized to zero mean and it is important whether it is higher or lower than the mean,
             setting to `True` makes the coloring easier to read.
+        params_imshow: dict, optional, default = None
+            The dictionary of kwargs in imshow used for drawing the value of the feature in the latent space.
+            See the official document of matplotlib.pyplot.imshow for more information on available arguments.
+        params_scatter: dict, optional, default = None
+            The dictionary of kwargs in scatter used for plotting latent variables in the latent space.
+            See the official document of matplotlib.pyplot.imshow for more information on available arguments.
+        title_latent_space: str, optional, default = None
+            The title of axis to visualize the latent space
+        title_feature_bars: str, optional, default = None
+            The title of axis to visualize bars of features
         fig: matplotlib.figure.Figure, default = True
             The figure to visualize.
             It is assigned only when you want to specify a figure to visualize.
@@ -238,16 +234,13 @@ class UnsupervisedKernelRegression(object):
         import matplotlib.pyplot as plt
 
         self._initialize_to_visualize(n_grid_points=n_grid_points,
-                                      cmap_imshow=cmap_imshow,
-                                      cmap_z=cmap_z,
-                                      color_z=color_z,
-                                      marker_z=marker_z,
+                                      params_imshow=params_imshow,
+                                      params_scatter=params_scatter,
                                       label_data=label_data,
                                       label_feature=label_feature,
                                       title_latent_space=title_latent_space,
                                       title_feature_bars=title_feature_bars,
                                       is_show_all_label_data=is_show_all_label_data,
-                                      interpolation=interpolation,
                                       is_middle_color_zero=is_middle_color_zero,
                                       fig=fig,
                                       fig_size=fig_size,
@@ -291,11 +284,12 @@ class UnsupervisedKernelRegression(object):
             elif event.inaxes == self.ax_feature_bars:
                 pass
 
-    def _initialize_to_visualize(self, n_grid_points, cmap_imshow, cmap_z, color_z, marker_z,
-                                 label_data, label_feature,
-                                 title_latent_space, title_feature_bars, is_show_all_label_data,
-                                 interpolation, is_middle_color_zero,
+    def _initialize_to_visualize(self, n_grid_points, label_data, label_feature,
+                                 is_show_all_label_data, is_middle_color_zero,
+                                 params_imshow, params_scatter,
+                                 title_latent_space, title_feature_bars,
                                  fig, fig_size, ax_latent_space, ax_feature_bars):
+
         # invalid check
         if self.n_components != 2:
             raise ValueError('Now support only n_components = 2')
@@ -334,6 +328,21 @@ class UnsupervisedKernelRegression(object):
         else:
             raise ValueError('label_feature must be 1d array or list')
 
+        if params_imshow is None:
+            self.params_imshow = {}
+        elif isinstance(params_imshow, dict):
+            self.params_imshow = params_imshow
+        else:
+            raise ValueError('invalid params_imshow={}'.format(params_imshow))
+
+        if params_scatter is None:
+            self.params_scatter = {}
+            params_scatter['s'] = 10
+        elif isinstance(params_scatter, dict):
+            self.params_scatter = params_scatter
+        else:
+            raise ValueError('invalid params_scatter={}'.format(params_scatter))
+
         if title_latent_space is None:
             self.title_latent_space = 'Latent space'
         else:
@@ -363,11 +372,6 @@ class UnsupervisedKernelRegression(object):
             self.ax_latent_space = ax_latent_space
             self.ax_feature_bars = ax_feature_bars
 
-        self.cmap_imshow = cmap_imshow
-        self.cmap_z = cmap_z
-        self.color_z = color_z
-        self.marker_z = marker_z
-        self.interpolation = interpolation
         self.is_middle_color_zero = is_middle_color_zero
         self.click_point_latent_space = None  # index of the clicked representative point
         self.clicked_mapping = self.X.mean(axis=0)
@@ -412,7 +416,7 @@ class UnsupervisedKernelRegression(object):
         self.selected_feature = None
 
     def _set_cmap(self, cmap):
-        self.cmap_imshow = cmap
+        self.params_imshow['cmap'] = cmap
 
     def _set_titles(self, title_latent_space, title_feature_bars):
         self.title_latent_space = title_latent_space
@@ -463,10 +467,9 @@ class UnsupervisedKernelRegression(object):
                                                 coordinate_ax_right,
                                                 coordinate_ax_bottom,
                                                 coordinate_ax_top],
-                                        interpolation=self.interpolation,
-                                        cmap=self.cmap_imshow,
                                         vmin=vmin,
-                                        vmax=vmax)
+                                        vmax=vmax,
+                                        **self.params_imshow)
             ctr = self.ax_latent_space.contour(grid_points_3d[:, :, 0],
                                                grid_points_3d[:, :, 1],
                                                grid_values_to_contour, 6, colors='k')
@@ -477,8 +480,7 @@ class UnsupervisedKernelRegression(object):
                                           path_effects.Normal()])
 
         # Plot latent variables
-        self.ax_latent_space.scatter(self.Z[:, 0], self.Z[:, 1],
-                                     s=10, c=self.color_z, cmap=self.cmap_z, marker=self.marker_z)
+        self.ax_latent_space.scatter(self.Z[:, 0], self.Z[:, 1], **self.params_scatter)
 
         # Write label
         if self.label_data is None:
@@ -493,8 +495,6 @@ class UnsupervisedKernelRegression(object):
                                            path_effects.Normal()])
             else:
                 if self.index_data_label_shown is not None:
-                    # point_label = self.Z[self.index_data_label_shown,:] + self.noise_label[self.index_data_label_shown,:]
-                    # label = self.label_data[self.index_data_label_shown]
                     text = self.ax_latent_space.text(self.Z[self.index_data_label_shown, 0],
                                                      self.Z[self.index_data_label_shown, 1],
                                                      self.label_data[self.index_data_label_shown],
@@ -551,4 +551,3 @@ class UnsupervisedKernelRegression(object):
             return np.squeeze(grid_array.reshape(np.append(self.n_grid_points, -1)))
         else:
             raise ValueError('arg shape {} is not consistent'.format(grid_array.shape))
-
