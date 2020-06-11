@@ -415,8 +415,17 @@ class UnsupervisedKernelRegression(object):
         self.grid_values_to_draw = grid_values
         self.selected_feature = None
 
-    def _set_cmap(self, cmap):
-        self.params_imshow['cmap'] = cmap
+    def set_params_imshow(self, params: dict):
+        if isinstance(params, dict):
+            self.params_imshow.update(params)
+        else:
+            raise ValueError('invalid params={}')
+
+    def set_params_scatter(self, params: dict):
+        if isinstance(params, dict):
+            self.params_scatter.update(params)
+        else:
+            raise ValueError('invalid params={}')
 
     def _set_titles(self, title_latent_space, title_feature_bars):
         self.title_latent_space = title_latent_space
