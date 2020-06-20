@@ -79,7 +79,7 @@ class TSOMCrossSOM:
 
 
 
-    def fit(self, tsom_epoch_num, som_epoch_num):
+    def fit(self, epoch_num=100):
         # 下位TSOMの定義
         child_TSOM = []
         for i in np.arange(self.class_num):
@@ -93,10 +93,11 @@ class TSOMCrossSOM:
             child_TSOM[i].fit(nb_epoch=1)
 
         #parentに渡すデータの作成
+        parent_observed_dim = child_TSOM[0].Y.shape[0] * child_TSOM[0].Y.shape[1] * child_TSOM[0].Y.shape[2]
+        reference_vector_set =np.zeros((class_num,parent_observed_dim))
         for i in np.arange(self.class_num):
-            K=child_TSOM[i].Y.shape[0]*child_TSOM[i].Y.shape[1]*child_TSOM[i].Y.shape[2]
-            #reshaped_reference_vector=child_TSOM[i].Y.reshape(())
-        #reference_vector_set=
+            reshaped_reference_vector=child_TSOM[i].Y.reshape((parent_observed_dim))
+            reference_vector_set[i,:]=reshaped_reference_vector
 
 
         #上位のSOMの定義
@@ -152,4 +153,4 @@ if __name__ == '__main__':
 
     tsom_cross_som=TSOMCrossSOM(datasets=dataset,latent_dim=2,resolution=20,SIGMA_MAX=1.0,SIGMA_MIN=0.1,TAU=40,init=init)
 
-    tsom_cross_som.fit(tsom_epoch_num=1,som_epoch_num=1)
+    tsom_cross_som.fit(epoch_num=1)
