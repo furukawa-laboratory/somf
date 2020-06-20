@@ -1,7 +1,7 @@
 from libs.models.tsom import TSOM2
 from libs.models.som import SOM
 import numpy as np
-from scipy.spatial import distance as dist
+from tqdm import tqdm
 
 
 class TSOMCrossSOM:
@@ -74,65 +74,73 @@ class TSOMCrossSOM:
             raise ValueError("invalid init: {}\n init must be list or tuple".format((init)))
 
 
-
-
-
-
-
     def fit(self, epoch_num=100):
+
         # 下位TSOMの定義
         child_TSOM = []
         for i in np.arange(self.class_num):
-            temp_class = TSOM2(X=self.datasets[i],latent_dim=self.child_latent_dim,resolution=self.child_resolution,
-                               SIGMA_MAX=self.child_sigma_max,SIGMA_MIN=self.child_sigma_min,TAU=self.child_tau)
+            temp_class = TSOM2(X=self.datasets[i], latent_dim=self.child_latent_dim, resolution=self.child_resolution,
+                               SIGMA_MAX=self.child_sigma_max, SIGMA_MIN=self.child_sigma_min, TAU=self.child_tau)
             child_TSOM.append(temp_class)
 
 
-        #childTSOMの学習
-        for i in np.arange(self.class_num):
-            child_TSOM[i].fit(nb_epoch=1)
+        parent_observed_dim = child_TSOM[0].K1 * child_TSOM[0].K2 * child_TSOM[0].observed_dim
+        reference_vector_set = np.zeros((class_num, parent_observed_dim))
 
-        #parentに渡すデータの作成
-        parent_observed_dim = child_TSOM[0].Y.shape[0] * child_TSOM[0].Y.shape[1] * child_TSOM[0].Y.shape[2]
-        reference_vector_set =np.zeros((class_num,parent_observed_dim))
-        for i in np.arange(self.class_num):
-            reshaped_reference_vector=child_TSOM[i].Y.reshape((parent_observed_dim))
-            reference_vector_set[i,:]=reshaped_reference_vector
+        for epoch in np.arange(epoch_num):
+
+            #学習が1回目の時(潜在変数初期化なので別にする)
+            if epoch==0:
+                # childTSOMの学習(1回目)
+                for i in np.arange(self.class_num):
+                    child_TSOM[i].fit(nb_epoch=1)
+
+                # parentに渡すデータの作成
+                for i in np.arange(self.class_num):
+                    reshaped_reference_vector = child_TSOM[i].Y.reshape((parent_observed_dim))
+                    reference_vector_set[i, :] = reshaped_reference_vector
+
+                # 上位SOMの定義
+                parent_SOM = SOM(X=reference_vector_set, latent_dim=self.parent_latent_dim,
+                                 resolution=self.parent_resolution
+                                 , sigma_max=self.parent_sigma_max, sigma_min=self.parent_sigma_min,
+                                 tau=self.parent_tau,
+                                 init=self.parent_init)
+                # 上位のSOMの学習(１回目)
+                parent_SOM.fit(nb_epoch=1)
+
+                # コピーバック
+                for i in np.arange(self.class_num):
+                    child_TSOM[i].Y = parent_SOM.Y[parent_SOM.bmus[i]]
+
+            else:
+                #下位のTSOMの学習
+                for i in np.arange(self.class_num):
+                    # 勝者決定
+                    child_TSOM[i]._competitive_process_nonmissing_indirect()
+
+                    #学習量の決定
+                    child_TSOM[i]._cooperative_process(epoch=epoch)
+
+                    #写像の更新
+                    child_TSOM[i]._adaptive_process_nonmissing_indirect()
+
+                    #parentに渡すデータん更新
+                    reshaped_reference_vector = child_TSOM[i].Y.reshape((parent_observed_dim))
+                    reference_vector_set[i, :] = reshaped_reference_vector
+
+                #上位のSOMの学習
+                parent_SOM._competitive_process()
+                parent_SOM._cooperative_process(epoch=epoch)
+                parent_SOM._adaptive_process()
+
+                #コピーバック
+                for i in np.arange(self.class_num):
+                    child_TSOM[i].Y = parent_SOM.Y[parent_SOM.bmus[i]]
 
 
-        #上位のSOMの定義
-        #parent_SOM=SOM(X=)
 
 
-        #コピーバック
-
-
-
-    #     self._fit_1st_TSOM(tsom_epoch_num)
-    #     self._fit_KDE(kernel_width)
-    #     self._fit_2nd_SOM(som_epoch_num)
-    #
-    # def _fit_1st_TSOM(self, tsom_epoch_num):
-    #     self.tsom = TSOM2(**self.params_tsom)
-    #     self.tsom.fit(tsom_epoch_num)
-    #
-    # def _fit_KDE(self, kernel_width):  # 学習した後の潜在空間からKDEで確率分布を作る
-    #     prob_data = np.zeros((self.group_num, self.tsom.K1))  # group数*ノード数
-    #     # グループごとにKDEを適用
-    #     for i in range(self.group_num):
-    #         Dist = dist.cdist(self.tsom.Zeta1, self.tsom.Z1[self.index_members_of_group[i], :],
-    #                           'sqeuclidean')  # KxNの距離行列を計算
-    #         H = np.exp(-Dist / (2 * kernel_width * kernel_width))  # KxNの学習量行列を計算
-    #         prob = np.sum(H, axis=1)
-    #         prob_sum = np.sum(prob)
-    #         prob = prob / prob_sum
-    #         prob_data[i, :] = prob
-    #     self.params_som['X'] = prob_data
-    #     self.params_som['metric'] = "KLdivergence"
-    #
-    # def _fit_2nd_SOM(self, som_epoch_num):  # 上位のSOMを
-    #     self.som = SOM(**self.params_som)
-    #     self.som.fit(som_epoch_num)
 
 
 if __name__ == '__main__':
