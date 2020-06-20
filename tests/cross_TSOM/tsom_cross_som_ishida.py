@@ -7,42 +7,105 @@ from scipy.spatial import distance as dist
 class TSOMCrossSOM:
     def __init__(self, datasets, latent_dim,resolution,SIGMA_MAX, SIGMA_MIN, TAU,init):
 
-        # #データセットに関しての例外処理
-        # if datasets.ndim == 2:
-        #     self.X = X.reshape((X.shape[0], X.shape[1], 1))
-        #     self.N1 = self.X.shape[0]
-        #     self.N2 = self.X.shape[1]
-        #     self.observed_dim = self.X.shape[2]  # 観測空間の次元
-        #
-        # elif X.ndim == 3:
-        #     self.X = X
-        #     self.N1 = self.X.shape[0]
-        #     self.N2 = self.X.shape[1]
-        #     self.observed_dim = self.X.shape[2]  # 観測空間の次元
-        # else:
-        #     raise ValueError("invalid X: {}\nX must be 2d or 3d ndarray".format(X))
+        # #データセットに関しての例外処理(tupleかlistのみでndarrayの場合はerror)
+        if isinstance(datasets,(tuple,list)):
+            self.datasets=datasets
+            self.class_num = len(datasets)  # クラス数
+        else:
+            raise ValueError("invalid datasets: {}\ndataset must be list or tuple".format(datasets))
+
+        #全クラスで次元数が違う場合でエラーを出すかどうか？
+
+        #resolutionに関しての例外処理(下位のTSOMとSOMで分けてる)
+        if isinstance(resolution,(list,tuple)) and len(resolution)==2:
+            self.child_resolution=resolution[0]
+            self.parent_resolution = resolution[1]
+        elif isinstance(resolution,int):
+            self.child_resolution=resolution
+            self.parent_resolution = resolution
+        else:
+            raise ValueError("invalid resolution: {}".format(resolution))
+
+        #sigma_maxについての例外処理(下位のTSOMとSOMで分けてる)
+        if isinstance(SIGMA_MAX,(tuple,list)):
+            self.child_sigma_max = SIGMA_MAX[0]
+            self.parent_sigma_max = SIGMA_MAX[1]
+        elif isinstance(SIGMA_MAX,float):#下位のTSOMと上位のSOMで同じ場合
+            self.child_sigma_max=SIGMA_MAX
+            self.parent_sigma_max = SIGMA_MAX
+        else:
+            raise ValueError("invalid SIGMAX: {}".format(SIGMA_MAX))
+
+        # sigma_minについての例外処理(下位のTSOMとSOMで分けてる)
+        if isinstance(SIGMA_MIN, (tuple, list)):
+            self.child_sigma_min = SIGMA_MIN[0]
+            self.parent_sigma_min = SIGMA_MIN[1]
+        elif isinstance(SIGMA_MIN, float):  # 下位のTSOMと上位のSOMで同じ場合
+            self.child_sigma_min = SIGMA_MIN
+            self.parent_sigma_min = SIGMA_MIN
+        else:
+            raise ValueError("invalid SIGMIN: {}".format(SIGMA_MIN))
+
+        #TAUについての例外処理(下位のTSOMとSOMで分けてる)
+        if isinstance(TAU,(tuple,list)):
+            self.child_tau=TAU[0]
+            self.parent_tau=TAU[1]
+        elif isinstance(TAU,int):
+            self.child_tau = TAU
+            self.parent_tau = TAU
+        else:
+            raise ValueError("invalid TAU: {}".format(TAU))
+
+        #latent_dimについての例外処理(下位のTSOMとSOMで分けてる)
+        if isinstance(latent_dim,(tuple,list)):
+            self.child_latent_dim = latent_dim[0]
+            self.parent_latent_dim = latent_dim[1]
+        elif isinstance(latent_dim,int):
+            self.child_latent_dim=latent_dim
+            self.parent_latent_dim = latent_dim
+        else:
+            raise ValueError("invalid latent_dim: {}".format(latent_dim))
+
+        #initについての例外処理(上位と下位に分けてる)
+        if isinstance(init,(tuple,list)):
+            self.child_init=init[0]
+            self.parent_init = init[1]
+        else:
+            raise ValueError("invalid init: {}\n init must be list or tuple".format((init)))
 
 
-        self.datasets=datasets#listかndarrayで与えるか
-        self.class_num=datasets.shape[0]
-        self.N1=datasets.shape[1]
-        self.N2=datasets.shape[2]
-        self.observed_dim=datasets.shape[3]
-
-        self.child_latent_dim=latent_dim#子供と親
-        self.child_resolution=resolution#子供と親
-        self.child_sigma_max=SIGMA_MAX#各子TSOMと親
 
 
 
 
 
-    def fit(self, tsom_epoch_num, kernel_width, som_epoch_num):
+    def fit(self, tsom_epoch_num, som_epoch_num):
         # 下位TSOMの定義
         child_TSOM = []
-
         for i in np.arange(self.class_num):
-            temp_class = TSOM2(X=self.datasets[i],latent_dim=self.child_latent_dim,resolution=self.child_resolution,SIGMA_MAX=self.child_sigma_max)
+            temp_class = TSOM2(X=self.datasets[i],latent_dim=self.child_latent_dim,resolution=self.child_resolution,
+                               SIGMA_MAX=self.child_sigma_max,SIGMA_MIN=self.child_sigma_min,TAU=self.child_tau)
+            child_TSOM.append(temp_class)
+
+
+        #childTSOMの学習
+        for i in np.arange(self.class_num):
+            child_TSOM[i].fit(nb_epoch=1)
+
+        #parentに渡すデータの作成
+        for i in np.arange(self.class_num):
+            K=child_TSOM[i].Y.shape[0]*child_TSOM[i].Y.shape[1]*child_TSOM[i].Y.shape[2]
+            #reshaped_reference_vector=child_TSOM[i].Y.reshape(())
+        #reference_vector_set=
+
+
+        #上位のSOMの定義
+        #parent_SOM=SOM(X=)
+
+
+        #コピーバック
+
+
 
     #     self._fit_1st_TSOM(tsom_epoch_num)
     #     self._fit_KDE(kernel_width)
@@ -69,3 +132,24 @@ class TSOMCrossSOM:
     # def _fit_2nd_SOM(self, som_epoch_num):  # 上位のSOMを
     #     self.som = SOM(**self.params_som)
     #     self.som.fit(som_epoch_num)
+
+
+if __name__ == '__main__':
+
+    #人工データの作成
+    class_num=10
+    N1=20#ひとまず全クラスで同じ状況で行う
+    N2=30
+    observed_dim=4
+    dataset=[]
+    for i in np.arange(class_num):
+        Xi=np.random.rand(N1,N2,observed_dim)
+        dataset.append(Xi)
+    #パラメータの設定
+    child_init="random"
+    parent_init = "random"
+    init=[child_init,parent_init]
+
+    tsom_cross_som=TSOMCrossSOM(datasets=dataset,latent_dim=2,resolution=20,SIGMA_MAX=1.0,SIGMA_MIN=0.1,TAU=40,init=init)
+
+    tsom_cross_som.fit(tsom_epoch_num=1,som_epoch_num=1)
