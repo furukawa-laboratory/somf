@@ -182,6 +182,8 @@ class TSOM2():
             np.sum(np.square(self.U[:, None, :, :] - self.Y[None, :, :, :]), axis=(2, 3)), axis=1)
         self.k_star2 = np.argmin(
             np.sum(np.square(self.V[:, :, None, :] - self.Y[:, None, :, :]), axis=(0, 3)), axis=1)
+        self.Z1 = self.Zeta1[self.k_star1, :]  # k_starのZの座標N*L(L=2
+        self.Z2 = self.Zeta2[self.k_star2, :]  # k_starのZの座標N*L(L=2
 
     def _competitive_process_missing_direct(self):
         # 勝者決定
@@ -189,6 +191,8 @@ class TSOM2():
             self.X[:, :, None, None, :] - self.Y[None, None, :, :, :])
         self.k_star1 = np.argmin(np.einsum("jl,ijklm->ik", self.H2.T, Dist), axis=1)
         self.k_star2 = np.argmin(np.einsum("ik,ijklm->jl", self.H1.T, Dist), axis=1)
+        self.Z1 = self.Zeta1[self.k_star1, :]  # k_starのZの座標N*L(L=2
+        self.Z2 = self.Zeta2[self.k_star2, :]  # k_starのZの座標N*L(L=2
 
     def _competitive_process_nonmissing_indirect(self):
         # 勝者決定
@@ -196,6 +200,8 @@ class TSOM2():
             np.sum(np.square(self.U[:, None, :, :] - self.Y[None, :, :, :]), axis=(2, 3)), axis=1)
         self.k_star2 = np.argmin(
             np.sum(np.square(self.V[:, :, None, :] - self.Y[:, None, :, :]), axis=(0, 3)), axis=1)
+        self.Z1 = self.Zeta1[self.k_star1, :]  # k_starのZの座標N*L(L=2
+        self.Z2 = self.Zeta2[self.k_star2, :]  # k_starのZの座標N*L(L=2
 
     def _competitive_process_nonmissing_direct(self):
         # 勝者決定
@@ -203,6 +209,8 @@ class TSOM2():
             self.X[:, :, None, None, :] - self.Y[None, None, :, :, :])
         self.k_star1 = np.argmin(np.einsum("jl,ijklm->ik", self.H2.T, Dist), axis=1)
         self.k_star2 = np.argmin(np.einsum("ik,ijklm->jl", self.H1.T, Dist), axis=1)
+        self.Z1 = self.Zeta1[self.k_star1, :]  # k_starのZの座標N*L(L=2
+        self.Z2 = self.Zeta2[self.k_star2, :]  # k_starのZの座標N*L(L=2
 
 
     def fit(self, nb_epoch=200):
@@ -237,9 +245,6 @@ class TSOM2():
                     self._competitive_process_nonmissing_direct()
                 else:
                     raise ValueError("invalid model: {}\nmodel must be None or direct".format(self.model))
-
-            self.Z1 = self.Zeta1[self.k_star1, :]  # k_starのZの座標N*L(L=2
-            self.Z2 = self.Zeta2[self.k_star2, :]  # k_starのZの座標N*L(L=2
 
             self.history['y'][epoch, :, :] = self.Y
             self.history['z1'][epoch, :] = self.Z1
