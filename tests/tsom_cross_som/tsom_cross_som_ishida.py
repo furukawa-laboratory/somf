@@ -74,69 +74,91 @@ class TSOMCrossSOM:
             raise ValueError("invalid init: {}\n init must be list or tuple".format((init)))
 
 
-    def fit(self, epoch_num=100):
+    def fit(self, epoch_num=100,verbose=True):
 
         # 下位TSOMの定義
-        child_TSOM = []
+        self.child_TSOM = []
         for i in np.arange(self.class_num):
             temp_class = TSOM2(X=self.datasets[i], latent_dim=self.child_latent_dim, resolution=self.child_resolution,
                                SIGMA_MAX=self.child_sigma_max, SIGMA_MIN=self.child_sigma_min, TAU=self.child_tau)
-            child_TSOM.append(temp_class)
+            self.child_TSOM.append(temp_class)
 
-
-        parent_observed_dim = child_TSOM[0].K1 * child_TSOM[0].K2 * child_TSOM[0].observed_dim
+        parent_observed_dim = self.child_TSOM[0].K1 * self.child_TSOM[0].K2 * self.child_TSOM[0].observed_dim
         reference_vector_set = np.zeros((class_num, parent_observed_dim))
 
-        for epoch in np.arange(epoch_num):
+        if verbose is True:
+            bar=tqdm(np.arange(epoch_num))
+        else:
+            bar=np.arange(epoch_num)
 
+        for epoch in bar:
             #学習が1回目の時(潜在変数初期化なので別にする)
             if epoch==0:
                 # childTSOMの学習(1回目)
                 for i in np.arange(self.class_num):
-                    child_TSOM[i].fit(nb_epoch=1)
+                    self.child_TSOM[i].fit(nb_epoch=1)
 
-                # parentに渡すデータの作成
-                for i in np.arange(self.class_num):
-                    reshaped_reference_vector = child_TSOM[i].Y.reshape((parent_observed_dim))
+                    # parentに渡すデータの作成
+                    reshaped_reference_vector = self.child_TSOM[i].Y.reshape((parent_observed_dim))
                     reference_vector_set[i, :] = reshaped_reference_vector
 
+
                 # 上位SOMの定義
-                parent_SOM = SOM(X=reference_vector_set, latent_dim=self.parent_latent_dim,
+                self.parent_SOM = SOM(X=reference_vector_set, latent_dim=self.parent_latent_dim,
                                  resolution=self.parent_resolution
                                  , sigma_max=self.parent_sigma_max, sigma_min=self.parent_sigma_min,
                                  tau=self.parent_tau,
                                  init=self.parent_init)
                 # 上位のSOMの学習(１回目)
-                parent_SOM.fit(nb_epoch=1)
+                self.parent_SOM.fit(nb_epoch=1,verbose=False)
 
                 # コピーバック
                 for i in np.arange(self.class_num):
-                    child_TSOM[i].Y = parent_SOM.Y[parent_SOM.bmus[i]]
+                    self.child_TSOM[i].Y = self.parent_SOM.Y[self.parent_SOM.bmus[i]].reshape(self.child_TSOM[i].K1,self.child_TSOM[i].K2,self.child_TSOM[i].observed_dim)
 
+                #学習履歴の保存
+                #下位のTSOMの学習履歴の保存
+                for i in np.arange(self.class_num):
+                    self.child_TSOM[i].history["z1"][epoch,:,:]=self.child_TSOM[i].Z1
+                    self.child_TSOM[i].history["z2"][epoch, :, :] = self.child_TSOM[i].Z2
+                    self.child_TSOM[i].history["y"][epoch,:,:,:]=self.child_TSOM[i].Y
+                #上位のSOMの学習履歴の保存
+                self.parent_SOM.history["z"][epoch,:,:]=self.parent_SOM.Z
+                self.parent_SOM.history["y"][epoch, :, :] = self.parent_SOM.Y
+
+            #学習２回目以降
             else:
                 #下位のTSOMの学習
                 for i in np.arange(self.class_num):
                     # 勝者決定
-                    child_TSOM[i]._competitive_process_nonmissing_indirect()
-
+                    self.child_TSOM[i]._competitive_process_nonmissing_indirect()
                     #学習量の決定
-                    child_TSOM[i]._cooperative_process(epoch=epoch)
-
+                    self.child_TSOM[i]._cooperative_process(epoch=epoch)
                     #写像の更新
-                    child_TSOM[i]._adaptive_process_nonmissing_indirect()
+                    self.child_TSOM[i]._adaptive_process_nonmissing_indirect()
 
-                    #parentに渡すデータん更新
-                    reshaped_reference_vector = child_TSOM[i].Y.reshape((parent_observed_dim))
+                    #parentに渡すデータの更新
+                    reshaped_reference_vector = self.child_TSOM[i].Y.reshape((parent_observed_dim))
                     reference_vector_set[i, :] = reshaped_reference_vector
 
                 #上位のSOMの学習
-                parent_SOM._competitive_process()
-                parent_SOM._cooperative_process(epoch=epoch)
-                parent_SOM._adaptive_process()
+                self.parent_SOM._competitive_process()
+                self.parent_SOM._cooperative_process(epoch=epoch)
+                self.parent_SOM._adaptive_process()
 
                 #コピーバック
                 for i in np.arange(self.class_num):
-                    child_TSOM[i].Y = parent_SOM.Y[parent_SOM.bmus[i]]
+                    self.child_TSOM[i].Y = self.parent_SOM.Y[self.parent_SOM.bmus[i]]
+
+                    # 学習履歴の保存
+                    # 下位のTSOMの学習履歴の保存
+                    for i in np.arange(self.class_num):
+                        self.child_TSOM[i].history["z1"][epoch, :, :] = self.child_TSOM[i].Z1
+                        self.child_TSOM[i].history["z2"][epoch, :, :] = self.child_TSOM[i].Z2
+                        self.child_TSOM[i].history["y"][epoch, :, :] = self.child_TSOM[i].Y
+                    # 上位のSOMの学習履歴の保存
+                    self.parent_SOM.history["z"][epoch, :, :] = self.parent_SOM.Z
+                    self.parent_SOM.history["y"][epoch, :, :] = self.parent_SOM.Y
 
 
 
@@ -159,6 +181,6 @@ if __name__ == '__main__':
     parent_init = "random"
     init=[child_init,parent_init]
 
-    tsom_cross_som=TSOMCrossSOM(datasets=dataset,latent_dim=2,resolution=20,SIGMA_MAX=1.0,SIGMA_MIN=0.1,TAU=40,init=init)
+    tsom_cross_som=TSOMCrossSOM(datasets=dataset,latent_dim=2,resolution=10,SIGMA_MAX=1.0,SIGMA_MIN=0.1,TAU=40,init=init)
 
-    tsom_cross_som.fit(epoch_num=1)
+    tsom_cross_som.fit(epoch_num=1,verbose=False)
