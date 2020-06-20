@@ -155,7 +155,7 @@ class TSOMCrossSOM:
                     for i in np.arange(self.class_num):
                         self.child_TSOM[i].history["z1"][epoch, :, :] = self.child_TSOM[i].Z1
                         self.child_TSOM[i].history["z2"][epoch, :, :] = self.child_TSOM[i].Z2
-                        self.child_TSOM[i].history["y"][epoch, :, :] = self.child_TSOM[i].Y
+                        self.child_TSOM[i].history["y"][epoch, :, :,:] = self.child_TSOM[i].Y.reshape(self.child_TSOM[i].K1,self.child_TSOM[i].K2,self.child_TSOM[i].observed_dim)
                     # 上位のSOMの学習履歴の保存
                     self.parent_SOM.history["z"][epoch, :, :] = self.parent_SOM.Z
                     self.parent_SOM.history["y"][epoch, :, :] = self.parent_SOM.Y
