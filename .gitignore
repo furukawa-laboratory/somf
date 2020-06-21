@@ -1,3 +1,10 @@
+# For furukawa-laboratory
+.idea/
+*-checkpoint.ipynb
+*.pyc
+temp-plot.html
+lastfailed
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
