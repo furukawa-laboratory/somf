@@ -1,16 +1,17 @@
 [tool.poetry]
-name = "somf"
+name = "libs"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-numpy = "^1.18.4"
-tensorflow = "^2.2.0"
+python = "^3.6"
 tqdm = "^4.46.0"
 sklearn = "^0.0"
 scipy = "^1.4.1"
+scikit-learn = "^0.22.1"
+matplotlib = "^2.2.2"
+numpy = "^1.18.1"
 
 [tool.poetry.dev-dependencies]
 
