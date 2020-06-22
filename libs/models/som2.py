@@ -2,7 +2,7 @@
 import numpy as np
 from tqdm import tqdm
 
-from libs.models.som import SOM as som
+from libs.models.som import SOM
 
 
 class SOM2:
@@ -43,17 +43,17 @@ class SOM2:
         self.history["bmu"] = np.zeros((nb_epoch, self.n_class, self.n_sample))
         self.history["bmm"] = np.zeros((nb_epoch, self.n_class))
 
-        SOMs = []
+        soms = []
         for n in range(self.n_class):
-            SOMs.append(som(self.Datasets[n], self.child_latent_dim, self.child_resolution,
+            soms.append(SOM(self.Datasets[n], self.child_latent_dim, self.child_resolution,
                             self.child_sigma_max, self.child_sigma_min, self.child_tau, self.cZinit))
 
         empty = np.empty((self.n_class, self.cK * self.Dim))
         som = SOM(empty, self.parent_latent_dim, self.parent_resolution,
                   self.parent_sigma_max, self.parent_sigma_min, self.parent_tau, self.pZinit)
 
-        self.history['cZeta'] = SOMs[0].Zeta
-        self.history['pZeta'] = SOM.Zeta
+        self.history['cZeta'] = soms[0].Zeta
+        self.history['pZeta'] = som.Zeta
 
         if verbose:
             bar = tqdm(range(nb_epoch))
@@ -61,29 +61,29 @@ class SOM2:
             bar = range(nb_epoch)
 
         for epoch in bar:
-            SOMs_mapping = np.zeros((self.n_class, self.cK * self.Dim))
+            soms_mapping = np.zeros((self.n_class, self.cK * self.Dim))
 
             for n in range(self.n_class):
                 if epoch == 0:
-                    SOMs[n]._cooperative_process(epoch)
-                    SOMs[n]._adaptive_process()
-                    SOMs[n]._competitive_process()
+                    soms[n]._cooperative_process(epoch)
+                    soms[n]._adaptive_process()
+                    soms[n]._competitive_process()
                 else:
-                    SOMs[n].Y = SOM.Y[n].reshape(self.cK, self.Dim)  # copy back
-                    SOMs[n]._competitive_process()
-                    SOMs[n]._cooperative_process(epoch)
-                    SOMs[n]._adaptive_process()
-                SOMs_mapping[n] = SOMs[n].Y.reshape(self.cK * self.Dim)
+                    soms[n].Y = som.Y[n].reshape(self.cK, self.Dim)  # copy back
+                    soms[n]._competitive_process()
+                    soms[n]._cooperative_process(epoch)
+                    soms[n]._adaptive_process()
+                soms_mapping[n] = soms[n].Y.reshape(self.cK * self.Dim)
 
-            SOM.X = SOMs_mapping
-            SOM._cooperative_process(epoch)
-            SOM._adaptive_process()
-            SOM._competitive_process()
+            som.X = soms_mapping
+            som._cooperative_process(epoch)
+            som._adaptive_process()
+            som._competitive_process()
 
             for n in range(self.n_class):
-                self.history["cZ"][epoch, n] = SOMs[n].Z
-                self.history["cY"][epoch, n] = SOMs[n].Y
-                self.history["bmu"][epoch, n] = SOMs[n].bmus
-            self.history["pZ"][epoch] = SOM.Z
-            self.history["pY"][epoch] = SOM.Y.reshape(self.pK, self.cK, self.Dim)
-            self.history["bmm"][epoch] = SOM.bmus
+                self.history["cZ"][epoch, n] = soms[n].Z
+                self.history["cY"][epoch, n] = soms[n].Y
+                self.history["bmu"][epoch, n] = soms[n].bmus
+            self.history["pZ"][epoch] = som.Z
+            self.history["pY"][epoch] = som.Y.reshape(self.pK, self.cK, self.Dim)
+            self.history["bmm"][epoch] = som.bmus
