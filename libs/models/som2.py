@@ -8,7 +8,7 @@ from libs.models.som import SOM
 class SOM2:
     def __init__(self, Datasets, parent_latent_dim, child_latent_dim, parent_resolution, child_resolution,
                  parent_sigma_max, child_sigma_max, parent_sigma_min, child_sigma_min,
-                 parent_tau, child_tau, pZinit, cZinit):
+                 parent_tau, child_tau, pZinit, cZinit, is_save_history=False):
 
         self.Datasets = Datasets
         self.n_class = self.Datasets.shape[0]
@@ -29,19 +29,20 @@ class SOM2:
         self.pK = parent_resolution ** parent_latent_dim
         self.cK = child_resolution ** child_latent_dim
         self.W = np.zeros((self.n_class, self.cK * self.Dim))
+        self.is_save_history = is_save_history
         self.history = {}
 
         self._done_fit = False
         self.Z_grad = None
 
     def fit(self, nb_epoch, verbose=True):
-
-        self.history['cZ'] = np.zeros((nb_epoch, self.n_class, self.n_sample, self.child_latent_dim))
-        self.history['pZ'] = np.zeros((nb_epoch, self.n_class, self.parent_latent_dim))
-        self.history['cY'] = np.zeros((nb_epoch, self.n_class, self.cK, self.Dim))
-        self.history['pY'] = np.zeros((nb_epoch, self.pK, self.cK, self.Dim))
-        self.history["bmu"] = np.zeros((nb_epoch, self.n_class, self.n_sample))
-        self.history["bmm"] = np.zeros((nb_epoch, self.n_class))
+        if self.is_save_history:
+            self.history['cZ'] = np.zeros((nb_epoch, self.n_class, self.n_sample, self.child_latent_dim))
+            self.history['pZ'] = np.zeros((nb_epoch, self.n_class, self.parent_latent_dim))
+            self.history['cY'] = np.zeros((nb_epoch, self.n_class, self.cK, self.Dim))
+            self.history['pY'] = np.zeros((nb_epoch, self.pK, self.cK, self.Dim))
+            self.history["bmu"] = np.zeros((nb_epoch, self.n_class, self.n_sample))
+            self.history["bmm"] = np.zeros((nb_epoch, self.n_class))
 
         soms = []
         for n in range(self.n_class):
@@ -80,10 +81,11 @@ class SOM2:
             som._adaptive_process()
             som._competitive_process()
 
-            for n in range(self.n_class):
-                self.history["cZ"][epoch, n] = soms[n].Z
-                self.history["cY"][epoch, n] = soms[n].Y
-                self.history["bmu"][epoch, n] = soms[n].bmus
-            self.history["pZ"][epoch] = som.Z
-            self.history["pY"][epoch] = som.Y.reshape(self.pK, self.cK, self.Dim)
-            self.history["bmm"][epoch] = som.bmus
+            if self.is_save_history:
+                for n in range(self.n_class):
+                    self.history["cZ"][epoch, n] = soms[n].Z
+                    self.history["cY"][epoch, n] = soms[n].Y
+                    self.history["bmu"][epoch, n] = soms[n].bmus
+                self.history["pZ"][epoch] = som.Z
+                self.history["pY"][epoch] = som.Y.reshape(self.pK, self.cK, self.Dim)
+                self.history["bmm"][epoch] = som.bmus
