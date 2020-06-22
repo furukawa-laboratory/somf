@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     model = SOM2(Datasets, parent_latent_dim, child_latent_dim, parent_resolution, child_resolution,
                  parent_sigma_max, child_sigma_max, parent_sigma_min, child_sigma_min,
-                 parent_tau, child_tau, pZ, cZ)
+                 parent_tau, child_tau, pZ, cZ, is_save_history=True)
     model.fit(nb_epoch)
 
     cY = model.history["cY"]

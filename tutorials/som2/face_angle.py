@@ -74,6 +74,7 @@ if __name__ == "__main__":
         child_tau,
         pZ,
         cZ,
+        is_save_history = True,
     )
     model.fit(nb_epoch)
 
@@ -114,5 +115,5 @@ if __name__ == "__main__":
     ani = anim.FuncAnimation(
         fig, update, interval=interval, frames=nb_epoch, repeat=False
     )
-    ani.save("SOM2.gif", writer='pillow')
-    # plt.show()
+    # ani.save("SOM2.gif", writer='pillow')
+    plt.show()
