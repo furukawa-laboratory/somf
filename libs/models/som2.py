@@ -49,7 +49,7 @@ class SOM2:
                             self.child_sigma_max, self.child_sigma_min, self.child_tau, self.cZinit))
 
         empty = np.empty((self.n_class, self.cK * self.Dim))
-        SOM = som(empty, self.parent_latent_dim, self.parent_resolution,
+        som = SOM(empty, self.parent_latent_dim, self.parent_resolution,
                   self.parent_sigma_max, self.parent_sigma_min, self.parent_tau, self.pZinit)
 
         self.history['cZeta'] = SOMs[0].Zeta
