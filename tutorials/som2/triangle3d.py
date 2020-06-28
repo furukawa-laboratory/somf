@@ -14,7 +14,7 @@ if __name__ == "__main__":
     np.random.seed(seed)
     nb_epoch = 100
     n_class = 3
-    n_sample = 300
+    n_sample = 200
     Dim = 3
     parent_latent_dim = 1
     child_latent_dim = 2
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     child_tau = nb_epoch
     interval = 100
 
-    # ZetaとZの初期値を生成
+    # Zの初期値を生成
     if parent_latent_dim == 2:
         pZ = np.random.normal(size=(n_class, parent_latent_dim), loc=0, scale=0.01)
     else:
@@ -60,9 +60,25 @@ if __name__ == "__main__":
         Datasets[n][:, 1] = rotate_Y
         Datasets[n][:, 2] = n - n_class / 2
 
-    model = SOM2(Datasets, parent_latent_dim, child_latent_dim, parent_resolution, child_resolution,
-                 parent_sigma_max, child_sigma_max, parent_sigma_min, child_sigma_min,
-                 parent_tau, child_tau, pZ, cZ, is_save_history=True)
+    params_1st_som = {
+        "latent_dim": child_latent_dim,
+        "resolution": child_resolution,
+        "sigma_max": child_sigma_max,
+        "sigma_min": child_sigma_min,
+        "tau": child_tau,
+        "init": cZ,
+    }
+
+    params_2nd_som = {
+        "latent_dim": parent_latent_dim,
+        "resolution": parent_resolution,
+        "sigma_max": parent_sigma_max,
+        "sigma_min": parent_sigma_min,
+        "tau": parent_tau,
+        "init": pZ,
+    }
+
+    model = SOM2(Datasets, params_1st_som, params_2nd_som, is_save_history=True)
     model.fit(nb_epoch)
 
     cY = model.history["cY"]
