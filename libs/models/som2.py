@@ -90,7 +90,8 @@ class SOM2:
                 som._adaptive_process()
                 som._competitive_process()
             else:
-                som.Y = self.second_som.Y[n].reshape(self.n_first_node, self.dim)  # copy back
+                bmm = self.second_som.bmus
+                som.Y = self.second_som.Y[bmm[n]].reshape(self.n_first_node, self.dim)  # copy back
                 som._competitive_process()
                 som._cooperative_process(epoch)
                 som._adaptive_process()
