@@ -16,15 +16,15 @@ class SOM2:
         self.Dim = self.datasets.shape[2]
         self.cK = params_first_som["resolution"] ** params_first_som["latent_dim"]
         self.pK = params_second_som["resolution"] ** params_second_som["latent_dim"]
-        self.child_latent_dim = params_first_som["latent_dim"]
-        self.parent_latent_dim = params_second_som["latent_dim"]
+        self.first_latent_dim = params_first_som["latent_dim"]
+        self.second_latent_dim = params_second_som["latent_dim"]
         self.history = {}
 
     def fit(self, nb_epoch, verbose=True):
         if self.is_save_history:
-            self.history['cZ'] = np.zeros((nb_epoch, self.n_class, self.n_sample, self.child_latent_dim))
-            self.history['pZ'] = np.zeros((nb_epoch, self.n_class, self.parent_latent_dim))
-            self.history['pZeta'] = np.zeros((self.pK, self.parent_latent_dim))
+            self.history['cZ'] = np.zeros((nb_epoch, self.n_class, self.n_sample, self.first_latent_dim))
+            self.history['pZ'] = np.zeros((nb_epoch, self.n_class, self.second_latent_dim))
+            self.history['pZeta'] = np.zeros((self.pK, self.second_latent_dim))
             self.history['cY'] = np.zeros((nb_epoch, self.n_class, self.cK, self.Dim))
             self.history['pY'] = np.zeros((nb_epoch, self.pK, self.cK, self.Dim))
             self.history["bmu"] = np.zeros((nb_epoch, self.n_class, self.n_sample))
