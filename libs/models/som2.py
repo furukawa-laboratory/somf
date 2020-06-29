@@ -35,7 +35,10 @@ class SOM2:
 
         self.first_soms = []
         for n in range(self.n_class):
-            self.first_soms.append(SOM(self.datasets[n], **self.params_first_som))
+            if isinstance(self.datasets[n], list):
+                self.first_soms.append(SOM(np.array(self.datasets[n]), **self.params_first_som))
+            else:
+                self.first_soms.append(SOM(self.datasets[n], **self.params_first_som))
         self.first_soms_mapping = np.zeros((self.n_class, self.n_first_node * self.dim))
 
         dummy_data = np.empty((self.n_class, self.n_first_node * self.dim))

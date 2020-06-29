@@ -17,7 +17,7 @@ if __name__ == "__main__":
     n_sample_list = np.random.randint(low=100, high=150, size=n_class)
     Dim = 3
     parent_latent_dim = 1
-    child_latent_dim = 1
+    child_latent_dim = 2
     parent_resolution = 5
     child_resolution = 10
     parent_node_num = parent_resolution ** parent_latent_dim
@@ -47,7 +47,7 @@ if __name__ == "__main__":
         rotate_X -= np.mean(rotate_X)
         rotate_Y -= np.mean(rotate_Y)
         stack = np.dstack([rotate_X, rotate_Y, [n - n_class / 2] * n_sample_list[n]])
-        datasets.append(stack[0])
+        datasets.append(stack.tolist()[0])
 
     params_1st_som = {
         "latent_dim": child_latent_dim,
@@ -90,8 +90,13 @@ if __name__ == "__main__":
         ax2.cla()
 
         for n in range(n_class):
-            ax1.scatter(datasets[n][:, 0], datasets[n][:, 1], datasets[n][:, 2], c=datasets[n][:, 0],
-                        cmap="viridis", marker="+", label='observation data')
+            if isinstance(datasets[n], list):
+                data = np.array(datasets[n])
+                ax1.scatter(data[:, 0], data[:, 1], data[:, 2],
+                            marker="+", label='observation data')
+            else:
+                ax1.scatter(datasets[n][:, 0], datasets[n][:, 1], datasets[n][:, 2],
+                            marker="+", label='observation data')
 
             if parent_latent_dim == 2:
                 ax2.scatter(pZeta[:, 0], pZeta[:, 1], s=100, c='white', edgecolors='grey', label='Zeta', zorder=1)
