@@ -30,10 +30,6 @@ if __name__ == "__main__":
     child_tau = nb_epoch
     interval = 100
 
-    assert parent_latent_dim in [1, 2], "parent_latent_dim must be 1 or 2."
-    assert child_latent_dim in [1, 2], "child_latent_dim must be 1 or 2."
-
-
     # データ生成
     datasets = []
     theta = np.linspace(-np.pi / 12, np.pi / 12, n_class)
