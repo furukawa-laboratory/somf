@@ -8,7 +8,7 @@ import matplotlib.animation as anim
 from libs.models.som2 import SOM2
 
 if __name__ == "__main__":
-    seed = 7
+    seed = 4
     np.random.seed(seed)
     nb_epoch = 20
     n_class = 6
