@@ -28,12 +28,6 @@ if __name__ == "__main__":
     child_tau = nb_epoch
     interval = 50
 
-    # Zの初期値を生成
-    init_bmus = []
-    for n_sample in n_sample_list:
-        init_bmus.append(np.random.randint(low=0, high=child_node_num, size=n_sample, dtype="int"))
-    init_bmm = np.random.randint(low=0, high=parent_node_num, size=n_class, dtype="int")
-
     # データ生成
     datasets = []
     func = [
