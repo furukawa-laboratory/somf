@@ -26,7 +26,7 @@ if __name__ == "__main__":
     child_sigma_min = 0.15
     parent_tau = nb_epoch
     child_tau = nb_epoch
-    interval = 50
+    interval = 200
 
     # データ生成
     datasets = []
