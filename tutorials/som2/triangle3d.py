@@ -30,6 +30,10 @@ if __name__ == "__main__":
     child_tau = nb_epoch
     interval = 100
 
+    assert parent_latent_dim in [1, 2], "parent_latent_dim must be 1 or 2."
+    assert child_latent_dim in [1, 2], "child_latent_dim must be 1 or 2."
+
+
     # データ生成
     datasets = []
     theta = np.linspace(-np.pi / 12, np.pi / 12, n_class)
@@ -48,6 +52,7 @@ if __name__ == "__main__":
         rotate_Y -= np.mean(rotate_Y)
         stack = np.dstack([rotate_X, rotate_Y, [n - n_class / 2] * n_sample_list[n]])
         datasets.append(stack.tolist()[0])
+
 
     params_1st_som = {
         "latent_dim": child_latent_dim,
@@ -77,6 +82,7 @@ if __name__ == "__main__":
     pZeta = model.history["pZeta"]
     bmu = model.history["bmu"]
 
+
     # 描画
     fig = plt.figure(figsize=(8, 4))
     gs_master = GridSpec(nrows=1, ncols=2)
@@ -84,6 +90,7 @@ if __name__ == "__main__":
     gs_2 = GridSpecFromSubplotSpec(nrows=1, ncols=1, subplot_spec=gs_master[:, 1:2])
     ax1 = fig.add_subplot(gs_1[:, :], projection='3d')
     ax2 = fig.add_subplot(gs_2[:, :])
+
 
     def update(epoch):
         ax1.cla()

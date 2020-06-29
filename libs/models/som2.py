@@ -22,6 +22,9 @@ class SOM2:
         self.is_save_history = is_save_history
         self.history = {}
 
+        assert self.first_latent_dim in [1, 2], "Not Implemented Error. first_latent_dim must be 1 or 2."
+        assert self.second_latent_dim in [1, 2], "Not Implemented Error. second_latent_dim must be 1 or 2."
+
 
     def fit(self, nb_epoch, verbose=True):
         if self.is_save_history:
