@@ -49,6 +49,11 @@ if __name__ == "__main__":
         stack = np.dstack([rotate_X, rotate_Y, [n - n_class / 2] * n_sample_list[n]])
         datasets.append(stack.tolist()[0])
 
+    # Zの初期値を生成
+    init_bmus = []
+    for n_sample in n_sample_list:
+        init_bmus.append(np.random.randint(low=0, high=child_node_num, size=n_sample, dtype="int"))
+    init_bmm = np.random.randint(low=0, high=parent_node_num, size=n_class, dtype="int")
 
     params_1st_som = {
         "latent_dim": child_latent_dim,
@@ -56,7 +61,6 @@ if __name__ == "__main__":
         "sigma_max": child_sigma_max,
         "sigma_min": child_sigma_min,
         "tau": child_tau,
-        "init": "random",
     }
 
     params_2nd_som = {
@@ -65,10 +69,9 @@ if __name__ == "__main__":
         "sigma_max": parent_sigma_max,
         "sigma_min": parent_sigma_min,
         "tau": parent_tau,
-        "init": "random",
     }
 
-    model = SOM2(datasets, params_1st_som, params_2nd_som, is_save_history=True)
+    model = SOM2(datasets, params_1st_som, params_2nd_som, init_bmus, init_bmm, is_save_history=True)
     model.fit(nb_epoch)
 
     cY = model.history["cY"]
@@ -76,7 +79,6 @@ if __name__ == "__main__":
     cZ = model.history["cZ"]
     pZ = model.history["pZ"]
     pZeta = model.history["pZeta"]
-    bmu = model.history["bmu"]
 
 
     # 描画
