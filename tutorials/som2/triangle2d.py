@@ -9,15 +9,15 @@ from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 from libs.models.som2 import SOM2
 
 if __name__ == "__main__":
-    seed = 2
+    seed = 1
     np.random.seed(seed)
     nb_epoch = 25
     n_class = 9
-    n_sample_list = np.random.randint(low=100, high=200, size=n_class)
+    n_sample_list = np.random.randint(low=50, high=200, size=n_class)
     Dim = 2
     parent_latent_dim = 2
     child_latent_dim = 2
-    parent_resolution = 5
+    parent_resolution = 9
     child_resolution = 10
     parent_node_num = parent_resolution ** parent_latent_dim
     child_node_num = child_resolution ** child_latent_dim
@@ -28,6 +28,8 @@ if __name__ == "__main__":
     parent_tau = nb_epoch
     child_tau = nb_epoch
     interval = 100
+
+    assert n_class == 9, "n_class must be 9."
 
     # データ生成
     datasets = []
@@ -82,55 +84,86 @@ if __name__ == "__main__":
     cZ = model.history["cZ"]
     pZ = model.history["pZ"]
     pZeta = model.history["pZeta"]
+    bmm = model.history["bmm"]
 
-    # 描画
-    fig = plt.figure(figsize=(8, 4))
-    gs_master = GridSpec(nrows=1, ncols=2)
-    gs_1 = GridSpecFromSubplotSpec(nrows=1, ncols=1, subplot_spec=gs_master[:, 0:1])
-    gs_2 = GridSpecFromSubplotSpec(nrows=1, ncols=1, subplot_spec=gs_master[:, 1:2])
-    ax1 = fig.add_subplot(gs_1[:, :])
-    ax2 = fig.add_subplot(gs_2[:, :])
+    fig, axes = plt.subplots(parent_resolution, parent_resolution, figsize=(6, 6))
 
     def update(epoch):
-        ax1.cla()
-        ax2.cla()
+        for i in range(parent_resolution):
+            for j in range(parent_resolution):
+                axes[i, j].cla()
 
-        for n in range(n_class):
-            if isinstance(datasets[n], list):
-                data = np.array(datasets[n])
-                ax1.scatter(data[:, 0], data[:, 1],
-                            marker="+", label='observation data')
-            else:
-                ax1.scatter(datasets[n][:, 0], datasets[n][:, 1],
-                            marker="+", label='observation data')
+        unique_bmm = np.unique(bmm[epoch])
+        list_bmm = [0]*parent_node_num
+        for i in unique_bmm:
+            list_bmm[int(i)] = 1
 
-            if parent_latent_dim == 2:
-                ax2.scatter(pZeta[:, 0], pZeta[:, 1], s=100, c='white', edgecolors='grey', label='Zeta', zorder=1)
-                ax2.scatter(pZ[epoch, n, 0], pZ[epoch, n, 1], label='latent variable: Z', zorder=2)
-            else:
-                ax2.scatter(pZeta, [0] * len(pZeta), s=100, c='white', edgecolors='grey', label='pZeta', zorder=1)
-                ax2.scatter(pZ[epoch, n], 0, label='Z', zorder=2)
+        t = 0
+        for i in range(parent_resolution):
+            for j in range(parent_resolution):
+                if list_bmm[t] == 1:
+                    axes[i, j].scatter(pY[epoch, t, :, 0], pY[epoch, t, :, 1], s=5, color='r')
+                    axes[i, j].set_facecolor('k')
+                    # axes[i, j].legend(loc=2, prop={'size': 5})
+                else:
+                    axes[i, j].scatter(pY[epoch, t, :, 0], pY[epoch, t, :, 1], s=5, color='grey')
+                    axes[i, j].set_facecolor('w')
+                t += 1
+                axes[i, j].set_xticks([])
+                axes[i, j].set_yticks([])
+                # axes[i, j].set_xlim(-1, 1)
+                # axes[i, j].set_ylim(-1, 1)
 
+        fig.suptitle("epoch {}/{} latent space(parent)".format((epoch + 1), nb_epoch), fontsize=10)
 
-        for k in range(parent_node_num):
-            if child_latent_dim == 2:
-                py = pY[epoch, k].reshape(child_resolution, child_resolution, Dim)
-                for r in range(child_resolution):
-                    ax1.plot(py[r, :, 0], py[r, :, 1], color='r', linewidth=1)
-                    ax1.plot(py[:, r, 0], py[:, r, 1], color='r', linewidth=1, zorder=0)
-            else:
-                ax1.plot(pY[epoch, k, :, 0], pY[epoch, k, :, 1], color='r')
+    # 描画
+    # fig = plt.figure(figsize=(8, 4))
+    # gs_master = GridSpec(nrows=1, ncols=2)
+    # gs_1 = GridSpecFromSubplotSpec(nrows=1, ncols=1, subplot_spec=gs_master[:, 0:1])
+    # gs_2 = GridSpecFromSubplotSpec(nrows=1, ncols=1, subplot_spec=gs_master[:, 1:2])
+    # ax1 = fig.add_subplot(gs_1[:, :])
+    # ax2 = fig.add_subplot(gs_2[:, :])
 
-        # fiberの表示
-        color_li = ['#A5BEFA', '#B3093F', "#451531", "#64B7CC"]
-        for i, node in enumerate([0, child_resolution-1, child_node_num-child_resolution, child_node_num-1]):
-            ax1.scatter(pY[epoch, :, node, 0], pY[epoch, :, node, 1], s=20, color=color_li[i], zorder=1)
-
-        ax1.set_title("observation space", fontsize=9)
-        ax2.set_title("latent space(parent)", fontsize=9)
-        fig.suptitle("epoch {}/{}".format((epoch + 1), nb_epoch), fontsize=10)
-        ax2.set_xlim(-1.2, 1.2)
-        ax2.set_ylim(-1.2, 1.2)
+    # def update(epoch):
+    #     ax1.cla()
+    #     ax2.cla()
+    #
+    #     for n in range(n_class):
+    #         if isinstance(datasets[n], list):
+    #             data = np.array(datasets[n])
+    #             ax1.scatter(data[:, 0], data[:, 1],
+    #                         marker="+", label='observation data')
+    #         else:
+    #             ax1.scatter(datasets[n][:, 0], datasets[n][:, 1],
+    #                         marker="+", label='observation data')
+    #
+    #         if parent_latent_dim == 2:
+    #             ax2.scatter(pZeta[:, 0], pZeta[:, 1], s=100, c='white', edgecolors='grey', label='Zeta', zorder=1)
+    #             ax2.scatter(pZ[epoch, n, 0], pZ[epoch, n, 1], label='latent variable: Z', zorder=2)
+    #         else:
+    #             ax2.scatter(pZeta, [0] * len(pZeta), s=100, c='white', edgecolors='grey', label='pZeta', zorder=1)
+    #             ax2.scatter(pZ[epoch, n], 0, label='Z', zorder=2)
+    #
+    #
+    #     for k in range(parent_node_num):
+    #         if child_latent_dim == 2:
+    #             py = pY[epoch, k].reshape(child_resolution, child_resolution, Dim)
+    #             for r in range(child_resolution):
+    #                 ax1.plot(py[r, :, 0], py[r, :, 1], color='r', linewidth=1)
+    #                 ax1.plot(py[:, r, 0], py[:, r, 1], color='r', linewidth=1, zorder=0)
+    #         else:
+    #             ax1.plot(pY[epoch, k, :, 0], pY[epoch, k, :, 1], color='r')
+    #
+    #     # fiberの表示
+    #     color_li = ['#A5BEFA', '#B3093F', "#451531", "#64B7CC"]
+    #     for i, node in enumerate([0, child_resolution-1, child_node_num-child_resolution, child_node_num-1]):
+    #         ax1.scatter(pY[epoch, :, node, 0], pY[epoch, :, node, 1], s=20, color=color_li[i], zorder=1)
+    #
+    #     ax1.set_title("observation space", fontsize=9)
+    #     ax2.set_title("latent space(parent)", fontsize=9)
+    #     fig.suptitle("epoch {}/{}".format((epoch + 1), nb_epoch), fontsize=10)
+    #     ax2.set_xlim(-1.2, 1.2)
+    #     ax2.set_ylim(-1.2, 1.2)
 
     ani = anim.FuncAnimation(fig, update, interval=interval, frames=nb_epoch, repeat=False)
     # ani.save("SOM2.gif", writer='pillow')
