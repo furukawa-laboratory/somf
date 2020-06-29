@@ -10,7 +10,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from libs.models.som2 import SOM2
 
 if __name__ == "__main__":
-    seed = 2
+    seed = 1
     np.random.seed(seed)
     nb_epoch = 100
     n_class = 3
@@ -20,12 +20,12 @@ if __name__ == "__main__":
     child_latent_dim = 2
     parent_resolution = 5
     child_resolution = 10
-    pCluster_num = parent_resolution ** parent_latent_dim
-    cCluster_num = child_resolution ** child_latent_dim
+    parent_node_num = parent_resolution ** parent_latent_dim
+    child_node_num = child_resolution ** child_latent_dim
     parent_sigma_max = 2.0
-    parent_sigma_min = 0.5
+    parent_sigma_min = 0.4
     child_sigma_max = 2.0
-    child_sigma_min = 0.3
+    child_sigma_min = 0.2
     parent_tau = nb_epoch
     child_tau = nb_epoch
     interval = 100
@@ -42,7 +42,7 @@ if __name__ == "__main__":
         cZ = np.random.normal(size=(n_sample, 1), loc=0.0, scale=0.01)
 
     # データ生成
-    Datasets = np.zeros((n_class, n_sample, Dim))
+    datasets = np.zeros((n_class, n_sample, Dim))
     theta = np.linspace(-np.pi / 12, np.pi / 12, n_class)
     for n in range(n_class):
         min_X, max_X = 0, 4
@@ -56,9 +56,9 @@ if __name__ == "__main__":
         rotate_Y = X * np.sin(theta[n]) - Y * np.cos(theta[n])
         rotate_X -= np.mean(rotate_X)
         rotate_Y -= np.mean(rotate_Y)
-        Datasets[n][:, 0] = rotate_X
-        Datasets[n][:, 1] = rotate_Y
-        Datasets[n][:, 2] = n - n_class / 2
+        datasets[n][:, 0] = rotate_X
+        datasets[n][:, 1] = rotate_Y
+        datasets[n][:, 2] = n - n_class / 2
 
     params_1st_som = {
         "latent_dim": child_latent_dim,
@@ -78,7 +78,7 @@ if __name__ == "__main__":
         "init": pZ,
     }
 
-    model = SOM2(Datasets, params_1st_som, params_2nd_som, is_save_history=True)
+    model = SOM2(datasets, params_1st_som, params_2nd_som, is_save_history=True)
     model.fit(nb_epoch)
 
     cY = model.history["cY"]
@@ -96,14 +96,12 @@ if __name__ == "__main__":
     ax1 = fig.add_subplot(gs_1[:, :], projection='3d')
     ax2 = fig.add_subplot(gs_2[:, :])
 
-    randomint = np.random.randint(0, child_resolution**child_latent_dim, 8)
-
     def update(epoch):
         ax1.cla()
         ax2.cla()
 
         for n in range(n_class):
-            ax1.scatter(Datasets[n, :, 0], Datasets[n, :, 1], Datasets[n, :, 2], c=Datasets[n, :, 0],
+            ax1.scatter(datasets[n, :, 0], datasets[n, :, 1], datasets[n, :, 2], c=datasets[n, :, 0],
                         cmap="viridis", marker="+", label='observation data')
 
             if parent_latent_dim == 2:
@@ -114,15 +112,13 @@ if __name__ == "__main__":
                 ax2.scatter(pZ[epoch, n], 0, label='Z', zorder=2)
 
 
-        for k in range(pCluster_num):
+        for k in range(parent_node_num):
             py = pY[epoch, k].reshape(child_resolution, child_resolution, Dim)
             ax1.plot_wireframe(py[:, :, 0], py[:, :, 1], py[:, :, 2], color='r')
 
-        # unique_bmu = np.unique(bmu)
-
         # fiberの表示
-        # for i in randomint:
-        #     ax1.plot(pY[epoch, :, i, 0], pY[epoch, :, i, 1], pY[epoch, :, i, 2], color='b')
+        for i in [0, child_resolution-1, child_node_num-child_resolution, child_node_num-1]:
+            ax1.plot(pY[epoch, :, i, 0], pY[epoch, :, i, 1], pY[epoch, :, i, 2], color='b')
 
         ax1.set_title("observation space", fontsize=9)
         ax2.set_title("latent space(parent)", fontsize=9)
