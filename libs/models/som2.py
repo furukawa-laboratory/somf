@@ -6,7 +6,7 @@ from libs.models.som import SOM
 
 
 class SOM2:
-    def __init__(self, datasets, params_first_som, params_second_som, is_save_history=False):
+    def __init__(self, datasets, params_first_som, params_second_som, first_init, second_init, is_save_history=False):
         self.datasets = datasets
         self.n_class = len(datasets)
         self.dim = len(datasets[0][0])
@@ -14,10 +14,22 @@ class SOM2:
         self.params_first_som = params_first_som
         self.n_first_node = params_first_som["resolution"] ** params_first_som["latent_dim"]
         self.first_latent_dim = params_first_som["latent_dim"]
+        if isinstance(first_init, str) and  first_init == "random":
+            self.first_init = ["random"] * self.n_class
+        elif isinstance(first_init, list) or isinstance(first_init, np.ndarray):
+            self.first_init = first_init
+        else:
+            raise ValueError("invalid init: {}".format(first_init))
 
         self.params_second_som = params_second_som
         self.n_second_node = params_second_som["resolution"] ** params_second_som["latent_dim"]
         self.second_latent_dim = params_second_som["latent_dim"]
+        if isinstance(second_init, str) and second_init == "random":
+            self.second_init = "random"
+        elif isinstance(second_init, list) or isinstance(second_init, np.ndarray):
+            self.second_init = second_init
+        else:
+            raise ValueError("invalid init: {}".format(second_init))
 
         self.is_save_history = is_save_history
         self.history = {}
@@ -39,13 +51,13 @@ class SOM2:
         self.first_soms = []
         for n in range(self.n_class):
             if isinstance(self.datasets[n], list):
-                self.first_soms.append(SOM(np.array(self.datasets[n]), **self.params_first_som))
+                self.first_soms.append(SOM(X=np.array(self.datasets[n]), init=self.first_init[n], **self.params_first_som))
             else:
-                self.first_soms.append(SOM(self.datasets[n], **self.params_first_som))
+                self.first_soms.append(SOM(X=self.datasets[n], init=self.first_init[n], **self.params_first_som))
         self.first_soms_mapping = np.zeros((self.n_class, self.n_first_node * self.dim))
 
         dummy_data = np.empty((self.n_class, self.n_first_node * self.dim))
-        self.second_som = SOM(dummy_data, **self.params_second_som)
+        self.second_som = SOM(X=dummy_data, init=self.second_init, **self.params_second_som)
         self.history["pZeta"] = self.second_som.Zeta
 
         if verbose:
