@@ -185,7 +185,7 @@ class UnsupervisedKernelRegression(object):
         return F
 
     def visualize(self, n_grid_points=30, label_data=None, label_feature=None,
-                  marker=None, is_show_all_label_data=False, is_middle_color_zero=False,
+                  marker='.', is_show_all_label_data=False, is_middle_color_zero=False,
                   params_imshow=None, params_scatter=None,
                   title_latent_space=None, title_feature_bars=None,
                   fig=None, fig_size=None, ax_latent_space=None, ax_feature_bars=None):
@@ -256,7 +256,8 @@ class UnsupervisedKernelRegression(object):
                                       fig=fig,
                                       fig_size=fig_size,
                                       ax_latent_space=ax_latent_space,
-                                      ax_feature_bars=ax_feature_bars)
+                                      ax_feature_bars=ax_feature_bars,
+                                      marker=marker)
 
         self._draw_latent_space()
         self._draw_feature_bars()
