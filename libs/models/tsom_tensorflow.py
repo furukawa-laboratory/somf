@@ -200,7 +200,7 @@ class TSOM2:
         """
 
         with tf.name_scope('Sigma_computation'):
-            return tf.maximum(self.sigma_min * tf.constant(1, tf.float64), self.sigma_max * (1 - (self.iter_no / self.tau)))
+            return tf.maximum(self.sigma_min * tf.constant(1, tf.float64), self.sigma_min + (self.sigma_max - self.sigma_min) * (1 - (self.iter_no / self.tau)))
 
     def winning_nodes(self, M, Y, axis):
         """

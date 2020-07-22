@@ -21,7 +21,7 @@ def __calc_sigma_exp(sigma_max: float, sigma_min: float, tau: float, epoch: int)
 
 
 def __calc_sigma_linear(sigma_max: float, sigma_min: float, tau: float, epoch: int) -> float:
-    return max(sigma_min, sigma_max * (1 - (epoch / tau)))
+    return max(sigma_min, sigma_min + (sigma_max - sigma_min) * (1 - (epoch / tau)))
 
 
 if __name__ == '__main__':
