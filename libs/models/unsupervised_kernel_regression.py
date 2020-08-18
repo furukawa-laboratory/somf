@@ -426,6 +426,8 @@ class UnsupervisedKernelRegression(object):
             epsilon = 0.02 * np.abs(self.grid_points.max() - self.grid_points.min())
             if dist < epsilon:
                 is_uncondition = True
+            else:
+                is_uncondition = False
         else:
             is_uncondition = False
 
