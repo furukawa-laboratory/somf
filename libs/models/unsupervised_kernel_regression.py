@@ -391,6 +391,7 @@ class UnsupervisedKernelRegression(object):
         self.selected_feature = None
         self.grid_values_to_draw = None
         self.index_data_label_shown = None
+        self.alpha_scatter = np.ones(self.n_samples)
 
     def _set_grid(self, grid_points, n_grid_points):
         self.grid_points = grid_points
@@ -438,6 +439,9 @@ class UnsupervisedKernelRegression(object):
             self.params_scatter.update(params)
         else:
             raise ValueError('invalid params={}')
+
+    def set_alpha_scatter(self, alpha):
+        self.alpha_scatter = alpha
 
     def _set_titles(self, title_latent_space, title_feature_bars):
         self.title_latent_space = title_latent_space
@@ -502,7 +506,9 @@ class UnsupervisedKernelRegression(object):
 
         # Plot latent variables
         if self.multiple_marker is None:
-            self.ax_latent_space.scatter(self.Z[:, 0], self.Z[:, 1], **self.params_scatter)
+            self.ax_latent_space.scatter(self.Z[:, 0], self.Z[:, 1],
+                                         alpha=self.alpha_scatter,
+                                         **self.params_scatter)
         else:
             unique_markers = np.unique(self.multiple_marker)
             for marker in unique_markers:
@@ -511,6 +517,7 @@ class UnsupervisedKernelRegression(object):
                     self.Z[mask, 0],
                     self.Z[mask, 1],
                     marker=marker,
+                    alpha=self.alpha_scatter[mask],
                     **self.params_scatter
                 )
         # Write label
