@@ -400,7 +400,7 @@ class UnsupervisedKernelRegression(object):
         self.selected_feature = None
         self.grid_values_to_draw = None
         self.index_data_label_shown = None
-        self.alpha_scatter = np.ones(self.n_samples)
+        self.mask_latent_variables = np.full(self.n_samples, True, bool)
 
     def _set_grid(self, grid_points, n_grid_points):
         self.grid_points = grid_points
@@ -449,8 +449,8 @@ class UnsupervisedKernelRegression(object):
         else:
             raise ValueError('invalid params={}')
 
-    def set_alpha_scatter(self, alpha):
-        self.alpha_scatter = alpha
+    def set_mask_latent_variables(self, mask):
+        self.mask_latent_variables = mask
 
     def _set_titles(self, title_latent_space, title_feature_bars):
         self.title_latent_space = title_latent_space
@@ -515,18 +515,18 @@ class UnsupervisedKernelRegression(object):
 
         # Plot latent variables
         if self.multiple_marker is None:
-            self.ax_latent_space.scatter(self.Z[:, 0], self.Z[:, 1],
-                                         alpha=self.alpha_scatter,
+            self.ax_latent_space.scatter(self.Z[self.mask_latent_variables, 0],
+                                         self.Z[self.mask_latent_variables, 1],
                                          **self.params_scatter)
         else:
             unique_markers = np.unique(self.multiple_marker)
             for marker in unique_markers:
                 mask = (self.multiple_marker == marker)
+                mask = self.mask_latent_variables & mask
                 self.ax_latent_space.scatter(
                     self.Z[mask, 0],
                     self.Z[mask, 1],
                     marker=marker,
-                    alpha=self.alpha_scatter[mask],
                     **self.params_scatter
                 )
         # Write label
@@ -534,7 +534,9 @@ class UnsupervisedKernelRegression(object):
             pass
         else:
             if self.is_show_all_label_data:
-                for z, noise, label in zip(self.Z, self.noise_label, self.label_data):
+                for z, noise, label in zip(self.Z[self.mask_latent_variables],
+                                           self.noise_label[self.mask_latent_variables],
+                                           self.label_data[self.mask_latent_variables]):
                     point_label = z + noise
                     text = self.ax_latent_space.text(point_label[0], point_label[1], label,
                                                      ha='center', va='bottom', color='black')
@@ -542,13 +544,14 @@ class UnsupervisedKernelRegression(object):
                                            path_effects.Normal()])
             else:
                 if self.index_data_label_shown is not None:
-                    text = self.ax_latent_space.text(self.Z[self.index_data_label_shown, 0],
-                                                     self.Z[self.index_data_label_shown, 1],
-                                                     self.label_data[self.index_data_label_shown],
-                                                     ha='center', va='bottom', color='black')
-                    text.set_path_effects([path_effects.Stroke(linewidth=3, foreground='white'),
-                                           path_effects.Normal()]
-                                          )
+                    if self.mask_latent_variables[self.mask_latent_variables]:
+                        text = self.ax_latent_space.text(self.Z[self.index_data_label_shown, 0],
+                                                         self.Z[self.index_data_label_shown, 1],
+                                                         self.label_data[self.index_data_label_shown],
+                                                         ha='center', va='bottom', color='black')
+                        text.set_path_effects([path_effects.Stroke(linewidth=3, foreground='white'),
+                                               path_effects.Normal()]
+                                              )
                 else:
                     pass
 
