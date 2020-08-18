@@ -467,6 +467,8 @@ class UnsupervisedKernelRegression(object):
         from matplotlib import patheffects as path_effects
         self.ax_latent_space.cla()
         self.ax_latent_space.set_title(self.title_latent_space)
+        self.ax_latent_space.set_xlim(self.Z[:, 0].min() * 1.05, self.Z[:, 0].max() * 1.05)
+        self.ax_latent_space.set_ylim(self.Z[:, 1].min() * 1.05, self.Z[:, 1].max() * 1.05)
 
         # Draw color using self.grid_values_to_draw by pcolormesh and contour
         if self.grid_values_to_draw is not None:
@@ -550,7 +552,7 @@ class UnsupervisedKernelRegression(object):
                                            path_effects.Normal()])
             else:
                 if self.index_data_label_shown is not None:
-                    if self.mask_latent_variables[self.mask_latent_variables]:
+                    if self.mask_latent_variables[self.index_data_label_shown]:
                         text = self.ax_latent_space.text(self.Z[self.index_data_label_shown, 0],
                                                          self.Z[self.index_data_label_shown, 1],
                                                          self.label_data[self.index_data_label_shown],
