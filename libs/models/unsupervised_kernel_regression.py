@@ -420,11 +420,24 @@ class UnsupervisedKernelRegression(object):
         self.noise_label = epsilon * (np.random.rand(self.n_samples, self.n_components) * 2.0 - 1.0)
 
     def _set_feature_bar_from_latent_space(self, click_coordinates):
-        # クリックしたところといちばん近い代表点がどこかを計算
-        self.click_point_latent_space = self.__calc_nearest_grid_point(click_coordinates)
+        if self.click_point_latent_space is not None:
+            previous_coordinate = self.grid_points[self.click_point_latent_space]
+            dist = np.sqrt(np.sum(np.square(previous_coordinate - click_coordinates)))
+            epsilon = 0.02 * np.abs(self.grid_points.max() - self.grid_points.min())
+            if dist < epsilon:
+                is_uncondition = True
+        else:
+            is_uncondition = False
 
-        # その代表点の写像先の特徴量を計算
-        self.clicked_mapping = self.grid_mapping[self.click_point_latent_space, :]
+        if is_uncondition:
+            self.click_point_latent_space = None
+            self.clicked_mapping = self.X.mean(axis=0)
+        else:
+            # クリックしたところといちばん近い代表点がどこかを計算
+            self.click_point_latent_space = self.__calc_nearest_grid_point(click_coordinates)
+
+            # その代表点の写像先の特徴量を計算
+            self.clicked_mapping = self.grid_mapping[self.click_point_latent_space, :]
 
     def _set_latent_space_from_feature_bar(self, click_coordinates):
         for i, bar in enumerate(self.feature_bars):
@@ -567,7 +580,9 @@ class UnsupervisedKernelRegression(object):
         if self.click_point_latent_space is None:
             pass
         else:
-            self.__draw_click_point_latent_space()
+            coordinate = self.grid_points[self.click_point_latent_space]
+            self.ax_latent_space.plot(coordinate[0], coordinate[1],
+                                      ".", color="red", ms=20, fillstyle="none")
 
         self.fig.show()
 
@@ -584,11 +599,6 @@ class UnsupervisedKernelRegression(object):
         self.ax_feature_bars.set_title(title)
         self.ax_feature_bars.set_xticklabels(labels=self.label_feature, fontsize=8, rotation=270)
         self.fig.show()
-
-    def __draw_click_point_latent_space(self):
-        coordinate = self.grid_points[self.click_point_latent_space]
-        self.ax_latent_space.plot(coordinate[0], coordinate[1],
-                                  ".", color="red", ms=20, fillstyle="none")
 
     def __calc_nearest_grid_point(self, click_coordinates):
         distance = dist.cdist(self.grid_points, click_coordinates[None, :])
