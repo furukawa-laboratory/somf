@@ -407,6 +407,7 @@ class UnsupervisedKernelRegression(object):
         self.grid_values_to_draw = None
         self.index_data_label_shown = None
         self.mask_latent_variables = np.full(self.n_samples, True, bool)
+        self.cross_points = None
 
     def _set_grid(self, grid_points, n_grid_points):
         self.grid_points = grid_points
@@ -473,9 +474,14 @@ class UnsupervisedKernelRegression(object):
     def set_mask_latent_variables(self, mask):
         self.mask_latent_variables = mask
 
-    def _set_titles(self, title_latent_space, title_feature_bars):
-        self.title_latent_space = title_latent_space
-        self.title_feature_bars = title_feature_bars
+    def set_titles(self, title_latent_space=None, title_feature_bars=None):
+        if title_latent_space is not None:
+            self.title_latent_space = title_latent_space
+        if title_feature_bars is not None:
+            self.title_feature_bars = title_feature_bars
+
+    def set_scatter_cross(self, coordinates):
+        self.cross_points = coordinates
 
     def _draw_latent_space(self):
         import matplotlib.pyplot as plt
@@ -585,6 +591,13 @@ class UnsupervisedKernelRegression(object):
             coordinate = self.grid_points[self.click_point_latent_space]
             self.ax_latent_space.plot(coordinate[0], coordinate[1],
                                       ".", color="red", ms=20, fillstyle="none")
+
+        if self.cross_points is None:
+            pass
+        else:
+            self.ax_latent_space.scatter(self.cross_points.reshape(-1, self.n_components)[:, 0],
+                                         self.cross_points.reshape(-1, self.n_components)[:, 1],
+                                         marker='x', color='k', s=20)
 
         self.fig.show()
 
