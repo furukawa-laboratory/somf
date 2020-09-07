@@ -414,6 +414,7 @@ class UnsupervisedKernelRegression(object):
         self.index_data_label_shown = None
         self.mask_latent_variables = np.full(self.n_samples, True, bool)
         self.cross_points = None
+        self.comment_latent_space = None
 
     def _set_grid(self, grid_points, n_grid_points):
         self.grid_points = grid_points
@@ -488,6 +489,10 @@ class UnsupervisedKernelRegression(object):
 
     def set_scatter_cross(self, coordinates):
         self.cross_points = coordinates
+
+
+    def set_comment_in_latent_space(self, comment: str):
+        self.comment_latent_space = comment
 
     def _draw_latent_space(self):
         import matplotlib.pyplot as plt
@@ -604,6 +609,14 @@ class UnsupervisedKernelRegression(object):
             self.ax_latent_space.scatter(self.cross_points.reshape(-1, self.n_components)[:, 0],
                                          self.cross_points.reshape(-1, self.n_components)[:, 1],
                                          marker='x', color='k', s=20)
+
+        if self.comment_latent_space is not None:
+            self.ax_latent_space.text(1.0, 0.0,
+                                      self.comment_latent_space,
+                                      horizontalalignment='right',
+                                      verticalalignment='top',
+                                      transform=self.ax_latent_space.transAxes
+                                      )
 
         if not self.is_show_ticks_latent_space:
             self.ax_latent_space.tick_params(labelbottom=False,
