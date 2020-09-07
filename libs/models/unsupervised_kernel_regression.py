@@ -177,6 +177,7 @@ class UnsupervisedKernelRegression(object):
 
     def visualize(self, n_grid_points=30, label_data=None, label_feature=None,
                   marker='.', is_show_all_label_data=False, is_middle_color_zero=False,
+                  is_show_ticks_latent_space=False,
                   params_imshow=None, params_scatter=None,
                   title_latent_space=None, title_feature_bars=None,
                   fig=None, fig_size=None, ax_latent_space=None, ax_feature_bars=None):
@@ -205,6 +206,8 @@ class UnsupervisedKernelRegression(object):
             If `True`, the value corresponding to middle color in the colormap is fixed at 0.
             If the data is normalized to zero mean and it is important whether it is higher or lower than the mean,
             setting to `True` makes the coloring easier to read.
+        is_show_ticks_latent_space: bool, optional, default = False
+            When True the ticks and its label of latent space is shown.
         params_imshow: dict, optional, default = None
             The dictionary of kwargs in imshow used for drawing the value of the feature in the latent space.
             See the official document of matplotlib.pyplot.imshow for more information on available arguments.
@@ -244,6 +247,7 @@ class UnsupervisedKernelRegression(object):
                                       title_feature_bars=title_feature_bars,
                                       is_show_all_label_data=is_show_all_label_data,
                                       is_middle_color_zero=is_middle_color_zero,
+                                      is_show_ticks_latent_space=is_show_ticks_latent_space,
                                       fig=fig,
                                       fig_size=fig_size,
                                       ax_latent_space=ax_latent_space,
@@ -289,6 +293,7 @@ class UnsupervisedKernelRegression(object):
 
     def _initialize_to_visualize(self, n_grid_points, label_data, label_feature,
                                  marker, is_show_all_label_data, is_middle_color_zero,
+                                 is_show_ticks_latent_space,
                                  params_imshow, params_scatter,
                                  title_latent_space, title_feature_bars,
                                  fig, fig_size, ax_latent_space, ax_feature_bars):
@@ -385,6 +390,7 @@ class UnsupervisedKernelRegression(object):
             self.ax_feature_bars = ax_feature_bars
 
         self.is_middle_color_zero = is_middle_color_zero
+        self.is_show_ticks_latent_space = is_show_ticks_latent_space
         self.click_point_latent_space = None  # index of the clicked representative point
         self.clicked_mapping = self.X.mean(axis=0)
         self.is_initial_view = True
@@ -583,6 +589,16 @@ class UnsupervisedKernelRegression(object):
             self.ax_latent_space.scatter(self.cross_points.reshape(-1, self.n_components)[:, 0],
                                          self.cross_points.reshape(-1, self.n_components)[:, 1],
                                          marker='x', color='k', s=20)
+
+        if not self.is_show_ticks_latent_space:
+            self.ax_latent_space.tick_params(labelbottom=False,
+                                             labelleft=False,
+                                             labelright=False,
+                                             labeltop=False)
+            self.ax_latent_space.tick_params(bottom=False,
+                                             left=False,
+                                             right=False,
+                                             top=False)
 
         self.fig.show()
 
