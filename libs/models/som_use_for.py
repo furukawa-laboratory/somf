@@ -64,7 +64,7 @@ class SOMUseFor:
         # 学習量の計算
             H = np.zeros((self.K,self.N)) # 全ての学習量を保持する配列を用意
             # 近傍半径の計算
-            sigma = max(self.sigma_min, self.sigma_max * ( 1 - (epoch / self.tau) ) )# 線形で減少
+            sigma = max(self.sigma_min, self.sigma_min + (self.sigma_max - self.sigma_min) * (1 - (epoch / self.tau)))# 線形で減少
             #sigma = self.sigma_min + (self.sigma_max - self.sigma_min) * ( 1 - (epoch / self.tau) ) # 指数的に減少
             for k in range(self.K):
                 for n in range(self.N):
