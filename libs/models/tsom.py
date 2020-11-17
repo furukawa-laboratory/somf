@@ -135,14 +135,19 @@ class TSOM2():
 
         self.history = {}
 
-    def fit(self, nb_epoch=200):
+    def fit(self, nb_epoch=200,verbose=True):
         self.history['y'] = np.zeros((nb_epoch, self.K1, self.K2, self.observed_dim))
         self.history['z1'] = np.zeros((nb_epoch, self.N1, self.latent_dim1))
         self.history['z2'] = np.zeros((nb_epoch, self.N2, self.latent_dim2))
         self.history['sigma1'] = np.zeros(nb_epoch)
         self.history['sigma2'] = np.zeros(nb_epoch)
 
-        for epoch in tqdm(np.arange(nb_epoch)):
+        if verbose is True:
+            bar = tqdm(np.arange(nb_epoch))
+        else:
+            bar = np.arange(nb_epoch)
+
+        for epoch in bar:
             # 学習量の決定
             # sigma1 = self.SIGMA1_MIN + (self.SIGMA1_MAX - self.SIGMA1_MIN) * np.exp(-epoch / self.TAU1)
             sigma1 = max(self.SIGMA1_MIN, self.SIGMA1_MIN + (self.SIGMA1_MAX - self.SIGMA1_MIN) * (1 - (epoch / self.TAU1)))
