@@ -3,3 +3,4 @@
 *.pyc
 temp-plot.html
 lastfailed
+.vscode/
