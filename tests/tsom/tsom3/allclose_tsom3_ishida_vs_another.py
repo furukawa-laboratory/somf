@@ -23,10 +23,10 @@ class TestTSOM3(unittest.TestCase):
         # set learning parameter
         nb_epoch = 60
         latent_dim = [2, 2,2]
-        resolution = [5, 5,5]
-        sigma_max = [2.0, 2.0,2.0]
-        sigma_min = [0.2, 0.2,0.2]
-        tau = [50, 50,50]
+        resolution = [15,10,5]
+        sigma_max = [1.0, 2.0,1.5]
+        sigma_min = [0.1, 0.2,0.3]
+        tau = [15, 25,35]
 
         ## prepare init
         Z1init = np.random.rand(X.shape[0], latent_dim[0])
@@ -44,14 +44,17 @@ class TestTSOM3(unittest.TestCase):
                                       init=init)
         # learn
         tsom3_ishida.fit(nb_epoch=nb_epoch)
-
-
         tsom3_another.fit(nb_epoch=nb_epoch)
 
 
         # test
         np.testing.assert_allclose(tsom3_ishida.history['y'], tsom3_another.history['y'])
-
+        np.testing.assert_allclose(tsom3_ishida.history['z1'], tsom3_another.history['z1'])
+        np.testing.assert_allclose(tsom3_ishida.history['z2'], tsom3_another.history['z2'])
+        np.testing.assert_allclose(tsom3_ishida.history['z3'], tsom3_another.history['z3'])
+        np.testing.assert_allclose(tsom3_ishida.history['sigma1'], tsom3_another.history['sigma1'])
+        np.testing.assert_allclose(tsom3_ishida.history['sigma2'], tsom3_another.history['sigma2'])
+        np.testing.assert_allclose(tsom3_ishida.history['sigma3'], tsom3_another.history['sigma3'])
 
 
 if __name__ == "__main__":
