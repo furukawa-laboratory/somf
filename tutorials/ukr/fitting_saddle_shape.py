@@ -38,7 +38,7 @@ if __name__ == '__main__':
               is_compact=is_compact, is_save_history=is_save_history, lambda_=lambda_)
     som.fit(nb_epoch=nb_epoch)
     ukr.fit(nb_epoch=nb_epoch, eta=eta)
-    ukr.calculation_history_of_mapping(resolution=30)
+    ukr.calculate_history_of_mapping(resolution=30)
 
     fig = plt.figure(figsize=[7, 8])
     ax_latent_space_som = fig.add_subplot(2, 2, 1, aspect='equal')

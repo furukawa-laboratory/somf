@@ -1,19 +1,14 @@
 # coding: utf-8
 import sys
 sys.path.append('../')
-#from som.datasets.kura import create_data
-# from KSE.lib.datasets.artificial.spiral import create_data
 
 import numpy as np
 import torch
-import matplotlib.pyplot as plt
-import matplotlib.animation as anim
-from mpl_toolkits.mplot3d import Axes3D
 from tqdm import tqdm
 
 class Unsupervised_Kernel_Regression_pytorch(object):
     def __init__(self, X, nb_components, bandwidth_gaussian_kernel=1.0,
-                 is_compact=False, lambda_=1.0,
+                 is_compact=False, lambda_=1.0, weights=None,
                  init='random', is_loocv=False, is_save_history=False):
         self.X = X.clone()
         self.nb_samples = X.shape[0]
@@ -35,6 +30,11 @@ class Unsupervised_Kernel_Regression_pytorch(object):
 
         self.lambda_ = lambda_
 
+        if weights is None:
+            self.weights = torch.ones(self.nb_samples)
+        else:
+            self.weights = weights
+
         self._done_fit = False
 
     def fit(self, nb_epoch=100, verbose=True, eta=0.5, expand_epoch=None):
@@ -54,7 +54,7 @@ class Unsupervised_Kernel_Regression_pytorch(object):
 
         for epoch in bar:
             DistZ = torch.sum((self.Z[:, None, :] - self.Z[None, :, :])**2, dim=2)
-            H = torch.exp(-0.5 * self.precision * DistZ)
+            H = torch.exp(-0.5 * self.precision * DistZ) * self.weights[None, :]
             if self.is_loocv:
                 # H -= np.identity(H.shape[0])
                 assert 'Not Implemented Error'
@@ -64,7 +64,7 @@ class Unsupervised_Kernel_Regression_pytorch(object):
 
             Y = torch.mm(R,self.X)
             Error = Y - self.X
-            obj_func = torch.sum(Error**2) / self.nb_samples + self.lambda_ * torch.sum(self.Z**2)
+            obj_func = torch.sum((Error**2) * self.weights[:, None]) / self.weights.sum() + self.lambda_ * torch.sum(self.Z**2)
             obj_func.backward()
             with torch.no_grad():
                 self.Z = self.Z - eta * self.Z.grad
