@@ -22,3 +22,10 @@
 **returns**
 - x: ndarray
    - shape=(nb_samples1, nb_samples2, observed_dim)
+   
+   
+# animal
+出典元のデータを古川研の教育用に改竄した古川研オリジナル動物データ
+
+## 出典
+T. Kohonen, [Self-Organizing Maps], Springer Series in Information Sciences, Vol.30(1995)
