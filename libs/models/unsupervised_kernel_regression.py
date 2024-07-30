@@ -1,12 +1,14 @@
 import numpy as np
 import scipy.spatial.distance as dist
 from tqdm import tqdm
+from sklearn.utils import check_random_state
 
 
 class UnsupervisedKernelRegression(object):
     def __init__(self, X, n_components, bandwidth_gaussian_kernel=1.0,
                  is_compact=False, lambda_=1.0,
-                 init='random', is_loocv=False, is_save_history=False):
+                 init='random', is_loocv=False, is_save_history=False,
+                 random_state=None):
         self.X = X.copy()
         self.n_samples = X.shape[0]
         self.n_dimensions = X.shape[1]
@@ -19,7 +21,8 @@ class UnsupervisedKernelRegression(object):
 
         self.Z = None
         if isinstance(init, str) and init in 'random':
-            self.Z = np.random.normal(0, 1.0, (self.n_samples, self.n_components)) * bandwidth_gaussian_kernel * 0.5
+            random_state = check_random_state(random_state)
+            self.Z = random_state.normal(0, 1.0, (self.n_samples, self.n_components)) * bandwidth_gaussian_kernel * 0.5
         elif isinstance(init, np.ndarray) and init.shape == (self.n_samples, self.n_components):
             self.Z = init.copy()
         else:
