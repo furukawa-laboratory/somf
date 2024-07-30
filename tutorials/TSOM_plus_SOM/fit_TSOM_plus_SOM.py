@@ -2,7 +2,7 @@
 import numpy as np
 from libs.datasets.artificial.kura_tsom import load_kura_tsom
 import matplotlib.pyplot as plt
-from libs.models.TSOMPlusSOM import TSOMPlusSOM
+from libs.models.tsom_plus_som import TSOMPlusSOM
 from mpl_toolkits.mplot3d import Axes3D
 from libs.visualization.som.Grad_norm import Grad_Norm
 
@@ -27,11 +27,13 @@ for i in range(int(group_num / 2)):
     input_data[int(2 * i), :, :] = group1
     input_data[int(2 * i + 1), :, :] = group2
 
-# fig = plt.figure()
-# ax = fig.add_subplot(1, 1, 1, projection="3d")
-# for i in range(group_num):
-#     ax.scatter(input_data[i, :, 0], input_data[i, :, 1], input_data[i, :, 2])
-# plt.show()
+#観測データの描画
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1, projection="3d")
+for i in range(group_num):
+    ax.scatter(input_data[i, :, 0], input_data[i, :, 1], input_data[i, :, 2],label="group"+str(i+1))
+    plt.legend(bbox_to_anchor=(1, 1), loc='upper right', borderaxespad=0, fontsize=10)
+plt.show()
 input_data = input_data.reshape(-1, 3)
 
 # グループラベルの作成
@@ -55,7 +57,7 @@ params_som = {'latent_dim': 2,
 # +型階層TSOMのclass読み込み
 # group_label以降の変数ははlatent_dim,resolution,sigma_max,sigma_min,tauでSOMとTSOMでまとめている
 tsom_plus_som = TSOMPlusSOM(member_features=input_data,
-                            index_members_of_group=group_label,
+                            group_features=group_label,
                             params_tsom=params_tsom,
                             params_som=params_som)
 

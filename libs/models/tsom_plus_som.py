@@ -5,13 +5,13 @@ from scipy.spatial import distance as dist
 
 
 class TSOMPlusSOM:
-    def __init__(self, member_features, index_members_of_group, params_tsom, params_som):
+    def __init__(self, member_features, group_features, params_tsom, params_som):
         self.params_tsom = params_tsom
         self.params_som = params_som
 
         self.params_tsom['X'] = member_features
-        self.index_members_of_group = index_members_of_group  # グループ数の確認
-        self.group_num = len(self.index_members_of_group)
+        self.group_features = group_features  # グループ数の確認
+        self.group_num = len(self.group_features)
 
     def fit(self, tsom_epoch_num, kernel_width, som_epoch_num):
         self._fit_1st_TSOM(tsom_epoch_num)
@@ -25,14 +25,23 @@ class TSOMPlusSOM:
     def _fit_KDE(self, kernel_width):  # 学習した後の潜在空間からKDEで確率分布を作る
         prob_data = np.zeros((self.group_num, self.tsom.K1))  # group数*ノード数
         # グループごとにKDEを適用
-        for i in range(self.group_num):
-            Dist = dist.cdist(self.tsom.Zeta1, self.tsom.Z1[self.index_members_of_group[i], :],
-                              'sqeuclidean')  # KxNの距離行列を計算
-            H = np.exp(-Dist / (2 * kernel_width * kernel_width))  # KxNの学習量行列を計算
-            prob = np.sum(H, axis=1)
-            prob_sum = np.sum(prob)
-            prob = prob / prob_sum
-            prob_data[i, :] = prob
+        if isinstance(self.group_features, np.ndarray) and self.group_features.ndim == 2:
+            # group_featuresがbag of membersで与えられた時の処理
+            distance = dist.cdist(self.tsom.Zeta1, self.tsom.Z1, 'sqeuclidean')  # K1 x num_members
+            H = np.exp(-0.5 * distance / (kernel_width * kernel_width))  # KxN
+            prob_data = self.group_features @ H.T  # num_group x K1
+            prob_data = prob_data / prob_data.sum(axis=1)[:, None]
+        else:
+            # group_featuresがlist of listsもしくはlist of arraysで与えられた時の処理
+            for i in range(self.group_num):
+                Dist = dist.cdist(self.tsom.Zeta1,
+                                  self.tsom.Z1[self.group_features[i], :],
+                                  'sqeuclidean')  # KxNの距離行列を計算
+                H = np.exp(-Dist / (2 * kernel_width * kernel_width))  # KxNの学習量行列を計算
+                prob = np.sum(H, axis=1)
+                prob_sum = np.sum(prob)
+                prob = prob / prob_sum
+                prob_data[i, :] = prob
         self.params_som['X'] = prob_data
         self.params_som['metric'] = "KLdivergence"
 
