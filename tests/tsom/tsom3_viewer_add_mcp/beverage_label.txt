@@ -1,0 +1,14 @@
+Coke
+Soda_pop
+Ginger_ale
+Melon_soda
+Orange_juice
+Apple_juice
+Vegetable_juice
+Black_tea(koucha)
+Oolong_tea
+Green_tea
+Cafe_au_lait
+Lactic_drink
+Mineral_water
+Isotonic_drink
